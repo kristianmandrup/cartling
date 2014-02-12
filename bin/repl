@@ -1,0 +1,42 @@
+#!/usr/local/bin/node
+'use strict';
+
+var repl = require('repl');
+console.log('\n*** Apigee Phrixus REPL ***');
+console.log('\nContext variables:');
+console.log('__      : lodash');
+console.log('config  : app config');
+console.log('ug      : usergrid client');
+console.log('User    : User model');
+console.log('model   : Usergrid models - eg. model.Cart, model.CartItem');
+console.log('_cb     : callback function - prints, assigns vars: _err, _reply');
+console.log("\nexample: ug.getEntity({ type: 'users', username: 'test' }, _cb)");
+console.log();
+
+var context = repl.start('phrixus> ').context;
+
+// util stuff
+var _ = require("lodash");
+context.__ = _;
+
+// config
+var config = require('../config');
+context.config = config;
+
+// usergrid
+var usergrid = require('usergrid');
+context.ug = new usergrid.client(_.assign({ authType: usergrid.AUTH_CLIENT_ID}, config.usergrid));
+
+// User
+context.User = require('../lib/usergrid/user');
+
+// Cart models
+context.model = require('../cart/models');
+
+// callback function to assign values and print to console
+context._cb = function(err,reply) {
+  context._err = err;
+  context._reply = reply;
+  console.log('err:\n%s', JSON.stringify(err, null, ' '));
+  console.log('reply:\n%s', JSON.stringify(reply, null, ' '));
+};
