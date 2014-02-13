@@ -3,15 +3,27 @@
 var ROOT = 'phrixus';
 
 // pubsub-js is the baseline for our events API
-// todo: configurable
 var events = require('pubsub-js');
-
 events.ROOT = ROOT;
+var subscription;
 
-// wire up to logger
-var logger = require('./logger');
-var subscription = events.subscribe(events.ROOT, function(msg, data) {
-  logger.log(msg, data);
-});
+function configure(config) {
 
-module.exports = events;
+  if (config.provider) {
+    events = config.provider;
+    events.ROOT = ROOT;
+  }
+
+  if (config.sendToLogger) {
+    var logger = require('./logger')();
+    if (subscription) { events.unsubscribe(subscription); }
+    subscription = events.subscribe(events.ROOT, function(msg, data) {
+      logger.log(msg, data);
+    });
+  }
+}
+
+module.exports = function(config) {
+  if (config && config.events) { configure(config.events); }
+  return events;
+};

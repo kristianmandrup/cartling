@@ -1,15 +1,12 @@
 'use strict';
 
-var events = require('./events');
-var logger = require('./logger');
+var exports = {
+};
 
 var configure = function(config) {
   exports.usergrid = require('./usergrid')(config);
-};
-
-var exports = {
-  events: events,
-  logger: logger
+  exports.events = require('./events')(config);
+  exports.logger = require('./logger')(config);
 };
 
 module.exports = function(config) {

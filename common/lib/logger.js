@@ -1,7 +1,15 @@
 'use strict';
 
 // winston is the baseline for our events API
-// todo: configurable
 var logger = require('winston');
 
-module.exports = logger;
+function configure(config) {
+  if (config.provider) {
+    logger = config.provider;
+  }
+}
+
+module.exports = function(config) {
+  if (config && config.logger) { configure(config.logger); }
+  return logger;
+};

@@ -9,28 +9,28 @@ var Usergrid = require('./usergrid');
 var validators = require('./validators');
 var client;
 
-var configure = function(config) {
-  client = new usergrid_sdk.client(_.assign({ authType: usergrid_sdk.AUTH_CLIENT_ID}, config.usergrid));
+function configure(config) {
+  client = new usergrid_sdk.client(_.assign({ authType: usergrid_sdk.AUTH_CLIENT_ID}, config));
   exports.client = client;
-};
+  exports.define = define;
+}
 
 // type is optional. if omitted, constructor name is used as type.
-var define = function(clazz, constructor, type) {
-  if (!client) { throw new Error('You must call configure() first!'); }
+function define(clazz, constructor, type) {
+  if (!client) { throw new Error('phrixus-common not configured'); }
   clazz._usergrid = {
     constructor: constructor,
     type: (type) ? type : constructor.name.toLowerCase()
   };
   _.mixin(clazz, UsergridStatics);
-};
-
-var exports = {
-  validators: validators,
-  define: define
 }
 
+var exports = {
+  validators: validators
+};
+
 module.exports = function(config) {
-  if (config) { configure(config); }
+  if (config && config.usergrid) { configure(config.usergrid); }
   return exports;
 };
 
