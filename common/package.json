@@ -1,9 +1,10 @@
 {
-  "name": "phrixus",
-  "description": "A Node.js eCommerce system built on Apigee Volos and Apache Usergrid.",
+  "name": "phrixus-common",
+  "description": "Common lib for Phrixus: A Node.js eCommerce system built on Apigee Volos and Apache Usergrid.",
   "version": "0.0.1",
   "private": true,
   "license": "MIT",
+  "main": "lib/index.js",
   "author": "Scott Ganyo <sganyo@apigee.com>",
   "contributors": [
     {
@@ -27,13 +28,8 @@
   ],
   "dependencies": {
     "usergrid": "0.10.x",
-    "volos-cache-redis": "0.0.3",
-    "volos-quota-redis": "0.0.1",
-    "volos-management-redis": "0.0.3",
-    "volos-oauth-redis": "0.0.7",
     "lodash": "2.4.x",
     "winston": "0.7.x",
-    "express": "3.4.x",
     "validator" : "3.2.x",
     "pubsub-js" : "1.4.x"
   },

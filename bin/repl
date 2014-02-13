@@ -28,10 +28,11 @@ var usergrid = require('usergrid');
 context.ug = new usergrid.client(_.assign({ authType: usergrid.AUTH_CLIENT_ID}, config.usergrid));
 
 // User
-context.User = require('../lib/usergrid/user');
+require('../common/lib/usergrid').configure(config.usergrid); // this must happen before any models are referenced!
+context.User = require('../common/lib/usergrid/user');
 
 // Cart models
-context.model = require('../cart/models');
+context.model = require('../cart/src/models');
 
 // callback function to assign values and print to console
 context._cb = function(err,reply) {

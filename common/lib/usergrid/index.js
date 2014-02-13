@@ -5,24 +5,37 @@
 
 var _ = require('lodash');
 var usergrid_sdk = require('usergrid');
-var config = require('../../../config').usergrid;
 var Usergrid = require('./usergrid');
+var validators = require('./validators');
+var client;
 
-var client = new usergrid_sdk.client(_.assign({ authType: usergrid_sdk.AUTH_CLIENT_ID}, config));
-exports.client = client;
-
-exports.validators = require('./validators');
-
-// statics //
+var configure = function(config) {
+  client = new usergrid_sdk.client(_.assign({ authType: usergrid_sdk.AUTH_CLIENT_ID}, config.usergrid));
+  exports.client = client;
+};
 
 // type is optional. if omitted, constructor name is used as type.
-exports.define = function(clazz, constructor, type) {
+var define = function(clazz, constructor, type) {
+  if (!client) { throw new Error('You must call configure() first!'); }
   clazz._usergrid = {
     constructor: constructor,
     type: (type) ? type : constructor.name.toLowerCase()
   };
   _.mixin(clazz, UsergridStatics);
 };
+
+var exports = {
+  validators: validators,
+  define: define
+}
+
+module.exports = function(config) {
+  if (config) { configure(config); }
+  return exports;
+};
+
+
+// statics //
 
 var UsergridStatics = {
 

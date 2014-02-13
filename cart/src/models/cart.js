@@ -1,7 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
-var usergrid = require('../../common/lib/usergrid');
+var usergrid = require('../helpers').usergrid;
 var validators = usergrid.validators;
 
 usergrid.define(this, Cart);

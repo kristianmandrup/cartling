@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "license": "MIT",
+  "main": "src/index.js",
   "author": "Scott Ganyo <sganyo@apigee.com>",
   "contributors": [
     {
@@ -26,9 +27,7 @@
     "basket"
   ],
   "dependencies": {
-    "usergrid": "0.10.x",
     "lodash": "2.4.x",
-    "winston": "0.7.x",
     "express": "3.4.x",
     "validator" : "3.2.x"
   },
