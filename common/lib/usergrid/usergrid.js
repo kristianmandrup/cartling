@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var ValidationErrors = require('./validation_errors');
+var usergrid_sdk = require('usergrid');
 
 var Usergrid = function() {
 
@@ -11,7 +12,10 @@ var Usergrid = function() {
 
   this.save = function(cb) {
     if (!this.isValid()) { return cb(this.getErrors()); }
-    this.prototype.save(cb);
+    var self = this;
+    usergrid_sdk.entity.prototype.save.call(this, function(err, data, reply) { // todo
+      cb(err, self);
+    });
   };
 
   // updates locally, no call to server
@@ -36,11 +40,6 @@ var Usergrid = function() {
 
   this.clearErrors = function() {
     this._errors = new ValidationErrors();
-  };
-
-  // return a single Error object wrapping ValidationErrors
-  this.getError = function() {
-    return this.getErrors().asError();
   };
 
   this.getErrors = function() {
@@ -84,7 +83,11 @@ var Usergrid = function() {
   };
 
   this.toJSON = function() {
-    return JSON.stringify(this._data);
+    var json = JSON.stringify(this._data, function(k,v) {
+      if (k === 'metadata') { return undefined; }
+      return v;
+    });
+    return json;
   };
 };
 module.exports = Usergrid;

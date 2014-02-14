@@ -25,10 +25,8 @@ function ValidationErrors(errors) {
     return _.keys(this.errors).length > 0;
   };
 
-  this.asError = function() {
-    var err = new Error('Validation errors');
-    err.validationErrors = this.getErrors();
-    return err;
+  this.isValidationErrors = function() {
+    return true;
   };
 }
 module.exports = ValidationErrors;

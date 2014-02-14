@@ -1,3 +1,6 @@
 'use strict';
 
-module.exports = require('phrixus-common')();
+module.exports = {
+  common: require('./common'),
+  controllers: require('./controllers')
+};

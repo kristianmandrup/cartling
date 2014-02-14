@@ -7,6 +7,7 @@ var _ = require('lodash');
 var usergrid_sdk = require('usergrid');
 var Usergrid = require('./usergrid');
 var validators = require('./validators');
+var ValidationErrors = require('./validation_errors');
 var client;
 
 function configure(config) {
@@ -26,7 +27,8 @@ function define(clazz, constructor, type) {
 }
 
 var exports = {
-  validators: validators
+  validators: validators,
+  ValidationErrors: ValidationErrors
 };
 
 module.exports = function(config) {
@@ -79,7 +81,7 @@ var UsergridStatics = {
     },
 
   // updates entity immediately on the server w/ attributes and returns the entity
-  update: // todo: test
+  update:
     function(attributes, cb) {
       var self = this;
       var test = newEntity(self, attributes);
