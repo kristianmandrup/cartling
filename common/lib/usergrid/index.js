@@ -8,15 +8,17 @@ var usergrid_sdk = require('usergrid');
 var Usergrid = require('./usergrid');
 var validators = require('./validators');
 var ValidationErrors = require('./validation_errors');
+var translateSDKCallback = require('./helpers').translateSDKCallback;
 var client;
 
 function configure(config) {
   client = new usergrid_sdk.client(_.assign({ authType: usergrid_sdk.AUTH_CLIENT_ID}, config));
   exports.client = client;
   exports.define = define;
+  exports.User = require('./user');
 }
 
-// type is optional. if omitted, constructor name is used as type.
+// "type" is optional. if omitted, constructor name is used as the usergrid type.
 function define(clazz, constructor, type) {
   if (!client) { throw new Error('phrixus-common not configured'); }
   clazz._usergrid = {
@@ -37,7 +39,7 @@ module.exports = function(config) {
 };
 
 
-// statics //
+// statics - applied to defined usergrid "class" objects //
 
 var UsergridStatics = {
 
@@ -46,14 +48,14 @@ var UsergridStatics = {
       this.findBy({}, cb);
     },
 
-  // retrieve an entity by uuid or unique name
+  // retrieve a single entity by uuid or unique name
   find:
     function(uuid_or_name, cb) {
       var self = this;
-      client.getEntity({ type: self._usergrid.type, uuid: uuid_or_name }, function (err, entity) {
+      client.getEntity({ type: self._usergrid.type, uuid: uuid_or_name }, translateSDKCallback(function (err, entity) {
         if (err) { return cb(err); }
         cb(null, wrap(self, entity));
-      });
+      }));
     },
 
   // query with attributes - returns an array of entities
@@ -62,10 +64,10 @@ var UsergridStatics = {
       var self = this;
       var ql = buildQuery(criteria);
       var query = { qs: { ql: ql }};
-      client.createCollection(options(self, query), function (err, collection) {
+      client.createCollection(options(self, query), translateSDKCallback(function (err, collection) {
         if (err) { return cb(err); }
         cb(null, wrapCollection(self, collection));
-      });
+      }));
     },
 
   // creates entity immediately on the server w/ attributes and returns the entity
@@ -74,10 +76,10 @@ var UsergridStatics = {
       var self = this;
       var test = newEntity(self, attributes);
       if (!test.isValid()) { return cb(test.getErrors()); }
-      client.createEntity(options(self, attributes), function (err, entity) {
+      client.createEntity(options(self, attributes), translateSDKCallback(function (err, entity) {
         if (err) { return cb(err); }
         cb(null, wrap(self, entity));
-      });
+      }));
     },
 
   // updates entity immediately on the server w/ attributes and returns the entity
@@ -86,14 +88,40 @@ var UsergridStatics = {
       var self = this;
       var test = newEntity(self, attributes);
       if (!test.isValid()) { return cb(test.getErrors()); }
-      test.save(options(self, attributes), function (err, entity) {
+      test.save(options(self, attributes), translateSDKCallback(function (err, entity) {
         if (err) { return cb(err); }
         cb(null, wrap(self, entity));
-      });
+      }));
+    },
+
+  // searches for a record with criteria, creates it with criteria if not found
+  findOrCreate:
+    function(criteria, cb) {
+      var self = this;
+      var ql = buildQuery(criteria);
+      var query = { qs: { ql: ql, limit: 1 }};
+      client.createCollection(options(self, query), translateSDKCallback(function (err, collection) {
+        if (err) { return cb(err); }
+        if (collection.hasNextEntity()) {
+          cb(null, wrap(self, collection.getNextEntity()));
+        } else {
+          self.create(criteria, cb);
+        }
+      }));
+    },
+
+  // deletes the entity on the service with the passed id
+  delete:
+    function(uuid_or_name, cb) {
+      var self = this;
+      var test = newEntity(self, options(self, { uuid: uuid_or_name }));
+      test.delete(translateSDKCallback(cb));
     }
 };
 
-// transforms attributes into QL - note 'order' is treated as 'order by'
+// utility methods
+
+// transforms attributes into QL (note: 'order' is treated as 'order by')
 // if it's a string, it just assumes the string is already a valid QS
 // eg. { a: 'b', c: 'd' } -> "a = 'b' and c = 'd'"
 function buildQuery(options) {

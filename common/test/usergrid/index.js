@@ -4,7 +4,7 @@ var should = require('should');
 var _ = require('lodash');
 var Foo = require('./foo');
 
-describe('Model', function() {
+describe('Base Model', function() {
 
   this.timeout(10000);
   var TEST_ID = 'test';
@@ -78,9 +78,20 @@ describe('Model', function() {
     });
   });
 
-  it('destroy', function(done) {
+  it('updateAttributes and save', function(done) {
+    var attrs = { boo: 'bif' };
+    cart.updateAttributes(attrs);
+    cart.get('boo').should.equal(attrs.boo);
+    cart.save(function(err, reply) {
+      should.not.exist(err);
+      reply.get('boo').should.equal(attrs.boo);
+      done();
+    });
+  });
+
+  it('delete', function(done) {
     if (!cart) { done(); }
-    cart.destroy(function(err) {
+    cart.delete(function(err) {
       should.not.exist(err);
       Foo.find(TEST_ID, function(err, entity) {
         should.exist(err);
