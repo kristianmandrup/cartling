@@ -30,3 +30,6 @@ function ValidationErrors(errors) {
   };
 }
 module.exports = ValidationErrors;
+
+ValidationErrors.prototype = new Error();
+ValidationErrors.prototype.constructor = ValidationErrors;
