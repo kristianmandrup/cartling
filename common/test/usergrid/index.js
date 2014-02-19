@@ -11,12 +11,9 @@ describe('Base Model', function() {
   var TEST_ATTRS = { name: TEST_ID, foo: 'bar' };
   var cart;
 
-  function after(done) {
-    if (!cart) { done(); }
-    cart.destroy(function(err) {
-      done();
-    });
-  }
+  before(function(done) {
+    Foo.destroyAll(done);
+  });
 
   it('create', function(done) {
     Foo.create(TEST_ATTRS, function(err, entity) {

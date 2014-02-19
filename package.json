@@ -35,13 +35,14 @@
     "winston": "0.7.x",
     "express": "3.4.x",
     "validator" : "3.2.x",
-    "pubsub-js" : "1.4.x"
+    "pubsub-js" : "1.4.x",
+    "async": "0.2.x"
   },
   "devDependencies": {
     "should" : "x.x.x",
     "supertest" : "x.x.x",
-    "underscore" : "x.x.x",
-    "mocha" : "x.x.x"
+    "mocha" : "x.x.x",
+    "underscore" : "x.x.x"
   },
   "scripts": {
   }

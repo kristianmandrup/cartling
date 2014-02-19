@@ -5,10 +5,12 @@
 
 var _ = require('lodash');
 var usergrid_sdk = require('usergrid');
-var Usergrid = require('./usergrid');
+var UsergridEntity = require('./usergrid_entity');
 var validators = require('./validators');
 var ValidationErrors = require('./validation_errors');
 var translateSDKCallback = require('./helpers').translateSDKCallback;
+var async = require('async');
+
 var client;
 
 function configure(config) {
@@ -16,16 +18,17 @@ function configure(config) {
   exports.client = client;
   exports.define = define;
   exports.User = require('./user');
+  exports.Controller = require('./controller');
 }
 
 // "type" is optional. if omitted, constructor name is used as the usergrid type.
-function define(clazz, constructor, type) {
+function define(_class, constructor, type) {
   if (!client) { throw new Error('phrixus-common not configured'); }
-  clazz._usergrid = {
+  _class._usergrid = {
     constructor: constructor,
     type: (type) ? type : constructor.name.toLowerCase()
   };
-  _.mixin(clazz, UsergridStatics);
+  _.mixin(_class, UsergridStatics);
 }
 
 var exports = {
@@ -43,6 +46,23 @@ module.exports = function(config) {
 
 var UsergridStatics = {
 
+  defaults:
+    function(hash) {  // field_name -> value
+      this._usergrid.defaults = hash;
+    },
+
+  validates:
+    function(validations) {  // field_name -> [ validator_function ]
+      _.each(validations, function(validators, name) {
+        _.each(validators, function(validator) {
+          if (!_.isFunction(validator)) {
+            throw new Error('bad validator for field: ' + name);
+          }
+        });
+      });
+      this._usergrid.validations = validations;
+    },
+
   all:
     function(cb) {
       this.findBy({}, cb);
@@ -59,11 +79,14 @@ var UsergridStatics = {
     },
 
   // query with attributes - returns an array of entities
+  // limit is optional
   findBy:
-    function(criteria, cb) {
+    function(criteria, limit, cb) {
+      if (_.isFunction(limit)) { cb = limit; limit = undefined; }
       var self = this;
       var ql = buildQuery(criteria);
       var query = { qs: { ql: ql }};
+      if (limit) { query.qs.limit = limit; }
       client.createCollection(options(self, query), translateSDKCallback(function (err, collection) {
         if (err) { return cb(err); }
         cb(null, wrapCollection(self, collection));
@@ -73,49 +96,68 @@ var UsergridStatics = {
   // creates entity immediately on the server w/ attributes and returns the entity
   create:
     function(attributes, cb) {
-      var self = this;
-      var test = newEntity(self, attributes);
-      if (!test.isValid()) { return cb(test.getErrors()); }
-      client.createEntity(options(self, attributes), translateSDKCallback(function (err, entity) {
-        if (err) { return cb(err); }
-        cb(null, wrap(self, entity));
-      }));
+      var test = this.new(attributes);
+      test.save(cb);
     },
 
   // updates entity immediately on the server w/ attributes and returns the entity
   update:
     function(attributes, cb) {
-      var self = this;
-      var test = newEntity(self, attributes);
-      if (!test.isValid()) { return cb(test.getErrors()); }
-      test.save(options(self, attributes), translateSDKCallback(function (err, entity) {
+      var test = this.new(attributes);
+      test.save(cb);
+    },
+
+  first:
+    function(criteria, cb) {
+      this.findBy(criteria, 1, function(err, reply) {
         if (err) { return cb(err); }
-        cb(null, wrap(self, entity));
-      }));
+        cb(null, reply.getNextEntity());
+      });
     },
 
   // searches for a record with criteria, creates it with criteria if not found
   findOrCreate:
     function(criteria, cb) {
       var self = this;
-      var ql = buildQuery(criteria);
-      var query = { qs: { ql: ql, limit: 1 }};
-      client.createCollection(options(self, query), translateSDKCallback(function (err, collection) {
+      this.first(criteria, function(err, entity) {
         if (err) { return cb(err); }
-        if (collection.hasNextEntity()) {
-          cb(null, wrap(self, collection.getNextEntity()));
+        if (entity) {
+          cb(null, entity);
         } else {
           self.create(criteria, cb);
         }
-      }));
+      });
     },
 
   // deletes the entity on the service with the passed id
   delete:
     function(uuid_or_name, cb) {
       var self = this;
-      var test = newEntity(self, options(self, { uuid: uuid_or_name }));
-      test.delete(translateSDKCallback(cb));
+      var test = this.new({ uuid: uuid_or_name });
+      test.delete(cb);
+    },
+
+  // destroys all entities matching criteria (criteria is optional)
+  destroyAll:
+    function(criteria, cb) {
+      if (_.isFunction(criteria)) { cb = criteria; criteria = {}; }
+      this.findBy(criteria, function(err, entities) {
+        if (err) { return cb(err); }
+        var deleteEntity = function(entity, callback) {
+          entity.delete(callback);
+        };
+        async.each(entities, deleteEntity, function(err) {
+          cb(err);
+        });
+      });
+    },
+
+  new:
+    function(attributes) {
+      var data = this._usergrid.defaults || {};
+      _.assign(data, attributes);
+      data.type = this._usergrid.type;
+      return wrap(this, new usergrid_sdk.entity({data: data, client: client}));
     }
 };
 
@@ -139,9 +181,9 @@ function buildQuery(options) {
 }
 
 // clones hash and adds type for usergrid context
-function options(clazz, hash) {
+function options(_class, hash) {
   var opts;
-  var type = { type: clazz._usergrid.type };
+  var type = { type: _class._usergrid.type };
   if (hash) {
     opts = _.clone(hash);
     _.assign(opts, type);
@@ -151,28 +193,22 @@ function options(clazz, hash) {
   return opts;
 }
 
-function newEntity(self, attributes) {
-  var entity = wrap(self, new usergrid_sdk.entity());
-  if (attributes) {
-    entity.updateAttributes(attributes);
-  }
+// Create a new typed entity from the passed sdk Usergrid.Entity.
+// Assigns prototypes as follows:
+//   [defined entity] -> [this UsergridEntity()] -> [sdk Usergrid.Entity()]
+function wrap(_class, entity) {
+  UsergridEntity.prototype = entity;
+  _class._usergrid.constructor.prototype = new UsergridEntity();
+  entity = new _class._usergrid.constructor();
+  entity._class = _class;
   return entity;
 }
 
-// Create a new typed entity from the passed sdk Usergrid.Entity.
-// Assigns prototypes as follows:
-//   [defined entity] -> [this Usergrid()] -> [sdk Usergrid.Entity()]
-function wrap(clazz, entity) {
-  Usergrid.prototype = entity;
-  clazz._usergrid.constructor.prototype = new Usergrid();
-  return new clazz._usergrid.constructor();
-}
-
-function wrapCollection(clazz, collection) {
+function wrapCollection(_class, collection) {
   var entities = [];
   while (collection.hasNextEntity()) {
     var entity = collection.getNextEntity();
-    entities.push(wrap(clazz, entity));
+    entities.push(wrap(_class, entity));
   }
   return entities;
 }

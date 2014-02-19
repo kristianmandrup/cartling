@@ -4,12 +4,18 @@ var common = require('../helpers/common');
 var usergrid = common.usergrid;
 var validators = usergrid.validators;
 
-// todo: define this as a sub-resource of Cart?
-usergrid.define(this, CartItem);
+var CartItemClass = {};
+usergrid.define(CartItemClass, CartItem);
+module.exports = CartItemClass;
+
+CartItemClass.validates({
+  sku:      [ validators.required ],
+  quantity: [ validators.required, validators.numeric ]
+});
+
+CartItemClass.defaults({
+  quantity: 1
+});
 
 function CartItem() {
-  this.validates({
-    sku:      [ validators.required ],
-    quantity: [ validators.required, validators.number ]
-  });
 }

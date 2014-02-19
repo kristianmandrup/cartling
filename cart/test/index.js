@@ -5,6 +5,7 @@ var Url = require('url');
 var request = require('supertest');
 var querystring = require('querystring');
 var _ = require('lodash');
+var async = require('async');
 
 var helpers = require('./helpers');
 var models = helpers.models;
@@ -19,26 +20,33 @@ describe('app', function() {
   var carts = [];
 
   before(function(done) {
-    Cart.create({ name: 'foo' }, function(err, cart) {
+    Cart.destroyAll(function(err, reply) {
       if (err) { return done(err); }
-      carts.push(cart);
-      Cart.create({ name: 'bar', bar: 'baz' }, function(err, cart) {
-        if (err) { return done(err); }
-        carts.push(cart);
-        done();
-      });
+      async.parallel([
+        function(cb) {
+          Cart.create({ name: 'foo' }, function(err, cart) {
+            cb(err, cart);
+          });
+        },
+        function(cb) {
+          Cart.create({ name: 'bar', bar: 'baz' }, function(err, cart) {
+            cb(err, cart);
+          });
+        }
+      ],
+        function(err, results) {
+          if (err) { return done(err); }
+          carts = results;
+          done();
+        });
     });
-  });
-
-  after(function(done) {
-    deleteAllCarts(done);
   });
 
   describe('cart', function() {
 
     it('list all', function(done) {
       request(server)
-        .get('/cart')
+        .get('/carts')
         .end(function(err, res) {
           if (err) { return done(err); }
           res.status.should.eql(200);
@@ -54,7 +62,7 @@ describe('app', function() {
       it('can succeed', function(done) {
         var attrs = { name: 'skippy' };
         request(server)
-          .post('/cart')
+          .post('/carts')
           .send(attrs)
           .end(function(err, res) {
             if (err) { return done(err); }
@@ -69,7 +77,7 @@ describe('app', function() {
       it('is validated', function(done) {
         var cart = { foo: 'bar' };
         request(server)
-          .post('/cart')
+          .post('/carts')
           .send(cart)
           .end(function(err, res) {
             if (err) { return done(err); }
@@ -83,7 +91,7 @@ describe('app', function() {
         it('can update from uuid', function(done) {
           var body = { bar: 'babs' };
           request(server)
-            .put('/cart/' + carts[1].get('uuid'))
+            .put('/carts/' + carts[1].get('uuid'))
             .send(body)
             .end(function(err, res) {
               if (err) { return done(err); }
@@ -97,7 +105,7 @@ describe('app', function() {
 //        it.only('is validated', function(done) {
 //          var cart = { foo: 'bar' };
 //          request(server)
-//            .post('/cart')
+//            .post('/carts')
 //            .send(cart)
 //            .end(function(err, res) {
 //              if (err) { return done(err); }
@@ -110,13 +118,3 @@ describe('app', function() {
     });
   });
 });
-
-function deleteAllCarts(done) {
-  Cart.all(function(err, carts) {
-    if (err) { return done(err); }
-    var deleted = _.after(carts.length, done);
-    _.each(carts, function(cart) {
-      cart.destroy(deleted);
-    });
-  });
-}

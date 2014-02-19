@@ -6,29 +6,27 @@ var app = express();
 
 module.exports = function(config) {
 
-  // todo: oauth
-//  var oauth = config.oauth.expressMiddleware();
-  var cart = require('phrixus-cart')(config);
+  app.use(express.json());
 
   // apply config
   _.forOwn(config.app, function(v,k) {
     app.set(k,v);
   });
 
-//  app.use(express.logger());
-//  app.use(express.compress());
-  app.use(express.json());
-
   // routes //
-
-  // todo: pass oauth roles/scopes
-  cart.routes(app);
+  var cart = require('phrixus-cart')(config);
+  cart.routes(app, mockOAuthMiddleware);
 
   // start //
-
-  app.listen(app.get('port'), function() {
-//    console.log("Express listening on port %d in %s mode", app.get('port'), app.settings.env);
-  });
-
+  app.listen(app.get('port'));
   return app;
+};
+
+
+var mockOAuthMiddleware = {
+  authenticate: function() {
+    return function(req, resp, next) {
+      return next();
+    };
+  }
 };

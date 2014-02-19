@@ -9,7 +9,7 @@ var translateSDKCallback = helpers.translateSDKCallback;
 var request = helpers.request;
 var usergrid_sdk = require('usergrid');
 
-var Usergrid = function() {
+var UsergridEntity = function() {
 
   // persistence
 
@@ -38,6 +38,18 @@ var Usergrid = function() {
     });
   };
 
+  this.getConnections = function(name, cb) {
+    var self = this;
+    // call up to the sdk getConnections
+    usergrid_sdk.entity.prototype.getConnections.call(this, name, function(err, reply) {
+      if (err) { return cb(err); } // todo: translateSDKCallback?
+      var entities = _.map(reply.entities, function(entity) {
+        return self._class.new(entity);
+      });
+      cb(null, entities);
+    });
+  };
+
   // updates locally, no call to server
   this.updateAttributes = function(attributes) {
     if (!this._data) { this._data = {}; }
@@ -49,10 +61,6 @@ var Usergrid = function() {
   };
 
   // validation
-
-  this.validates = function(validations) {
-    this._validations = validations;
-  };
 
   this.addError = function(attribute, error) {
     this._errors.addError(attribute, error);
@@ -69,7 +77,8 @@ var Usergrid = function() {
   this.validate = function() {
     var self = this;
     self.clearErrors();
-    _.each(self._validations, function(validations, name) {
+    var validations = this._class._usergrid.validations;
+    _.each(validations, function(validations, name) {
       var value = self.get(name);
       _.each(validations, function(validator) {
         var err = validator(value);
@@ -110,4 +119,4 @@ var Usergrid = function() {
     return json;
   };
 };
-module.exports = Usergrid;
+module.exports = UsergridEntity;

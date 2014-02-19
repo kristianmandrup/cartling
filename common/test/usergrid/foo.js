@@ -4,13 +4,14 @@ var _ = require('lodash');
 var usergrid  = require('../helpers').libs.usergrid;
 var validators = usergrid.validators;
 
-usergrid.define(this, Foo);
+var FooClass = {};
+usergrid.define(FooClass, Foo);
+module.exports = FooClass;
+
+FooClass.validates({
+  name:  [ validators.required ],
+  email: [ validators.email ]
+});
 
 function Foo() {
-
-  this.validates({
-    name:  [ validators.required ],
-    email: [ validators.email ]
-  });
-
 }

@@ -7,38 +7,38 @@ module.exports = function(app, oauth) {
 
   // Cart
 
-  app.post('/cart',
-//  oauth.authenticate('customer'),
+  app.post('/carts',
+    oauth.authenticate('cart'),
     cart.create);
 
-  app.get('/cart',
-//  oauth.authenticate('customer'),
+  app.get('/carts',
+    oauth.authenticate('cart'),
     cart.list);
 
-  app.get('/cart/:id',
-//  oauth.authenticate('customer'),
+  app.get('/carts/:id',
+    oauth.authenticate('cart'),
     cart.get);
 
-  app.put('/cart/:id',
-//  oauth.authenticate('customer'),
+  app.put('/carts/:id',
+    oauth.authenticate('cart'),
     cart.update);
 
-  app.delete('/cart/:id',
-//  oauth.authenticate('customer'),
+  app.delete('/carts/:id',
+    oauth.authenticate('cart'),
     cart.close);
 
 
   // CartItems
 
-  app.get('/cart/:cartId/item/:id',
-//  oauth.authenticate('customer'),
-    cartItem.get);
+  app.post('/carts/:cartId/items',
+    oauth.authenticate('cart'),
+    cartItem.create);
 
-  app.put('/cart/:cartId/item/:id',
-//  oauth.authenticate('customer'),
+  app.put('/carts/:cartId/items/:id',
+    oauth.authenticate('cart'),
     cartItem.update);
 
-  app.delete('/cart/:cartId/item/:id',
-//  oauth.authenticate('customer'),
-    cartItem.close);
+  app.delete('/carts/:cartId/items/:id',
+    oauth.authenticate('cart'),
+    cartItem.delete);
 };

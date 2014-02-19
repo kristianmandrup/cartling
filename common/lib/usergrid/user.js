@@ -6,16 +6,16 @@ var validators = usergrid.validators;
 var helpers = require('./helpers');
 
 // defines statics for this module and User as a type of Usergrid Entity
-var UserClass = {
-};
-module.exports = UserClass;
+var UserClass = {};
 usergrid.define(UserClass, User);
+module.exports = UserClass;
+
+UserClass.validates({
+  username: [ validators.required ]
+});
+
 
 function User() {
-
-  this.validates({
-    username: [ validators.required ]
-  });
 
   // cb reply returns token
   this.getAccessToken = function(password, cb) {
