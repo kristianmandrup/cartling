@@ -5,7 +5,6 @@ var log = common.logger;
 var events = common.events;
 var models = require('../models');
 var Cart = models.Cart;
-var CartItem = models.CartItem;
 var _ = require('lodash');
 var commonController = _.bindAll(new common.usergrid.Controller(Cart));
 var onSuccess = commonController.onSuccess;
@@ -14,22 +13,20 @@ var onSuccess = commonController.onSuccess;
 var cartController = {
 
   list: commonController.all,
+  create: commonController.create,
+  update: commonController.update,
 
   get:
     function(req, res) {
       commonController.get(req, res, function (err, reply) {
         onSuccess(err, req, res, reply, function(res, cart) {
-          cart.getItems('items', function(err, items) { // todo: include optionally?
+          cart.getItems('items', function(err, items) {
             cart.set('items', items);
             res.json(cart);
           });
         });
       });
     },
-
-  create: commonController.create,
-
-  update: commonController.update,
 
   close:
     function(req, res) {

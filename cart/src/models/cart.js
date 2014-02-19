@@ -19,7 +19,6 @@ function Cart() {
   };
 
   this.close = function(cb) {
-    // todo: state verification?
     this.set('status', 'closed');
     this.save(cb);
   };

@@ -4,9 +4,8 @@
 
 var _ = require('lodash');
 var ValidationErrors = require('./validation_errors');
-var helpers = require('./helpers')
+var helpers = require('./helpers');
 var translateSDKCallback = helpers.translateSDKCallback;
-var request = helpers.request;
 var usergrid_sdk = require('usergrid');
 
 var UsergridEntity = function() {
