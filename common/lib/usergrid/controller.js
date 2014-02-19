@@ -91,6 +91,8 @@ function Controller(UsergridClass) {
     });
   };
 
+  // passes to next when no error
+  // if err, translates err into an appropriate json response
   this.onSuccess = function(err, req, res, reply, next) {
     if (err) {
       if (err.isValidationErrors()) {
@@ -100,8 +102,9 @@ function Controller(UsergridClass) {
         log.error(err.stack);
         res.json(500, err); // todo: more error handling
       }
+    } else {
+      next(res, reply);
     }
-    next(res, reply);
   };
 
 }
