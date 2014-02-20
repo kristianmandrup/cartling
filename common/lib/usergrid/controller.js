@@ -10,7 +10,7 @@ function Controller(UsergridClass) {
   var eventType = events.ROOT + '.' + UsergridClass._usergrid.type;
 
   // list all
-  this.all = function(req, res) {
+  this.list = function(req, res) {
     log.debug('cart list');
     var self = this;
     UsergridClass.all(function(err, reply) {

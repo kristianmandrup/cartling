@@ -14,8 +14,8 @@ module.exports = function(config) {
   });
 
   // routes //
-  var cart = require('phrixus-cart')(config);
-  cart.routes(app, mockOAuthMiddleware);
+  var cartApp = require('../')(config);
+  cartApp.routes(app, mockOAuthMiddleware);
 
   // start //
   app.listen(app.get('port'));

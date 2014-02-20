@@ -86,35 +86,33 @@ describe('app', function() {
           });
       });
 
-      describe('update', function() {
-
-        it('can update from uuid', function(done) {
-          var body = { bar: 'babs' };
-          request(server)
-            .put('/carts/' + carts[1].get('uuid'))
-            .send(body)
-            .end(function(err, res) {
-              if (err) { return done(err); }
-              res.status.should.eql(200);
-              var cart = JSON.parse(res.body);
-              cart.bar.should.equal('babs');
-              done();
-            });
-        });
-
-//        it.only('is validated', function(done) {
-//          var cart = { foo: 'bar' };
-//          request(server)
-//            .post('/carts')
-//            .send(cart)
-//            .end(function(err, res) {
-//              if (err) { return done(err); }
-//              res.status.should.eql(400);
-//              done();
-//            });
-//        });
-
-      });
     });
+
+    describe('update', function() {
+
+      it('can update from uuid', function(done) {
+        var body = { bar: 'babs' };
+        request(server)
+          .put('/carts/' + carts[1].get('uuid'))
+          .send(body)
+          .end(function(err, res) {
+            if (err) { return done(err); }
+            res.status.should.eql(200);
+            var cart = JSON.parse(res.body);
+            cart.bar.should.equal('babs');
+            done();
+          });
+      });
+
+    });
+
+    describe('connections', function() {
+
+      it('can add items');
+      it('can retrieve connected items');
+      it('can remove items');
+
+    });
+
   });
 });

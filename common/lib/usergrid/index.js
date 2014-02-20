@@ -13,6 +13,11 @@ var async = require('async');
 
 var client;
 
+var exports = {
+  validators: validators,
+  ValidationErrors: ValidationErrors
+};
+
 function configure(config) {
   client = new usergrid_sdk.client(_.assign({ authType: usergrid_sdk.AUTH_CLIENT_ID}, config));
   exports.client = client;
@@ -30,11 +35,6 @@ function define(_class, constructor, type) {
   };
   _.mixin(_class, UsergridStatics);
 }
-
-var exports = {
-  validators: validators,
-  ValidationErrors: ValidationErrors
-};
 
 module.exports = function(config) {
   if (config && config.usergrid) { configure(config.usergrid); }
@@ -109,10 +109,7 @@ var UsergridStatics = {
 
   first:
     function(criteria, cb) {
-      this.findBy(criteria, 1, function(err, reply) {
-        if (err) { return cb(err); }
-        cb(null, reply.getNextEntity());
-      });
+      this.findBy(criteria, 1, cb);
     },
 
   // searches for a record with criteria, creates it with criteria if not found

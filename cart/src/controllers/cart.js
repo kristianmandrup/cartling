@@ -12,7 +12,7 @@ var onSuccess = commonController.onSuccess;
 // todo: user context / security
 var cartController = {
 
-  list: commonController.all,
+  list: commonController.list,
   create: commonController.create,
   update: commonController.update,
 
