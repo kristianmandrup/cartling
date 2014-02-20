@@ -14,6 +14,12 @@ UserClass.validates({
   username: [ validators.required ]
 });
 
+  // cb reply returns token
+UserClass.getAccessToken =
+    function(username, password, cb) {
+      var u = this.new({ username: username});
+      u.getAccessToken(password, cb);
+    };
 
 function User() {
 

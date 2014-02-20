@@ -1,0 +1,38 @@
+{
+  "name": "phrixus-user",
+  "description": "User management for a Node.js Shopping Cart system built on Apigee Volos and Apache Usergrid.",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.js",
+  "author": "Scott Ganyo <sganyo@apigee.com>",
+  "contributors": [
+    {
+      "name": "Scott Ganyo",
+      "email": "sganyo@apigee.com",
+      "url": "https://github.com/scottganyo"
+    }
+  ],
+  "homepage": "https://github.com/apigee/phrixus",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/apigee/phrixus.git"
+  },
+  "keywords": [
+    "ecommerce",
+    "volos",
+    "usergrid",
+    "shopping",
+    "cart",
+    "basket"
+  ],
+  "dependencies": {
+    "lodash": "2.4.x",
+    "express": "3.4.x",
+    "validator" : "3.2.x"
+  },
+  "devDependencies": {
+  },
+  "scripts": {
+  }
+}
