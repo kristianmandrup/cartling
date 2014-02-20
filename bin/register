@@ -1,0 +1,71 @@
+#!/usr/local/bin/node
+
+// register an app to use phrixus //
+
+'use strict';
+
+var config = require('../config');
+var oauthConfig = config.oauth.config || {};
+var management = config.oauth.management.create(oauthConfig);
+var User = require('../user')(config).User;
+var fs = require('fs');
+var path = require('path');
+
+var devRequest = {
+  firstName: 'Phrixus',
+  lastName: 'Developer',
+  email: 'phrixus@developer.com',
+  userName: 'phrixus'
+};
+
+var appRequest = {
+  name: 'Phrixus',
+  developerId: undefined,
+  scopes: 'user cart'
+};
+
+var default_user = {
+  username: 'testuser',
+  password: 'password'
+};
+
+console.log('Creating developer %s', devRequest.userName);
+management.createDeveloper(devRequest , function(err, developer) {
+  if (err) { throw err; }
+
+  appRequest.developerId = developer.id;
+  console.log('Creating application %s for developer %s', appRequest.name, developer.id);
+
+  management.createApp(appRequest, function(err, app) {
+    if (err) { throw err; }
+
+    console.log();
+    console.log('Application credentials:');
+    console.log(app.credentials);
+
+    User.findOrCreate(default_user, function(err, reply) {
+      if (err) { throw err; }
+
+      console.log();
+      console.log('Default User:');
+      console.log(default_user);
+
+      var registration = {
+        app: {
+          key: app.credentials[0].key,
+          secret: app.credentials[0].secret
+        },
+        defaultUser: default_user
+      };
+
+
+      var regFile = path.join(path.dirname(module.filename), '../config/registration.json');
+      fs.writeFile(regFile, JSON.stringify(registration), function(err, reply) {
+        console.log();
+        console.log('registration written to: %s', regFile);
+
+        process.exit();
+      });
+    });
+  });
+});

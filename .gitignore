@@ -16,3 +16,4 @@ node_modules
 config/development.js
 config/test.js
 config/production.js
+registration.json
