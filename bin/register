@@ -25,7 +25,7 @@ var appRequest = {
 };
 
 var default_user = {
-  username: 'testuser',
+  username: 'default',
   password: 'password'
 };
 

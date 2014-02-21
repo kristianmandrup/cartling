@@ -23,7 +23,8 @@ var oauthConfig = config.oauth.config || {};
 oauthConfig.validGrantTypes = [ 'client_credentials', 'authorization_code', 'implicit_grant', 'password' ];
 oauthConfig.passwordCheck = checkPassword;
 oauthConfig.beforeCreateToken = beforeCreateToken;
-var oauth = config.oauth.provider.create(oauthConfig).expressMiddleware();
+var oauthCore = config.oauth.provider.create(oauthConfig);
+var oauth = oauthCore.expressMiddleware();
 
 
 // routes //
@@ -67,7 +68,20 @@ function printInstructions() {
   var creds = config.registration.app;
   var defaultUser = config.registration.defaultUser;
 
-  checkPassword(defaultUser.username, defaultUser.password, function(err, reply) {
+  var body = {
+    grant_type: 'password',
+    client_id: creds.key,
+    client_secret: creds.secret,
+    username: defaultUser.username,
+    password: defaultUser.password,
+    scope: 'user cart'
+  };
+  oauthCore.generateToken(body, function(err, reply) {
+    if (err) {
+      console.log("Uh oh. Looks like your registration process didn't go well. There's no default user.");
+      throw err;
+    }
+
     console.log();
     console.log('All ready!');
     console.log("Express listening on port %d in %s mode", app.get('port'), app.settings.env);
@@ -81,7 +95,6 @@ function printInstructions() {
 
     console.log('Or use a token I got for you. Just start your curl commands like so:');
     console.log();
-    console.log('curl -H "Authorization: Bearer mbldJpWesj145+yoYEd4l7IZirZz7XR2IQuUJlJeNLs=" "http://localhost:%d/...',
-      app.get('port'));
+    console.log('curl -H "Authorization: Bearer %s" "http://localhost:%d/', reply.access_token, app.get('port'));
   });
 }
