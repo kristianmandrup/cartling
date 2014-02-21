@@ -3,7 +3,6 @@
 var common = require('../helpers/common');
 var usergrid = common.usergrid;
 var validators = usergrid.validators;
-var Cart = require('./cart');
 
 var CartItemClass = {};
 usergrid.define(CartItemClass, CartItem);
@@ -17,9 +16,6 @@ CartItemClass.validates({
 CartItemClass.defaults({
   quantity: 1
 });
-
-// todo: CartItemClass.belongsTo(Cart)
-//CartItemClass.belongsTo(Cart, 'item');
 
 function CartItem() {
 }

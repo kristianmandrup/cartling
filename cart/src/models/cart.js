@@ -3,7 +3,6 @@
 var common = require('../helpers/common');
 var usergrid = common.usergrid;
 var validators = usergrid.validators;
-var CartItemClass = require('./cart_item');
 
 var CartClass = {};
 usergrid.define(CartClass, Cart);
@@ -13,6 +12,7 @@ CartClass.validates({
   name: [ validators.required ]
 });
 
+var CartItemClass = require('./cart_item');
 CartClass.hasMany('items', CartItemClass);
 
 function Cart() {

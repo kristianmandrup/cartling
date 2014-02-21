@@ -24,6 +24,14 @@ describe('User Model', function() {
     });
   });
 
+  after(function(done) {
+    if (user) {
+      user.delete(function(err) {
+        done();
+      });
+    }
+  });
+
   describe('getAccessToken()', function() {
 
     it('should receive a token with a good username and password', function(done) {

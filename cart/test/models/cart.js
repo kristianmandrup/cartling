@@ -13,6 +13,11 @@ describe('Cart Model', function() {
     name: 'testcart',
     foo: 'bar'
   };
+  var cartItem_attrs = {
+    name: 'testcartitem',
+    sku: '123',
+    quantity: 1
+  };
   var cart;
 
   before(function(done) {
@@ -20,17 +25,37 @@ describe('Cart Model', function() {
       Cart.create(cart_attrs, function(err, reply) {
         if (err) { return done(err); }
         cart = reply;
-        done();
+
+        CartItem.delete(cartItem_attrs.name, function(err, reply) {
+          done();
+        });
       });
     });
   });
+
+  after(function(done) {
+    if (cart) {
+      cart.delete(function(err) {
+        done();
+      });
+    }
+  });
+
 
   describe('hasMany CartItems', function() {
 
     var cartItem;
 
+    after(function(done) {
+      if (cartItem) {
+        cartItem.delete(function(err) {
+          done();
+        });
+      }
+    });
+
     it('should be able to add a CartItem', function(done) {
-      CartItem.create({ sku: '123', quantity: 1 }, function(err, item) {
+      CartItem.create(cartItem_attrs, function(err, item) {
         should.not.exist(err);
 
         cart.addItem(item, function(err, reply) {
@@ -63,7 +88,14 @@ describe('Cart Model', function() {
           should.not.exist(err);
           should.exist(items);
           items.length.should.equal(0);
-          done();
+
+          CartItem.find(cartItem_attrs.name, function(err, cartItem) {
+            should.not.exist(err);
+            should.exist(cartItem);
+            cartItem.delete(function() {
+              done();
+            });
+          });
         });
       });
     });
