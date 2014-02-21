@@ -13,7 +13,8 @@ var ClassStatics = function(client) {
   return {
 
     hasMany:
-      function(connectionClass, connectionName) {
+      function(connectionName, connectionClass) {
+        if (!this._usergrid.connections) { this._usergrid.connections = {}; }
         this._usergrid.connections[connectionName] = connectionClass;
       },
 

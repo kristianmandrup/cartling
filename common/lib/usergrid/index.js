@@ -29,8 +29,7 @@ function define(Class, constructor, type) {
   if (!client) { throw new Error('phrixus-common not configured'); }
   Class._usergrid = {
     constructor: constructor,
-    type: (type) ? type : constructor.name.toLowerCase(),
-    connections: {}
+    type: (type) ? type : constructor.name.toLowerCase()
   };
   _.mixin(Class, usergridStatics(client));
 }

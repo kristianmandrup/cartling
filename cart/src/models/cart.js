@@ -13,7 +13,7 @@ CartClass.validates({
   name: [ validators.required ]
 });
 
-CartClass.hasMany(CartItemClass, 'item');
+CartClass.hasMany('items', CartItemClass);
 
 function Cart() {
   this.isClosed = function() {
