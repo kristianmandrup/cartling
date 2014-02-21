@@ -37,13 +37,14 @@ var UsergridEntity = function() {
     });
   };
 
-  this.getConnections = function(name, cb) {
+  // connectedType is the defined() type of the connected entity
+  this.getConnectedEntities = function(name, connectedType, cb) {
     var self = this;
     // call up to the sdk getConnections
-    usergrid_sdk.entity.prototype.getConnections.call(this, name, function(err, reply) {
+    this.getConnections(name, function(err, reply) {
       if (err) { return cb(err); } // todo: translateSDKCallback?
       var entities = _.map(reply.entities, function(entity) {
-        return self._class.new(entity);
+        return connectedType.new(entity);
       });
       cb(null, entities);
     });
@@ -58,6 +59,7 @@ var UsergridEntity = function() {
     });
     return this;
   };
+
 
   // validation
 
@@ -90,6 +92,7 @@ var UsergridEntity = function() {
   this.isValid = function() {
     return !(this.validate().hasErrors());
   };
+
 
   // utility
 

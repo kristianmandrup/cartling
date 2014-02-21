@@ -25,7 +25,7 @@ describe('Cart Model', function() {
     });
   });
 
-  describe('CartItems', function() {
+  describe('hasMany CartItems', function() {
 
     var cartItem;
 
@@ -48,6 +48,8 @@ describe('Cart Model', function() {
         should.exist(items);
         items.length.should.equal(1);
         items[0].get('uuid').should.equal(cartItem.get('uuid'));
+        CartItem.isInstance(items[0]).should.be.true;
+        Cart.isInstance(items[0]).should.not.be.true;
         done();
       });
     });
