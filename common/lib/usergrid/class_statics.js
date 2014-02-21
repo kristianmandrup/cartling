@@ -86,7 +86,10 @@ var ClassStatics = function(client) {
 
     first:
       function(criteria, cb) {
-        this.findBy(criteria, 1, cb);
+        this.findBy(criteria, 1, function(err, entities) {
+          if (err) { return cb(err); }
+          cb(null, entities[0]);
+        });
       },
 
     // searches for a record with criteria, creates it with criteria if not found
