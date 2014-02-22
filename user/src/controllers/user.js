@@ -31,8 +31,7 @@ var userController = {
       User.find(id, function(err, reply) {
         onSuccess(err, req, res, reply, function(res, user) {
           log.debug('user found %s', id);
-          user.updateAttributes(attributes);
-          user.save(function(err, reply) {
+          user.update(attributes, function(err, reply) {
             onSuccess(err, req, res, reply, function(res, reply) {
               log.debug('user updated %s', id);
               var event = { op: 'update', attributes: attributes };

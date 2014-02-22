@@ -59,8 +59,7 @@ function Controller(UsergridClass) {
     UsergridClass.find(id, function(err, reply) {
       self.onSuccess(err, req, res, reply, function(res, cart) {
         log.debug('cart found %s', id);
-        cart.updateAttributes(attributes);
-        cart.save(function(err, reply) {
+        cart.update(attributes, function(err, reply) {
           self.onSuccess(err, req, res, reply, function(res, reply) {
             log.debug('cart updated %s', id);
             var event = { user: '?', op: 'update', attributes: attributes };

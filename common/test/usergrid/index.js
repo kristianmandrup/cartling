@@ -77,7 +77,7 @@ describe('Base Model', function() {
 
   it('updateAttributes and save', function(done) {
     var attrs = { boo: 'bif' };
-    cart.updateAttributes(attrs);
+    cart.assignAttributes(attrs);
     cart.get('boo').should.equal(attrs.boo);
     cart.save(function(err, reply) {
       should.not.exist(err);

@@ -50,8 +50,14 @@ var UsergridEntity = function() {
     });
   };
 
+  // updateAttributes locally and save to server
+  this.update = function(attributes, cb) {
+    this.assignAttributes(attributes);
+    this.save(cb);
+  };
+
   // updates locally, no call to server
-  this.updateAttributes = function(attributes) {
+  this.assignAttributes = function(attributes) {
     if (!this._data) { this._data = {}; }
     var self = this;
     _.forOwn(attributes, function(v, k) {
