@@ -26,6 +26,9 @@ module.exports = function(config) {
 var mockOAuthMiddleware = {
   authenticate: function() {
     return function(req, resp, next) {
+      req.token = {};
+      req.token.attributes = {};
+      req.token.attributes.username = 'testuser';
       return next();
     };
   }

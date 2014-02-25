@@ -5,36 +5,37 @@ function Controller(UsergridClass) {
   var common = require('../')();
   var log = common.logger;
   var events = common.events;
-
   var type = UsergridClass._usergrid.type;
   var eventType = events.ROOT + '.' + UsergridClass._usergrid.type;
 
   // list all
-  this.list = function(req, res) {
+  this.list = function(req, res, cb) {
     log.debug('cart list');
     var self = this;
     UsergridClass.all(function(err, reply) {
       self.onSuccess(err, req, res, reply, function(res, reply) {
+        if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
         res.json(reply);
       });
     });
   };
 
   // get by req.params.id
-  this.get = function(req, res) {
+  this.get = function(req, res, cb) {
     var id = req.params.id;
     if (!id) { return res.json(400, 'missing id'); }
     log.debug('%s get %s', type, id);
     var self = this;
     UsergridClass.find(id, function(err, reply) {
       self.onSuccess(err, req, res, reply, function(res, reply) {
+        if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
         res.json(reply);
       });
     });
   };
 
   // create from attributes in req.body
-  this.create = function(req, res) {
+  this.create = function(req, res, cb) {
     log.debug('%s create %s', type, req.body);
     if (!req.body) { return res.json(400, 'body required'); }
     var attributes = req.body;
@@ -43,13 +44,14 @@ function Controller(UsergridClass) {
       self.onSuccess(err, req, res, reply, function(res, reply) {
         var event = { op: 'create', attributes: attributes };
         events.publish(eventType, event);
+        if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
         res.json(reply);
       });
     });
   };
 
   // update from attributes in req.body
-  this.update = function(req, res) {
+  this.update = function(req, res, cb) {
     var id = req.params.id;
     if (!id) { return res.json(400, 'missing id'); }
     if (!req.body) { return res.json(400, 'body required'); }
@@ -64,6 +66,7 @@ function Controller(UsergridClass) {
             log.debug('cart updated %s', id);
             var event = { user: '?', op: 'update', attributes: attributes };
             events.publish(eventType, event);
+            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
             res.json(reply);
           });
         });
@@ -72,7 +75,7 @@ function Controller(UsergridClass) {
   };
 
   // delete by req.params.id
-  this.delete = function(req, res) {
+  this.delete = function(req, res, cb) {
     var id = req.params.id;
     if (!id) { return res.json(400, 'missing id'); }
     log.debug('%s delete %s', type, id);
@@ -83,6 +86,7 @@ function Controller(UsergridClass) {
           self.onSuccess(err, req, res, reply, function(res, reply) {
             var event = { op: 'close' };
             events.publish(eventType, event);
+            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
             res.json(reply);
           });
         });
@@ -94,9 +98,12 @@ function Controller(UsergridClass) {
   // if err, translates err into an appropriate json response
   this.onSuccess = function(err, req, res, reply, next) {
     if (err) {
-      if (err.isValidationErrors()) {
+      if (err.isValidationErrors) {
         log.error(JSON.stringify(err));
         res.json(400, err);
+      } else if (err.statusCode) {
+        log.error(err.message);
+        res.json(err.statusCode, err);
       } else {
         log.error(err.stack);
         res.json(500, err); // todo: more error handling

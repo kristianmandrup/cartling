@@ -20,25 +20,15 @@ var userController = {
 
   authenticate:
     function(req, res) {
-      var id = req.params.id;
-      if (!id) { return res.json(400, 'missing id'); }
-      User.find(id, function(err, reply) {
-
-      });
       if (!req.body) { return res.json(400, 'body required'); }
       var attributes = req.body;
-      log.debug('user update %s:', id, attributes);
-      User.find(id, function(err, reply) {
-        onSuccess(err, req, res, reply, function(res, user) {
-          log.debug('user found %s', id);
-          user.update(attributes, function(err, reply) {
-            onSuccess(err, req, res, reply, function(res, reply) {
-              log.debug('user updated %s', id);
-              var event = { op: 'update', attributes: attributes };
-              events.publish(events.USER, event);
-              res.json(reply);
-            });
-          });
+      log.debug('user authenticate %s:', attributes.username);
+      User.getAccessToken(attributes.username, attributes.password, function(err, reply) {
+        onSuccess(err, req, res, reply, function(res, reply) {
+          log.debug('user authenticated %s', attributes.username);
+          var event = { op: 'authenticate', attributes: attributes };
+          events.publish(events.USER, event);
+          res.json(reply);
         });
       });
     }

@@ -25,16 +25,9 @@ var UsergridEntity = function() {
 
   this.delete = function(cb) {
     var self = this;
-    var type = this.get('type');
-    type += '/' + (this.get('uuid') || this.get('name') || this.get('username'));
-    var options = {
-      method: 'DELETE',
-      endpoint: type
-    };
-    helpers.request(options, function (err, data) {
-      if (!err) { self.set(null); }
-      cb(err, data);
-    });
+    this.destroy(translateSDKCallback(function(err, reply) {
+      cb(err, self);
+    }));
   };
 
   // connectedType is the defined() type of the connected entity
@@ -42,7 +35,7 @@ var UsergridEntity = function() {
     var self = this;
     // call up to the sdk getConnections
     this.getConnections(name, function(err, reply) {
-      if (err) { return cb(err); } // todo: translateSDKCallback?
+      if (err) { return translateSDKCallback(cb); }
       var entities = _.map(reply.entities, function(entity) {
         return connectedType.new(entity);
       });
@@ -120,11 +113,12 @@ var UsergridEntity = function() {
   };
 
   this.toJSON = function() {
-    var json = JSON.stringify(this._data, function(k,v) {
-      if (k === 'metadata') { return undefined; }
-      return v;
-    });
-    return json;
+//    var json = JSON.stringify(this._data, function(k,v) {
+//      if (k === 'metadata') { return undefined; }
+//      return v;
+//    });
+//    return json;
+    return this._data;
   };
 };
 module.exports = UsergridEntity;

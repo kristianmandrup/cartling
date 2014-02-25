@@ -9,7 +9,6 @@ var _ = require('lodash');
 var commonController = _.bindAll(new common.usergrid.Controller(Cart));
 var onSuccess = commonController.onSuccess;
 
-// todo: user context / security
 var cartController = {
 
   list: commonController.list,

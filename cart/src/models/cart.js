@@ -9,7 +9,7 @@ usergrid.define(CartClass, Cart);
 module.exports = CartClass;
 
 CartClass.validates({
-  name: [ validators.required ]
+//  name: [ validators.required ]
 });
 
 var CartItemClass = require('./cart_item');

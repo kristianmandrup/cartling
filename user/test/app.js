@@ -17,6 +17,10 @@ module.exports = function(config) {
   var userApp = require('../')(config);
   userApp.routes(app, mockOAuthMiddleware);
 
+  // test authenticate
+  var user = require('../src/controllers/user');
+  app.post('/users/authenticate', user.authenticate);
+
   // start //
   app.listen(app.get('port'));
   return app;

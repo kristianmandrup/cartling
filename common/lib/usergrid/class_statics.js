@@ -42,7 +42,7 @@ var ClassStatics = function(client) {
 
     all:
       function(cb) {
-        this.findBy({}, cb);
+        this.findBy(null, cb);
       },
 
     // retrieve a single entity by uuid or unique name
@@ -109,8 +109,7 @@ var ClassStatics = function(client) {
     // deletes the entity on the service with the passed id
     delete:
       function(uuid_or_name, cb) {
-        var self = this;
-        var test = this.new({ uuid: uuid_or_name });
+        var test = this.new(uuid_or_name);
         test.delete(cb);
       },
 
@@ -131,13 +130,14 @@ var ClassStatics = function(client) {
 
     new:
       function(attributes) {
+        if (_.isString(attributes)) { attributes = { uuid: attributes }; } // assume it's a uuid
         var data = this._usergrid.defaults || {};
         _.assign(data, attributes);
         data.type = this._usergrid.type;
         return wrap(this, new usergrid_sdk.entity({data: data, client: client}));
       }
   };
-}
+};
 
 // utility methods
 
@@ -145,6 +145,7 @@ var ClassStatics = function(client) {
 // if it's a string, it just assumes the string is already a valid QS
 // eg. { a: 'b', c: 'd' } -> "a = 'b' and c = 'd'"
 function buildQuery(options) {
+  if (!options) { return ''; }
   if (_.isString(options)) { return options; }
   var qs = '';
   var order = '';

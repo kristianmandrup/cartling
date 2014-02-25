@@ -1,0 +1,128 @@
+'use strict';
+
+var Usergrid = require('usergrid');
+var AUTH_CLIENT_ID = Usergrid.AUTH_CLIENT_ID;
+var AUTH_APP_USER = Usergrid.AUTH_APP_USER;
+var request = require('request');
+
+// changed to return the statusCode with the error
+Usergrid.client.prototype.request = function (options, callback) {
+  var self = this;
+  var method = options.method || 'GET';
+  var endpoint = options.endpoint;
+  var body = options.body || {};
+  var qs = options.qs || {};
+  var mQuery = options.mQuery || false; //is this a query to the management endpoint?
+  var orgName = this.get('orgName');
+  var appName = this.get('appName');
+  if(!mQuery && !orgName && !appName){
+    if (typeof(this.logoutCallback) === 'function') {
+      return this.logoutCallback(true, 'no_org_or_app_name_specified');
+    }
+  }
+  var uri;
+  if (mQuery) {
+    uri = this.URI + '/' + endpoint;
+  } else {
+    uri = this.URI + '/' + orgName + '/' + appName + '/' + endpoint;
+  }
+
+  if (this.authType === AUTH_CLIENT_ID) {
+    qs['client_id'] = this.clientId;
+    qs['client_secret'] = this.clientSecret;
+  } else if (this.authType === AUTH_APP_USER && self.getToken()) {
+    qs['access_token'] = self.getToken();
+  }
+
+  if (this.logging) {
+    console.log('calling: ' + method + ' ' + uri);
+  }
+  this._start = new Date().getTime();
+  var callOptions = {
+    method: method,
+    uri: uri,
+    json: body,
+    qs: qs
+  };
+  request(callOptions, function (err, r, data) {
+    if (self.buildCurl) {
+      options.uri = r.request.uri.href;
+      self.buildCurlCall(options);
+    }
+    self._end = new Date().getTime();
+    if(r.statusCode === 200) {
+      if (self.logging) {
+        console.log('success (time: ' + self.calcTimeDiff() + '): ' + method + ' ' + uri);
+      }
+      callback(err, data);
+    } else {
+      err = true;
+      data.statusCode = r.statusCode;
+      if ((r.error === 'auth_expired_session_token') ||
+        (r.error === 'auth_missing_credentials')   ||
+        (r.error === 'auth_unverified_oath')       ||
+        (r.error === 'expired_token')   ||
+        (r.error === 'unauthorized')   ||
+        (r.error === 'auth_invalid')) {
+        //this error type means the user is not authorized. If a logout function is defined, call it
+        var error = r.body.error;
+        var errorDesc = r.body.error_description;
+        if (self.logging) {
+          console.log('Error (' + r.statusCode + ')(' + error + '): ' + errorDesc);
+        }
+        //if the user has specified a logout callback:
+        if (typeof(self.logoutCallback) === 'function') {
+          self.logoutCallback(err, data);
+        } else  if (typeof(callback) === 'function') {
+          callback(err, data);
+        }
+      } else {
+        var error = r.body.error;
+        var errorDesc = r.body.error_description;
+        if (self.logging) {
+          console.log('Error (' + r.statusCode + ')(' + error + '): ' + errorDesc);
+        }
+        if (typeof(callback) === 'function') {
+          callback(err, data);
+        }
+      }
+    }
+  });
+};
+
+// changed because getEntityId is just plain broken
+Usergrid.entity.prototype.getEntityId = function (entity) {
+  return entity.get('uuid') || entity.get('username') || entity.get('name') || false;
+};
+
+// changed to allow non-uuid identifiers (ie. could be 'name' or 'username')
+// also, fixed a bug where the callback could be called twice
+Usergrid.entity.prototype.destroy = function (callback) {
+  var self = this;
+  var type = this.get('type');
+  var id = this.get('uuid') || this.get('username') || this.get('name');
+  if (!id) {
+    if (typeof(callback) === 'function') {
+      var error = 'Error trying to delete object - no uuid or name specified.';
+      if (self._client.logging) {
+        console.log(error);
+      }
+      return callback(true, error);
+    }
+  }
+  type += '/' + this.get('uuid');
+  var options = {
+    method:'DELETE',
+    endpoint:type
+  };
+  this._client.request(options, function (err, data) {
+    if (err && self._client.logging) {
+      console.log('entity could not be deleted');
+    } else {
+      self.set(null);
+    }
+    if (typeof(callback) === 'function') {
+      callback(err, data);
+    }
+  });
+};

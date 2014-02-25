@@ -3,8 +3,10 @@
  */
 'use strict';
 
-var _ = require('lodash');
 var usergrid_sdk = require('usergrid');
+require('./monkeypatch');
+
+var _ = require('lodash');
 var validators = require('./validators');
 var ValidationErrors = require('./validation_errors');
 var usergridStatics = require('./class_statics');
