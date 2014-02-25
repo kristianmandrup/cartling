@@ -9,7 +9,6 @@ var _ = require('lodash');
 var commonController = _.bindAll(new common.usergrid.Controller(Cart));
 var onSuccess = commonController.onSuccess;
 
-// todo: add user to events
 var cartController = {
 
   list:
@@ -39,12 +38,8 @@ var cartController = {
       if (!id) { return res.json(400, 'missing id'); }
       var attributes = req.body;
       log.debug('%s update %s', 'my cart', req.body);
-      me(req).getCarts(function(err, reply) {
-        onSuccess(err, req, res, reply, function(res, carts) {
-          var cart = _.find(carts, function(ea) {
-            return (ea.get('uuid') === id || ea.get('name') === id);
-          });
-          if (!cart) { return res.json(401, new Error('cart not found')); }
+      me(req).getCart(id, function(err, reply) {
+        onSuccess(err, req, res, reply, function(res, cart) {
           log.debug('cart found %s', id);
           cart.update(attributes, function(err, reply) {
             onSuccess(err, req, res, reply, function(res, reply) {
@@ -62,11 +57,9 @@ var cartController = {
     function(req, res) {
       var id = req.params.id;
       if (!id) { return res.json(400, 'missing id'); }
-      me(req).getCarts(function(err, reply) {
-        onSuccess(err, req, res, reply, function(res, carts) {
-          var cart = _.find(carts, function(cart) { return cart.get('uuid' === id || cart.get('name') === id); });
-          if (!cart) { return res.json(401, new Error('cart not found')); }
-          res.json(reply);
+      me(req).getCart(id, function(err, reply) {
+        onSuccess(err, req, res, reply, function(res, cart) {
+          res.json(cart);
         });
       });
     },

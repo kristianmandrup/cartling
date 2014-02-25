@@ -17,7 +17,7 @@ describe('app', function() {
 
   this.timeout(10000);
 
-  describe('my cart', function() {
+  describe.only('my cart', function() {
 
     var user;
     var notMyCart;
@@ -86,36 +86,54 @@ describe('app', function() {
         });
     });
 
-    describe('update', function() {
+    it('can get my cart', function(done) {
+      request(server)
+        .get('/my/carts/' + myCart.uuid)
+        .end(function(err, res) {
+          if (err) { return done(err); }
+          res.status.should.eql(200);
+          var cart = res.body;
+          cart.uuid.should.equal(myCart.uuid);
+          done();
+        });
+    });
 
-      it('can update my cart', function(done) {
-        myCart.should.not.be.null;
-        var body = { bar: 'babs' };
-        request(server)
-          .put('/my/carts/' + myCart.uuid)
-          .send(body)
-          .end(function(err, res) {
-            if (err) { return done(err); }
-            res.status.should.eql(200);
-            var cart = res.body;
-            cart.uuid.should.equal(myCart.uuid);
-            cart.bar.should.equal('babs');
-            done();
-          });
-      });
+    it('cannot get not my cart', function(done) {
+      request(server)
+        .get('/my/carts/' + notMyCart.get('uuid'))
+        .end(function(err, res) {
+          if (err) { return done(err); }
+          res.status.should.eql(404);
+          done();
+        });
+    });
 
-      it('cannot update not my cart', function(done) {
-        notMyCart.should.not.be.null;
-        var body = { bar: 'babs' };
-        request(server)
-          .put('/my/carts/' + notMyCart.get('uuid'))
-          .send(body)
-          .end(function(err, res) {
-            res.status.should.eql(401);
-            done();
-          });
-      });
+    it('can update my cart', function(done) {
+      myCart.should.not.be.null;
+      var body = { bar: 'babs' };
+      request(server)
+        .put('/my/carts/' + myCart.uuid)
+        .send(body)
+        .end(function(err, res) {
+          if (err) { return done(err); }
+          res.status.should.eql(200);
+          var cart = res.body;
+          cart.uuid.should.equal(myCart.uuid);
+          cart.bar.should.equal('babs');
+          done();
+        });
+    });
 
+    it('cannot update not my cart', function(done) {
+      notMyCart.should.not.be.null;
+      var body = { bar: 'babs' };
+      request(server)
+        .put('/my/carts/' + notMyCart.get('uuid'))
+        .send(body)
+        .end(function(err, res) {
+          res.status.should.eql(404);
+          done();
+        });
     });
   });
 
@@ -168,54 +186,34 @@ describe('app', function() {
         });
     });
 
-    describe('create', function() {
-
-      it('can succeed', function(done) {
-        var attrs = { foo: 'skippy' };
-        request(server)
-          .post('/carts')
-          .send(attrs)
-          .end(function(err, res) {
-            if (err) { return done(err); }
-            res.status.should.eql(200);
-            var cart = res.body;
-            cart.uuid.should.not.be.null;
-            carts.push(cart);
-            cart.foo.should.equal('skippy');
-            done();
-          });
-      });
-
-//      it('is validated', function(done) {
-//        var cart = { foo: 'bar' };
-//        request(server)
-//          .post('/carts')
-//          .send(cart)
-//          .end(function(err, res) {
-//            if (err) { return done(err); }
-//            res.status.should.eql(400);
-//            done();
-//          });
-//      });
-
+    it('can create', function(done) {
+      var attrs = { foo: 'skippy' };
+      request(server)
+        .post('/carts')
+        .send(attrs)
+        .end(function(err, res) {
+          if (err) { return done(err); }
+          res.status.should.eql(200);
+          var cart = res.body;
+          cart.uuid.should.not.be.null;
+          carts.push(cart);
+          cart.foo.should.equal('skippy');
+          done();
+        });
     });
 
-    describe('update', function() {
-
-      it('can update from uuid', function(done) {
-        var body = { bar: 'babs' };
-        request(server)
-          .put('/carts/' + carts[1].get('uuid'))
-          .send(body)
-          .end(function(err, res) {
-            if (err) { return done(err); }
-            res.status.should.eql(200);
-            var cart = res.body;
-            cart.bar.should.equal('babs');
-            done();
-          });
-      });
-
+    it('can update from uuid', function(done) {
+      var body = { bar: 'babs' };
+      request(server)
+        .put('/carts/' + carts[1].get('uuid'))
+        .send(body)
+        .end(function(err, res) {
+          if (err) { return done(err); }
+          res.status.should.eql(200);
+          var cart = res.body;
+          cart.bar.should.equal('babs');
+          done();
+        });
     });
   });
 });
