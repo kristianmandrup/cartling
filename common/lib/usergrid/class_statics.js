@@ -132,7 +132,8 @@ var ClassStatics = function(client) {
     new:
       function(attributes) {
         if (_.isString(attributes)) { attributes = { uuid: attributes }; } // assume it's a uuid
-        var data = this._usergrid.defaults || {};
+        var data = {};
+        _.assign(data, this._usergrid.defaults);
         _.assign(data, attributes);
         data.type = this._usergrid.type;
         return wrap(this, new usergrid_sdk.entity({data: data, client: client}));
