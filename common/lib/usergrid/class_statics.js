@@ -73,15 +73,16 @@ var ClassStatics = function(client) {
     // creates entity immediately on the server w/ attributes and returns the entity
     create:
       function(attributes, cb) {
-        var test = this.new(attributes);
-        test.save(cb);
+        // todo
+        var entity = this.new(attributes);
+        entity.save(cb);
       },
 
     // updates entity immediately on the server w/ attributes and returns the entity
     update:
       function(attributes, cb) {
-        var test = this.new(attributes);
-        test.save(cb);
+        var entity = this.new(attributes);
+        entity.save(cb);
       },
 
     first:
@@ -109,8 +110,8 @@ var ClassStatics = function(client) {
     // deletes the entity on the service with the passed id
     delete:
       function(uuid_or_name, cb) {
-        var test = this.new(uuid_or_name);
-        test.delete(cb);
+        var entity = this.new(uuid_or_name);
+        entity.delete(cb);
       },
 
     // destroys all entities matching criteria (criteria is optional)

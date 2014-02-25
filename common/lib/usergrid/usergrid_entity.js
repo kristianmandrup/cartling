@@ -113,11 +113,6 @@ var UsergridEntity = function() {
   };
 
   this.toJSON = function() {
-//    var json = JSON.stringify(this._data, function(k,v) {
-//      if (k === 'metadata') { return undefined; }
-//      return v;
-//    });
-//    return json;
     return this._data;
   };
 };
