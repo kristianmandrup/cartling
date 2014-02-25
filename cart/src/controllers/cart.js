@@ -34,13 +34,24 @@ var cartController = {
       log.debug('cart close %s', id);
       Cart.find(id, function(err, reply) {
         onSuccess(err, req, res, reply, function(res, cart) {
-          cart.close(function(err, reply) {
-            onSuccess(err, req, res, reply, function(res, reply) {
-              var event = { op: 'close' };
-              events.publish(events.CART, event);
-              res.json(reply);
+          var target = req.query.merge;
+          if (target) {
+            cart.copyAndClose(target, function(err) {
+              onSuccess(err, req, res, reply, function(res, reply) {
+                var event = { op: 'merge' };
+                events.publish(events.CART, event);
+                res.json(reply);
+              });
             });
-          });
+          } else {
+            cart.close(function(err, reply) {
+              onSuccess(err, req, res, reply, function(res, reply) {
+                var event = { op: 'close' };
+                events.publish(events.CART, event);
+                res.json(reply);
+              });
+            });
+          }
         });
       });
     }

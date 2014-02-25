@@ -2,7 +2,10 @@
 
 var common = require('../helpers/common');
 var usergrid = common.usergrid;
-var validators = usergrid.validators;
+var async = require('async');
+var _ = require('lodash');
+var CartItem = require('./cart_item');
+//var validators = usergrid.validators;
 
 var CartClass = {};
 usergrid.define(CartClass, Cart);
@@ -21,7 +24,28 @@ function Cart() {
   };
 
   this.close = function(cb) {
-    this.set('status', 'closed');
-    this.save(cb);
+    this.update({ status: 'closed' }, cb);
+  };
+
+  this.copyItems = function(targetCart, cb) {
+    this.getItems(function (err, items) {
+      async.each(items,
+        function(item, cb2) {
+          var newItemAttrs = _.omit(item._data, ['uuid', 'name', 'metadata']);
+          CartItem.create(newItemAttrs, function (err, newItem) {
+            if (err) { return cb2(err); }
+            targetCart.addItem(newItem, cb2);
+          });
+        },
+        cb);
+    });
+  };
+
+  this.copyAndClose = function(targetCart, cb) {
+    var self = this;
+    this.copyItems(targetCart, function (err) {
+      if (err) { return cb(err); }
+      self.close(cb);
+    });
   };
 }

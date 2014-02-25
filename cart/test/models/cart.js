@@ -5,32 +5,54 @@ var _ = require('lodash');
 var helpers = require('../helpers');
 var Cart = helpers.models.Cart;
 var CartItem = helpers.models.CartItem;
+var async = require('async');
 
 describe('Cart Model', function() {
 
-  this.timeout(10000);
+  this.timeout(15000);
   var cart_attrs = {
     name: 'testcart',
     foo: 'bar'
   };
   var cartItem_attrs = {
-    name: 'testcartitem',
     sku: '123',
     quantity: 1
   };
   var cart;
 
   before(function(done) {
-    Cart.delete(cart_attrs.name, function(err, reply) {
-      Cart.create(cart_attrs, function(err, reply) {
-        if (err) { return done(err); }
-        cart = reply;
-
-        CartItem.delete(cartItem_attrs.name, function(err, reply) {
+    async.waterfall([
+      function (cb) {
+        Cart.find(cart_attrs.name, function (err, reply) {
+          cb(null, reply);
+        });
+      },
+      function (cart, cb) {
+        if (cart) {
+          cart.getItems(function (err, items) {
+            async.each(items,
+              function (item, cb) {
+                cart.removeItem(item, function (err, reply) {
+                  item.delete(cb);
+                });
+              },
+              function(err) {
+                cart.delete(cb);
+              }
+            );
+          });
+        } else {
+          cb();
+        }
+      },
+    ],
+      function (err, reply) {
+        Cart.create(cart_attrs, function(err, reply) {
+          if (err) { return done(err); }
+          cart = reply;
           done();
         });
       });
-    });
   });
 
   after(function(done) {
@@ -42,7 +64,7 @@ describe('Cart Model', function() {
   });
 
 
-  describe('hasMany CartItems', function() {
+  describe('CartItems', function() {
 
     var cartItem;
 
@@ -79,6 +101,69 @@ describe('Cart Model', function() {
       });
     });
 
+    it('should be able to copy a CartItem to another Cart', function(done) {
+      Cart.create({ newCart: 'yup!' }, function (err, newCart) {
+        if (err) { return done(err); }
+        cart.copyItems(newCart, function (err) {
+          if (err) { return done(err); }
+          newCart.getItems(function (err, items) {
+            async.each(items,
+              function (item, cb) {
+                newCart.removeItem(item, function (err) {
+                  should.not.exist(err);
+                  item.delete(function (err) {
+                    should.not.exist(err);
+                    cb();
+                  });
+                });
+              },
+              function (cb) {
+                newCart.delete(function (err) {
+                  should.not.exist(err);
+                  items.length.should.equal(1);
+                  items[0].get('uuid').should.not.equal(cartItem.get('uuid'));
+                  items[0].get('sku').should.equal(cartItem.get('sku'));
+                  done();
+                });
+              }
+            );
+          });
+        });
+      });
+    });
+
+    it('should be able to close & merge a Cart', function(done) {
+      Cart.create({ newCart: 'yup!' }, function (err, newCart) {
+        if (err) { return done(err); }
+        cart.copyAndClose(newCart, function (err) {
+          if (err) { return done(err); }
+          newCart.getItems(function (err, items) {
+            async.each(items,
+              function (item, cb) {
+                newCart.removeItem(item, function (err) {
+                  should.not.exist(err);
+                  item.delete(function (err) {
+                    should.not.exist(err);
+                    cb();
+                  });
+                });
+              },
+              function (cb) {
+                newCart.delete(function (err) {
+                  should.not.exist(err);
+                  cart.get('status').should.equal('closed');
+                  items.length.should.equal(1);
+                  items[0].get('uuid').should.not.equal(cartItem.get('uuid'));
+                  items[0].get('sku').should.equal(cartItem.get('sku'));
+                  done();
+                });
+              }
+            );
+          });
+        });
+      });
+    });
+
     it('should be able to remove a CartItem', function(done) {
       cart.removeItem(cartItem, function(err, reply) {
         should.not.exist(err);
@@ -89,10 +174,11 @@ describe('Cart Model', function() {
           should.exist(items);
           items.length.should.equal(0);
 
-          CartItem.find(cartItem_attrs.name, function(err, cartItem) {
+          CartItem.find(cartItem.get('uuid'), function(err, cartItem) {
             should.not.exist(err);
             should.exist(cartItem);
             cartItem.delete(function() {
+              cartItem = null;
               done();
             });
           });
