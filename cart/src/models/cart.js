@@ -15,6 +15,10 @@ CartClass.validates({
 //  name: [ validators.required ]
 });
 
+CartClass.defaults({
+  status: 'open'
+});
+
 var CartItemClass = require('./cart_item');
 CartClass.hasMany('items', CartItemClass);
 
