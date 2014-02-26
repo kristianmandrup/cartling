@@ -11,15 +11,15 @@ var onSuccess = commonController.onSuccess;
 
 var cartController = {
 
-  list: commonController.list,
   create: commonController.create,
   update: commonController.update,
+  list: commonController.list,
 
   get:
     function(req, res) {
       commonController.get(req, res, function (err, reply) {
         onSuccess(err, req, res, reply, function(res, cart) {
-          cart.getItems('items', function(err, items) {
+          cart.getItems(function(err, items) {
             cart.set('items', items);
             res.json(cart);
           });

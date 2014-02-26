@@ -31,10 +31,10 @@ var UsergridEntity = function() {
   };
 
   // connectedType is the defined() type of the connected entity
-  this.getConnectedEntities = function(name, connectedType, cb) {
-    var self = this;
+  this.getConnectedEntities = function(name, connectedType, options, cb) {
+    if (_.isFunction(options)) { cb = options; options = undefined; }
     // call up to the sdk getConnections
-    this.getConnections(name, function(err, reply) {
+    this.getConnections(name, options, function(err, reply) {
       if (err) { return translateSDKCallback(cb); }
       var entities = _.map(reply.entities, function(entity) {
         return connectedType.new(entity);

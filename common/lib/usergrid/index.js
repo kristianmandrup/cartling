@@ -10,12 +10,14 @@ var _ = require('lodash');
 var validators = require('./validators');
 var ValidationErrors = require('./validation_errors');
 var usergridStatics = require('./class_statics');
+var UsergridError = require('./usergrid_error');
 
 var client;
 
 var exports = {
   validators: validators,
-  ValidationErrors: ValidationErrors
+  ValidationErrors: ValidationErrors,
+  UsergridError: UsergridError
 };
 
 function configure(config) {

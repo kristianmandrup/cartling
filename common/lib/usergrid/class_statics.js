@@ -7,6 +7,7 @@ var translateSDKCallback = require('./helpers').translateSDKCallback;
 var async = require('async');
 var addConnectionFunctions = require('./has_many');
 var usergrid_sdk = require('usergrid');
+var buildQuery = require('./helpers').buildQuery;
 
 var ClassStatics = function(client) {
 
@@ -61,9 +62,7 @@ var ClassStatics = function(client) {
       function(criteria, limit, cb) {
         if (_.isFunction(limit)) { cb = limit; limit = undefined; }
         var self = this;
-        var ql = buildQuery(criteria);
-        var query = { qs: { ql: ql }};
-        if (limit) { query.qs.limit = limit; }
+        var query = buildQuery(criteria, limit);
         client.createCollection(options(self, query), translateSDKCallback(function (err, collection) {
           if (err) { return cb(err); }
           cb(null, wrapCollection(self, collection));
@@ -73,7 +72,7 @@ var ClassStatics = function(client) {
     // creates entity immediately on the server w/ attributes and returns the entity
     create:
       function(attributes, cb) {
-        // todo
+        // todo: validate no uuid?
         var entity = this.new(attributes);
         entity.save(cb);
       },
@@ -144,24 +143,6 @@ var ClassStatics = function(client) {
 };
 
 // utility methods
-
-// transforms attributes into QL (note: 'order' is treated as 'order by')
-// if it's a string, it just assumes the string is already a valid QS
-// eg. { a: 'b', c: 'd' } -> "a = 'b' and c = 'd'"
-function buildQuery(options) {
-  if (!options) { return ''; }
-  if (_.isString(options)) { return options; }
-  var qs = '';
-  var order = '';
-  _.forOwn(options, function(v, k) {
-    if (k === 'order') {
-      order = 'order by ' + v;
-    } else {
-      qs += k + "= '" + v + "' ";
-    }
-  });
-  return qs;
-}
 
 // clones hash and adds type for usergrid context
 function options(_class, hash) {

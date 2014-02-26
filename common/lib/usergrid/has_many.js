@@ -2,7 +2,7 @@
 
 var _ = require('lodash');
 var inflection = require('inflection');
-var UsergridError = require('./usergrid_error');
+var buildQuery = require('./helpers').buildQuery;
 
 var addConnectionFunctions = function(owner, hasMany) {
   if (!hasMany) { return; }
@@ -30,24 +30,20 @@ var addConnectionFunctions = function(owner, hasMany) {
           });
         },
 
-      get:
+      find:
         function(id, cb) {
           if (!id) { cb(new Error('id required')); }
-          owner.getConnectedEntities(name, Class, function(err, entities) {
-            if (err) { return cb(err); }
-            var entity = _.find(entities, function(ea) {
-              return (ea.get('uuid') === id || ea.get('name') === id);
-            });
-            if (!entity) {
-              var errData = {
-                statusCode: 404,
-                name: 'service_resource_not_found',
-                message: 'Service resource not found'
-              };
-              return cb(new UsergridError(errData));
-            }
-            cb(null, entity);
-          });
+          var criteria = { _id: id };
+          this.findBy(criteria, 1, cb);
+        },
+
+      // note: special cases "_id" as "uuid" OR "name"
+      findBy:
+        function(criteria, limit, cb) {
+          if (_.isFunction(limit)) { cb = limit; limit = undefined; }
+          if (!criteria) { cb(new Error('criteria required')); }
+          var query = buildQuery(criteria, limit);
+          owner.getConnectedEntities(name, Class, query, cb);
         },
 
       deleteAll:
@@ -65,10 +61,9 @@ var addConnectionFunctions = function(owner, hasMany) {
 
     owner['add' + singularName] = functions.add;
     owner['remove' + singularName] = functions.remove;
-    owner['get' + singularName] = functions.get;
     owner['get' + pluralName] = functions.list;
-    owner['deleteAll' + pluralName] = functions.list;
-
+    owner['deleteAll' + pluralName] = functions.deleteAll;
+    owner['find' + pluralName + 'By'] = functions.findBy;
   });
 
 };

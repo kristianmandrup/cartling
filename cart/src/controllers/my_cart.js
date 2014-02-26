@@ -8,13 +8,16 @@ var Cart = models.Cart;
 var _ = require('lodash');
 var commonController = _.bindAll(new common.usergrid.Controller(Cart));
 var onSuccess = commonController.onSuccess;
+var UsergridError = common.usergrid.UsergridError;
+
+var OPEN_CRITERIA = { status: 'open' };
 
 var cartController = {
 
   list:
     function(req, res) {
       log.debug('my cart list');
-      me(req).getCarts(function(err, reply) {
+      me(req).findCartsBy(OPEN_CRITERIA, function(err, reply) {
         onSuccess(err, req, res, reply, function(res, reply) {
           res.json(reply);
         });
@@ -38,8 +41,10 @@ var cartController = {
       if (!id) { return res.json(400, 'missing id'); }
       var attributes = req.body;
       log.debug('%s update %s', 'my cart', req.body);
-      me(req).getCart(id, function(err, reply) {
-        onSuccess(err, req, res, reply, function(res, cart) {
+      var criteria = { _id: id };
+      _.assign(criteria, OPEN_CRITERIA);
+      me(req).findCartsBy(criteria, 1, function(err, reply) {
+        first(err, req, res, reply, function(res, cart) {
           log.debug('cart found %s', id);
           cart.update(attributes, function(err, reply) {
             onSuccess(err, req, res, reply, function(res, reply) {
@@ -57,8 +62,10 @@ var cartController = {
     function(req, res) {
       var id = req.params.id;
       if (!id) { return res.json(400, 'missing id'); }
-      me(req).getCart(id, function(err, reply) {
-        onSuccess(err, req, res, reply, function(res, cart) {
+      var criteria = { _id: id };
+      _.assign(criteria, OPEN_CRITERIA);
+      me(req).findCartsBy(criteria, 1, function(err, reply) {
+        first(err, req, res, reply, function(res, cart) {
           res.json(cart);
         });
       });
@@ -69,8 +76,10 @@ var cartController = {
       var id = req.params.id;
       if (!id) { return res.json(400, 'missing id'); }
       log.debug('cart close %s', id);
-      Cart.find(id, function(err, reply) {
-        onSuccess(err, req, res, reply, function(res, cart) {
+      var criteria = { _id: id };
+      _.assign(criteria, OPEN_CRITERIA);
+      me(req).findCartsBy(criteria, 1, function(err, reply) {
+        first(err, req, res, reply, function(res, cart) {
           cart.close(function(err, reply) {
             onSuccess(err, req, res, reply, function(res, reply) {
               var event = { op: 'close' };
@@ -86,4 +95,24 @@ module.exports = cartController;
 
 function me(req) {
   return req.token.user;
+}
+
+function first(err, req, res, reply, cb) {
+  if (!err) {
+    if(reply.length === 0) {
+      err = make404();
+    } else {
+      reply = reply[0];
+    }
+  }
+  onSuccess(err, req, res, reply, cb);
+}
+
+function make404() {
+  var errData = {
+    statusCode: 404,
+    name: 'service_resource_not_found',
+    message: 'Service resource not found'
+  };
+  return new UsergridError(errData);
 }

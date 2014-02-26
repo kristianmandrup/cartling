@@ -42,18 +42,25 @@ describe('app', function() {
     });
 
     after(function(done) {
-      var myCartEntity = Cart.new(myCart.uuid);
-      user.removeCart(myCartEntity, function (err, reply) {
-        user.delete(function (err, reply) {
-          var carts = [myCartEntity, notMyCart];
+      async.waterfall([
+        function(cb) {
+          if (!myCart) { return cb(null, myCartEntity); }
+          var myCartEntity = Cart.new(myCart.uuid);
+          user.removeCart(myCartEntity, function (err, reply) {
+            cb(err, myCartEntity);
+          });
+        },
+        function(myCartEntity, cb) {
+          var carts = [notMyCart];
+          if (myCartEntity) { carts.push(myCartEntity); }
           async.each(carts,
             function(cart, cb) {
               cart.delete(cb);
             },
-            done
-          );
-        });
-      });
+          cb);
+        }
+      ],
+      done);
     });
 
     it('can create', function(done) {
@@ -135,6 +142,24 @@ describe('app', function() {
           done();
         });
     });
+
+    it('can close my cart', function(done) {
+      myCart.should.not.be.null;
+      request(server)
+        .del('/my/carts/' + myCart.uuid)
+        .end(function(err, res) {
+          res.status.should.eql(200);
+
+          // should no longer be visible
+          request(server)
+            .get('/my/carts/' + myCart.uuid)
+            .end(function(err, res) {
+              if (err) { return done(err); }
+              res.status.should.eql(404);
+              done();
+            });
+        });
+    });
   });
 
   describe('cart', function() {
@@ -186,6 +211,22 @@ describe('app', function() {
         });
     });
 
+    it('can query', function(done) {
+      request(server)
+        .get('/carts')
+        .query('q=uuid=' + carts[1].get('uuid'))
+        .end(function(err, res) {
+          if (err) { return done(err); }
+          res.status.should.eql(200);
+          var entities = res.body;
+          entities.should.be.an.Array;
+          entities.length.should.equal(1);
+          var cart = entities[0];
+          cart.uuid.should.equal(carts[1].get('uuid'));
+          done();
+        });
+    });
+
     it('can create', function(done) {
       var attrs = { foo: 'skippy' };
       request(server)
@@ -215,5 +256,26 @@ describe('app', function() {
           done();
         });
     });
+
+    it('can close the cart', function(done) {
+      var uuid = carts[1].get('uuid');
+      request(server)
+        .del('/carts/' + uuid)
+        .end(function(err, res) {
+          res.status.should.eql(200);
+
+          // should still be visible here
+          request(server)
+            .get('/carts/' + uuid)
+            .end(function(err, res) {
+              if (err) { return done(err); }
+              res.status.should.eql(200);
+              var cart = res.body;
+              cart.status.should.equal('closed');
+              done();
+            });
+        });
+    });
+
   });
 });

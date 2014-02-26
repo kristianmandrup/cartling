@@ -4,6 +4,7 @@ var Usergrid = require('usergrid');
 var AUTH_CLIENT_ID = Usergrid.AUTH_CLIENT_ID;
 var AUTH_APP_USER = Usergrid.AUTH_APP_USER;
 var request = require('request');
+var _ = require('lodash');
 
 // changed to return the statusCode with the error
 Usergrid.client.prototype.request = function (options, callback) {
@@ -123,6 +124,56 @@ Usergrid.entity.prototype.destroy = function (callback) {
     }
     if (typeof(callback) === 'function') {
       callback(err, data);
+    }
+  });
+};
+
+// changed to allow passing options - actually, just takes the 'qs' key for now
+Usergrid.entity.prototype.getConnections = function (connection, opts, callback) {
+
+  if (_.isFunction(opts)) { callback = opts; opts = undefined; }
+
+  var self = this;
+
+  //connector info
+  var connectorType = this.get('type');
+  var connector = this.getEntityId(this);
+  if (!connector) {
+    if (typeof(callback) === 'function') {
+      var error = 'Error in getConnections - no uuid specified.';
+      if (self._client.logging) {
+        console.log(error);
+      }
+      callback(true, error);
+    }
+    return;
+  }
+
+  var endpoint = connectorType + '/' + connector + '/' + connection + '/';
+  var options = {
+    method:'GET',
+    endpoint:endpoint
+  };
+  if (opts && opts.qs) { options.qs = opts.qs; }
+  this._client.request(options, function (err, data) {
+    if (err && self._client.logging) {
+      console.log('entity connections could not be retrieved');
+    }
+
+    self[connection] = {};
+
+    var length = data.entities.length;
+    for (var i=0;i<length;i++)
+    {
+      if (data.entities[i].type === 'user'){
+        self[connection][data.entities[i].username] = data.entities[i];
+      } else {
+        self[connection][data.entities[i].name] = data.entities[i];
+      }
+    }
+
+    if (typeof(callback) === 'function') {
+      callback(err, data, data.entities);
     }
   });
 };

@@ -11,8 +11,9 @@ function Controller(UsergridClass) {
   // list all
   this.list = function(req, res, cb) {
     log.debug('%s list', type);
+    var criteria = req.query.q;
     var self = this;
-    UsergridClass.all(function(err, reply) {
+    UsergridClass.findBy(criteria, function(err, reply) {
       self.onSuccess(err, req, res, reply, function(res, reply) {
         if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
         res.json(reply);
