@@ -17,7 +17,7 @@ describe('app', function() {
 
   this.timeout(10000);
 
-  describe.only('my cart', function() {
+  describe('my cart', function() {
 
     var user;
     var notMyCart;

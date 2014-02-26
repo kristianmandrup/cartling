@@ -81,8 +81,10 @@ var ClassStatics = function(client) {
     // updates entity immediately on the server w/ attributes and returns the entity
     update:
       function(attributes, cb) {
-        var entity = this.new(attributes);
-        entity.save(cb);
+        var id = attributes.uuid || attributes.name || attributes.username;
+        this.find(id, function (err, entity) {
+          entity.update(attributes, cb);
+        });
       },
 
     first:

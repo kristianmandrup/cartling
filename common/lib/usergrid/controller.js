@@ -10,7 +10,7 @@ function Controller(UsergridClass) {
 
   // list all
   this.list = function(req, res, cb) {
-    log.debug('cart list');
+    log.debug('%s list', type);
     var self = this;
     UsergridClass.all(function(err, reply) {
       self.onSuccess(err, req, res, reply, function(res, reply) {
@@ -56,20 +56,16 @@ function Controller(UsergridClass) {
     if (!id) { return res.json(400, 'missing id'); }
     if (!req.body) { return res.json(400, 'body required'); }
     var attributes = req.body;
+    attributes.uuid = id;
     log.debug('%s update %s', type, req.body);
     var self = this;
-    UsergridClass.find(id, function(err, reply) {
-      self.onSuccess(err, req, res, reply, function(res, cart) {
-        log.debug('cart found %s', id);
-        cart.update(attributes, function(err, reply) {
-          self.onSuccess(err, req, res, reply, function(res, reply) {
-            log.debug('cart updated %s', id);
-            var event = { user: '?', op: 'update', attributes: attributes };
-            events.publish(eventType, event);
-            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
-            res.json(reply);
-          });
-        });
+    UsergridClass.update(attributes, function(err, reply) {
+      self.onSuccess(err, req, res, reply, function(res, reply) {
+        log.debug('%s updated %s', type, id);
+        var event = { user: '?', op: 'update', attributes: attributes };
+        events.publish(eventType, event);
+        if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
+        res.json(reply);
       });
     });
   };
@@ -80,16 +76,13 @@ function Controller(UsergridClass) {
     if (!id) { return res.json(400, 'missing id'); }
     log.debug('%s delete %s', type, id);
     var self = this;
-    UsergridClass.find(id, function(err, reply) {
-      this.onSuccess(err, req, res, reply, function(res, cart) {
-        cart.close(function(err, reply) {
-          self.onSuccess(err, req, res, reply, function(res, reply) {
-            var event = { op: 'close' };
-            events.publish(eventType, event);
-            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
-            res.json(reply);
-          });
-        });
+    UsergridClass.delete(id, function(err, reply) {
+      self.onSuccess(err, req, res, reply, function(res, entity) {
+        log.debug('%s deleted %s', type, id);
+        var event = { op: 'delete' };
+        events.publish(eventType, event);
+        if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
+        res.json(reply);
       });
     });
   };
