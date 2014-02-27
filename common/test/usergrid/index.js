@@ -3,23 +3,45 @@
 var should = require('should');
 var _ = require('lodash');
 var Foo = require('./foo');
+var Bar = require('./bar');
+var async = require('async');
 
 describe('Base Model', function() {
 
   this.timeout(10000);
   var TEST_ID = 'test';
   var TEST_ATTRS = { name: TEST_ID, foo: 'bar' };
-  var cart;
+  var foo;
 
   before(function(done) {
-    Foo.destroyAll(done);
+    async.parallel([
+      function(cb) {
+        Foo.deleteAll(cb);
+      },
+      function(cb) {
+        Bar.deleteAll(cb);
+      }
+    ],
+    done);
+  });
+
+  after(function(done) {
+    async.parallel([
+      function(cb) {
+        Foo.deleteAll(cb);
+      },
+      function(cb) {
+        Bar.deleteAll(cb);
+      }
+    ],
+      done);
   });
 
   it('create', function(done) {
     Foo.create(TEST_ATTRS, function(err, entity) {
       should.not.exist(err);
       checkEntity(entity);
-      cart = entity;
+      foo = entity;
       done();
     });
   });
@@ -77,9 +99,9 @@ describe('Base Model', function() {
 
   it('updateAttributes and save', function(done) {
     var attrs = { boo: 'bif' };
-    cart.assignAttributes(attrs);
-    cart.get('boo').should.equal(attrs.boo);
-    cart.save(function(err, reply) {
+    foo.assignAttributes(attrs);
+    foo.get('boo').should.equal(attrs.boo);
+    foo.save(function(err, reply) {
       should.not.exist(err);
       reply.get('boo').should.equal(attrs.boo);
       done();
@@ -87,16 +109,57 @@ describe('Base Model', function() {
   });
 
   it('delete', function(done) {
-    if (!cart) { done(); }
-    cart.delete(function(err) {
+    if (!foo) { done(); }
+    foo.delete(function(err) {
       should.not.exist(err);
       Foo.find(TEST_ID, function(err, entity) {
         should.exist(err);
         should.not.exist(entity);
-        cart = null;
+        foo = null;
         done();
       });
     });
+  });
+
+  it('deleteAll', function(done) {
+    var barAttrs = [{bar: 1}, {bar: 2}, {bar: 3}];
+    async.each(barAttrs,
+      function(attrs, cb) {
+        Bar.create(attrs, cb);
+      },
+      function(err) {
+        should.not.exist(err);
+
+        Bar.all(function (err, reply) {
+          should.not.exist(err);
+          reply.length.should.equal(barAttrs.length);
+
+          var query = 'bar < 3';
+          Bar.deleteAll(query, function (err, reply) {
+            should.not.exist(err);
+            reply.should.equal(2);
+
+            Bar.all(function (err, reply) {
+              should.not.exist(err);
+              reply.length.should.equal(1);
+              reply[0].get('bar').should.equal(3);
+
+              Bar.deleteAll(function (err, reply) {
+                should.not.exist(err);
+                reply.should.equal(1);
+
+                Bar.all(function (err, reply) {
+                  should.not.exist(err);
+                  reply.length.should.equal(0);
+
+                  done();
+                });
+              });
+            });
+          });
+        });
+      }
+    );
   });
 
 

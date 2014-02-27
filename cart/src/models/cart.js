@@ -5,15 +5,10 @@ var usergrid = common.usergrid;
 var async = require('async');
 var _ = require('lodash');
 var CartItem = require('./cart_item');
-//var validators = usergrid.validators;
 
 var CartClass = {};
 usergrid.define(CartClass, Cart);
 module.exports = CartClass;
-
-CartClass.validates({
-//  name: [ validators.required ]
-});
 
 CartClass.defaults({
   status: 'open'

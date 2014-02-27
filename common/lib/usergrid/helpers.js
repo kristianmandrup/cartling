@@ -31,9 +31,9 @@ module.exports = {
     // eg. { a: 'b', c: 'd' } -> "a = 'b' and c = 'd'"
     function(criteria, limit) {
       if (!criteria) { return { qs: {} }; }
-      var ql;
+      var queryString;
       if (_.isString(criteria)) {
-        ql = criteria;
+        queryString = criteria;
       } else {
         var orderby = criteria['order by'];
         if (orderby) { delete criteria['order by']; }
@@ -45,15 +45,15 @@ module.exports = {
           }
           delete criteria._id;
         }
-        ql = _.reduce(criteria,
+        queryString = _.reduce(criteria,
           function(result, v, k) {
             result = result ? result + ' and ' : '';
             return result + k + "=" + quote(v);
           },
           null);
-        if (orderby) { ql += (' ' + orderby); }
+        if (orderby) { queryString += (' ' + orderby); }
       }
-      var query = { qs: { q: ql }};
+      var query = { qs: { q: queryString }};
       if (limit) { query.qs.limit = limit; }
       return query;
     }

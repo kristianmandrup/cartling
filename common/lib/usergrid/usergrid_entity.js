@@ -12,7 +12,13 @@ var UsergridEntity = function() {
 
   // persistence
 
-  this._errors = {};
+  this.getUUID = function() {
+    return this.get('uuid');
+  };
+
+  this.isPersisted = function() {
+    return !!this.getUUID();
+  };
 
   this.save = function(cb) {
     if (!this.isValid()) { return cb(this.getErrors()); }
@@ -28,19 +34,6 @@ var UsergridEntity = function() {
     this.destroy(translateSDKCallback(function(err, reply) {
       cb(err, self);
     }));
-  };
-
-  // connectedType is the defined() type of the connected entity
-  this.getConnectedEntities = function(name, connectedType, options, cb) {
-    if (_.isFunction(options)) { cb = options; options = undefined; }
-    // call up to the sdk getConnections
-    this.getConnections(name, options, function(err, reply) {
-      if (err) { return translateSDKCallback(cb); }
-      var entities = _.map(reply.entities, function(entity) {
-        return connectedType.new(entity);
-      });
-      cb(null, entities);
-    });
   };
 
   // updateAttributes locally and save to server
@@ -59,10 +52,25 @@ var UsergridEntity = function() {
     return this;
   };
 
+  // connections
+
+  // connectedType is the defined() type of the connected entity
+  this.getConnectedEntities = function(name, connectedType, options, cb) {
+    if (_.isFunction(options)) { cb = options; options = undefined; }
+    // call up to the sdk getConnections
+    this.getConnections(name, options, function(err, reply) {
+      if (err) { return translateSDKCallback(cb); }
+      var entities = _.map(reply.entities, function(entity) {
+        return connectedType.new(entity);
+      });
+      cb(null, entities);
+    });
+  };
 
   // validation
 
   this.addError = function(attribute, error) {
+    if (!this._errors) { this._errors = new ValidationErrors(); }
     this._errors.addError(attribute, error);
   };
 

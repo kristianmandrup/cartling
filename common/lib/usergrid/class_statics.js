@@ -38,7 +38,8 @@ var ClassStatics = function(client) {
             }
           });
         });
-        this._usergrid.validations = validations;
+        if (!this._usergrid.validations) { this._usergrid.validations = {}; }
+        _.assign(this._usergrid.validations, validations);
       },
 
     all:
@@ -108,17 +109,30 @@ var ClassStatics = function(client) {
         });
       },
 
-    // deletes the entity on the service with the passed id
+    // deletes (does not retrieve) the entity on the service with the passed id
     delete:
       function(uuid_or_name, cb) {
         var entity = this.new(uuid_or_name);
         entity.delete(cb);
       },
 
-    // destroys all entities matching criteria (criteria is optional)
+    // destroys (does not retrieve) all entities matching criteria (criteria is optional)
+    // returns num of entities deleted to callback
+    deleteAll:
+      function(criteria, cb) {
+        if (_.isFunction(criteria)) { cb = criteria; criteria = undefined; }
+        var self = this;
+        var query = buildQuery(criteria);
+        client.delete(options(self, query), translateSDKCallback(function (err, data) {
+          if (err) { return cb(err); }
+          cb(null, data.entities.length);
+        }));
+      },
+
+    // destroys (retrieve and delete) all entities matching criteria (criteria is optional)
     destroyAll:
       function(criteria, cb) {
-        if (_.isFunction(criteria)) { cb = criteria; criteria = {}; }
+        if (_.isFunction(criteria)) { cb = criteria; criteria = undefined; }
         this.findBy(criteria, function(err, entities) {
           if (err) { return cb(err); }
           var deleteEntity = function(entity, callback) {

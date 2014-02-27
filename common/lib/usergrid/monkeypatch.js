@@ -177,3 +177,26 @@ Usergrid.entity.prototype.getConnections = function (connection, opts, callback)
     }
   });
 };
+
+
+// adding a "delete by query" function
+Usergrid.client.prototype.delete = function(opts, callback) {
+  if (_.isFunction(opts)) { callback = opts; opts = undefined; }
+
+  if (!opts.qs.q) { opts.qs.q = '*'; }
+
+  var options = {
+    method: 'DELETE',
+    endpoint: opts.type,
+    qs: opts.qs
+  };
+  var self = this;
+  this.request(options, function (err, data) {
+    if (err && self.logging) {
+      console.log('entities could not be deleted');
+    }
+    if (typeof(callback) === 'function') {
+      callback(err, data);
+    }
+  });
+}

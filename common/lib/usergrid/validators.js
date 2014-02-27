@@ -15,7 +15,8 @@ var validator_specs = {
   alpha:        [ validator.isAlpha,        '%s must only include alpha characters (A-Z)' ],
   numeric:      [ validator.isNumeric,      '%s must only include digits (0-9)' ],
   alphanumeric: [ validator.isAlphanumeric, '%s must only include alpha or numeric digits (A-Z and 0-9)' ],
-  date:         [ validator.isDate,         '%s is not a valid date' ]
+  date:         [ validator.isDate,         '%s is not a valid date' ],
+  boolean:      [ _.isBoolean,              '%s must be true or false' ]
 };
 
 var validateSpec = function(spec, str) {

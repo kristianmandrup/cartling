@@ -8,7 +8,6 @@ var async = require('async');
 var helpers = require('./helpers');
 var models = helpers.models;
 var Cart = models.Cart;
-var CartItem = models.CartItem;
 var User = models.User;
 
 var server = require('./app')(helpers.config);
@@ -30,7 +29,7 @@ describe('app', function() {
           if (err) { return done(err); }
 
           user = reply;
-          Cart.destroyAll(function(err, reply) {
+          Cart.deleteAll(function(err, reply) {
             Cart.create({ foo: 'bar' }, function(err, cart) {
               if (err) { return done(err); }
               notMyCart = cart;
@@ -171,38 +170,30 @@ describe('app', function() {
     var carts = [];
 
     before(function(done) {
-      async.each(cartAttributes,
-        function(attrs, cb) {
-          Cart.delete(attrs, cb);
-        },
-        function(err) {
-          async.each(cartAttributes,
-            function(attrs, cb) {
-              Cart.create(attrs, function (err, reply) {
-                if (err) { return cb(err); }
-                carts.push(reply);
-                cb();
-              });
-            },
-            done);
-        }
-      );
+      Cart.deleteAll(function(err) {
+        async.each(cartAttributes,
+          function(attrs, cb) {
+            Cart.create(attrs, function (err, reply) {
+              should.not.exist(err);
+              carts.push(reply);
+              cb();
+            });
+          },
+          done);
+      });
     });
 
     after(function(done) {
-      async.each(carts,
-        function (cart, cb) {
-          cart.delete(cb);
-        },
-        done
-      );
+      Cart.deleteAll(function(err) {
+        done();
+      });
     });
 
     it('list all', function(done) {
       request(server)
         .get('/carts')
         .end(function(err, res) {
-          if (err) { return done(err); }
+          should.not.exist(err);
           res.status.should.eql(200);
           var entities = res.body;
           entities.should.be.an.Array;
@@ -216,7 +207,7 @@ describe('app', function() {
         .get('/carts')
         .query('q=uuid=' + carts[1].get('uuid'))
         .end(function(err, res) {
-          if (err) { return done(err); }
+          should.not.exist(err);
           res.status.should.eql(200);
           var entities = res.body;
           entities.should.be.an.Array;
@@ -233,7 +224,7 @@ describe('app', function() {
         .post('/carts')
         .send(attrs)
         .end(function(err, res) {
-          if (err) { return done(err); }
+          should.not.exist(err);
           res.status.should.eql(200);
           var cart = res.body;
           cart.uuid.should.not.be.null;

@@ -2,15 +2,15 @@
 
 var common = require('../helpers/common');
 var usergrid = common.usergrid;
-var validators = usergrid.validators;
+var is = usergrid.validators;
 
 var CartItemClass = {};
 usergrid.define(CartItemClass, CartItem);
 module.exports = CartItemClass;
 
 CartItemClass.validates({
-  sku:      [ validators.required ],
-  quantity: [ validators.required, validators.numeric ]
+  sku:      [ is.required ],
+  quantity: [ is.required, is.numeric ]
 });
 
 CartItemClass.defaults({
