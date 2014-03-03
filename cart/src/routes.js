@@ -3,6 +3,7 @@
 var cart = require('./controllers/cart');
 var cartItem = require('./controllers/cart_item');
 var mycart = require('./controllers/my_cart');
+var usergridMiddleware = require('./helpers').common.usergrid.expressMiddleware;
 
 module.exports = function(app, oauth) {
 
@@ -10,27 +11,27 @@ module.exports = function(app, oauth) {
 
   app.post('/my/carts',
     oauth.authenticate('cart'),
-    addUserContext,
+    usergridMiddleware,
     mycart.create);
 
   app.get('/my/carts',
     oauth.authenticate('cart'),
-    addUserContext,
+    usergridMiddleware,
     mycart.list);
 
   app.get('/my/carts/:id',
     oauth.authenticate('cart'),
-    addUserContext,
+    usergridMiddleware,
     mycart.get);
 
   app.put('/my/carts/:id',
     oauth.authenticate('cart'),
-    addUserContext,
+    usergridMiddleware,
     mycart.update);
 
   app.delete('/my/carts/:id',
     oauth.authenticate('cart'),
-    addUserContext,
+    usergridMiddleware,
     mycart.close);
 
 
@@ -71,12 +72,3 @@ module.exports = function(app, oauth) {
     oauth.authenticate('cart'),
     cartItem.delete);
 };
-
-
-// retrieve the username & instantiate User for context
-var User = require('./models').User;
-function addUserContext(req, res, next) {
-  var username = req.token.attributes.username;
-  req.token.user = User.new({ username: username });
-  next();
-}

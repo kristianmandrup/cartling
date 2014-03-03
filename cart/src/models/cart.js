@@ -1,6 +1,6 @@
 'use strict';
 
-var common = require('../helpers/common');
+var common = require('../helpers').common;
 var usergrid = common.usergrid;
 var async = require('async');
 var _ = require('lodash');

@@ -1,13 +1,14 @@
 'use strict';
 
-var common = require('../helpers/common');
-var log = common.logger;
-var events = common.events;
+var helpers = require('../helpers');
+var log = helpers.common.logger;
+var events = helpers.common.events;
 var models = require('../models');
 var Cart = models.Cart;
 var _ = require('lodash');
-var commonController = _.bindAll(new common.usergrid.Controller(Cart));
+var commonController = _.bindAll(new helpers.common.usergrid.Controller(Cart));
 var onSuccess = commonController.onSuccess;
+var publish = events.publish;
 
 var cartController = {
 
@@ -17,8 +18,8 @@ var cartController = {
 
   get:
     function(req, res) {
-      commonController.get(req, res, function (err, reply) {
-        onSuccess(err, req, res, reply, function(res, cart) {
+      commonController.get(req, res, function (err, cart) {
+        onSuccess(err, req, res, cart, function() {
           cart.getItems(function(err, items) {
             cart.set('items', items);
             res.json(cart);
@@ -32,22 +33,23 @@ var cartController = {
       var id = req.params.id;
       if (!id) { return res.json(400, 'missing id'); }
       log.debug('cart close %s', id);
-      Cart.find(id, function(err, reply) {
-        onSuccess(err, req, res, reply, function(res, cart) {
+      var me = req.token.user;
+      Cart.find(id, function(err, cart) {
+        onSuccess(err, req, res, cart, function() {
           var target = req.query.merge;
           if (target) {
             cart.copyAndClose(target, function(err) {
-              onSuccess(err, req, res, reply, function(res, reply) {
-                var event = { op: 'merge' };
-                events.publish(events.CART, event);
+              onSuccess(err, req, res, null, function(res, reply) {
+                publish(me, events.DELETE, cart);
+                publish(me, events.UPDATE, target, reply);
                 res.json(reply);
               });
             });
           } else {
             cart.close(function(err, reply) {
-              onSuccess(err, req, res, reply, function(res, reply) {
+              onSuccess(err, req, res, reply, function() {
                 var event = { op: 'close' };
-                events.publish(events.CART, event);
+                publish(me, events.DELETE, cart);
                 res.json(reply);
               });
             });

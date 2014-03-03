@@ -11,13 +11,15 @@ var validators = require('./validators');
 var ValidationErrors = require('./validation_errors');
 var usergridStatics = require('./class_statics');
 var UsergridError = require('./usergrid_error');
+var expressMiddleware = require('./express_middleware');
 
 var client;
 
 var exports = {
   validators: validators,
   ValidationErrors: ValidationErrors,
-  UsergridError: UsergridError
+  UsergridError: UsergridError,
+  expressMiddleware: expressMiddleware
 };
 
 function configure(config) {

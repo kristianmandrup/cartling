@@ -7,6 +7,7 @@ var configure = function(config) {
   exports.usergrid = require('./usergrid')(config);
   exports.logger = require('./logger')(config);
   exports.events = require('./events')(config);
+  exports.intents = require('./intents');
 };
 
 module.exports = function(config) {

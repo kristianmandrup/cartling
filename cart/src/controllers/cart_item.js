@@ -1,10 +1,10 @@
 'use strict';
 
-var common = require('../helpers/common');
+var helpers = require('../helpers');
 var models = require('../models');
 var CartItem = models.CartItem;
 var _ = require('lodash');
-var commonController = _.bindAll(new common.usergrid.Controller(CartItem));
+var commonController = _.bindAll(new helpers.common.usergrid.Controller(CartItem));
 
 // just use all default controller methods
 module.exports = commonController;

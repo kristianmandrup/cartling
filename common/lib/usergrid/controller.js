@@ -5,8 +5,10 @@ function Controller(UsergridClass) {
   var common = require('../')();
   var log = common.logger;
   var events = common.events;
+  var intents = common.intents;
   var type = UsergridClass._usergrid.type;
-  var eventType = events.ROOT + '.' + UsergridClass._usergrid.type;
+  var publish = events.publish;
+  var verify = intents.verifyIntent;
 
   // list all
   this.list = function(req, res, cb) {
@@ -14,7 +16,7 @@ function Controller(UsergridClass) {
     var criteria = req.query.q;
     var self = this;
     UsergridClass.findBy(criteria, function(err, reply) {
-      self.onSuccess(err, req, res, reply, function(res, reply) {
+      self.onSuccess(err, req, res, reply, function() {
         if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
         res.json(reply);
       });
@@ -28,7 +30,7 @@ function Controller(UsergridClass) {
     log.debug('%s get %s', type, id);
     var self = this;
     UsergridClass.find(id, function(err, reply) {
-      self.onSuccess(err, req, res, reply, function(res, reply) {
+      self.onSuccess(err, req, res, reply, function() {
         if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
         res.json(reply);
       });
@@ -41,12 +43,17 @@ function Controller(UsergridClass) {
     if (!req.body) { return res.json(400, 'body required'); }
     var attributes = req.body;
     var self = this;
-    UsergridClass.create(attributes, function(err, reply) {
-      self.onSuccess(err, req, res, reply, function(res, reply) {
-        var event = { op: 'create', attributes: attributes };
-        events.publish(eventType, event);
-        if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
-        res.json(reply);
+    var me = req.token.user;
+    verify(me, intents.CREATE, type, attributes, function(err) {
+      self.onSuccess(err, req, res, null, function() {
+        UsergridClass.create(attributes, function(err, reply) {
+          self.onSuccess(err, req, res, reply, function() {
+            log.debug('%s created %s', type, reply.get('uuid'));
+            publish(me, intents.CREATE, type, attributes);
+            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
+            res.json(reply);
+          });
+        });
       });
     });
   };
@@ -60,13 +67,17 @@ function Controller(UsergridClass) {
     attributes.uuid = id;
     log.debug('%s update %s', type, req.body);
     var self = this;
-    UsergridClass.update(attributes, function(err, reply) {
-      self.onSuccess(err, req, res, reply, function(res, reply) {
-        log.debug('%s updated %s', type, id);
-        var event = { user: '?', op: 'update', attributes: attributes };
-        events.publish(eventType, event);
-        if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
-        res.json(reply);
+    var me = req.token.user;
+    verify(me, intents.UPDATE, type, attributes, function(err) {
+      self.onSuccess(err, req, res, null, function() {
+        UsergridClass.update(attributes, function(err, reply) {
+          self.onSuccess(err, req, res, reply, function() {
+            log.debug('%s updated %s', type, id);
+            publish(me, events.UPDATE, type, attributes);
+            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
+            res.json(reply);
+          });
+        });
       });
     });
   };
@@ -77,11 +88,11 @@ function Controller(UsergridClass) {
     if (!id) { return res.json(400, 'missing id'); }
     log.debug('%s delete %s', type, id);
     var self = this;
+    var me = req.token.user;
     UsergridClass.delete(id, function(err, reply) {
-      self.onSuccess(err, req, res, reply, function(res, entity) {
+      self.onSuccess(err, req, res, reply, function() {
         log.debug('%s deleted %s', type, id);
-        var event = { op: 'delete' };
-        events.publish(eventType, event);
+        publish(me, events.DELETE, entity);
         if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
         res.json(reply);
       });
@@ -106,7 +117,6 @@ function Controller(UsergridClass) {
       next(res, reply);
     }
   };
-
 }
 
 module.exports = Controller;

@@ -1,14 +1,18 @@
 'use strict';
 
-var common = require('../helpers/common');
+var common = require('../helpers').common;
 var log = common.logger;
 var events = common.events;
+var intents = common.intents;
 var models = require('../models');
 var Cart = models.Cart;
 var _ = require('lodash');
 var commonController = _.bindAll(new common.usergrid.Controller(Cart));
 var onSuccess = commonController.onSuccess;
 var UsergridError = common.usergrid.UsergridError;
+var publish = events.publish;
+var verify = intents.verifyIntent;
+var type = Cart._usergrid.type;
 
 var OPEN_CRITERIA = { status: 'open' };
 
@@ -17,8 +21,9 @@ var cartController = {
   list:
     function(req, res) {
       log.debug('my cart list');
-      me(req).findCartsBy(OPEN_CRITERIA, function(err, reply) {
-        onSuccess(err, req, res, reply, function(res, reply) {
+      var me = req.token.user;
+      me.findCartsBy(OPEN_CRITERIA, function(err, reply) {
+        onSuccess(err, req, res, reply, function() {
           res.json(reply);
         });
       });
@@ -26,9 +31,10 @@ var cartController = {
 
   create:
     function(req, res) {
-      commonController.create(req, res, function (err, reply) {
-        onSuccess(err, req, res, reply, function(res, cart) {
-          me(req).addCart(cart, function(err) {
+      commonController.create(req, res, function (err, cart) {
+        onSuccess(err, req, res, cart, function() {
+          var me = req.token.user;
+          me.addCart(cart, function(err) {
             res.json(cart);
           });
         });
@@ -43,15 +49,19 @@ var cartController = {
       log.debug('%s update %s', 'my cart', req.body);
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
-      me(req).findCartsBy(criteria, 1, function(err, reply) {
-        first(err, req, res, reply, function(res, cart) {
-          log.debug('cart found %s', id);
-          cart.update(attributes, function(err, reply) {
-            onSuccess(err, req, res, reply, function(res, reply) {
-              log.debug('cart updated %s', id);
-              var event = { op: 'update', attributes: attributes };
-              events.publish(events.CART, event);
-              res.json(reply);
+      var me = req.token.user;
+      verify(me, events.UPDATE, type, attributes, function(err) {
+        onSuccess(err, req, res, null, function() {
+          me.findCartsBy(criteria, 1, function(err, reply) {
+            first(err, req, res, reply, function(res, cart) {
+              log.debug('%s found %s', type, id);
+              cart.update(attributes, function(err, reply) {
+                onSuccess(err, req, res, reply, function() {
+                  log.debug('%s updated %s', type, id);
+                  publish(me, events.UPDATE, 'cart', attributes);
+                  res.json(reply);
+                });
+              });
             });
           });
         });
@@ -64,7 +74,8 @@ var cartController = {
       if (!id) { return res.json(400, 'missing id'); }
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
-      me(req).findCartsBy(criteria, 1, function(err, reply) {
+      var me = req.token.user;
+      me.findCartsBy(criteria, 1, function(err, reply) {
         first(err, req, res, reply, function(res, cart) {
           res.json(cart);
         });
@@ -75,15 +86,15 @@ var cartController = {
     function(req, res) {
       var id = req.params.id;
       if (!id) { return res.json(400, 'missing id'); }
-      log.debug('cart close %s', id);
+      log.debug('%s close %s', type, id);
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
-      me(req).findCartsBy(criteria, 1, function(err, reply) {
+      var me = req.token.user;
+      me.findCartsBy(criteria, 1, function(err, reply) {
         first(err, req, res, reply, function(res, cart) {
           cart.close(function(err, reply) {
-            onSuccess(err, req, res, reply, function(res, reply) {
-              var event = { op: 'close' };
-              events.publish(events.CART, event);
+            onSuccess(err, req, res, reply, function() {
+              publish(me, events.DELETE, cart);
               res.json(reply);
             });
           });
@@ -92,10 +103,6 @@ var cartController = {
     }
 };
 module.exports = cartController;
-
-function me(req) {
-  return req.token.user;
-}
 
 function first(err, req, res, reply, cb) {
   if (!err) {

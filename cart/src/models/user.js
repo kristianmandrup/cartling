@@ -1,6 +1,6 @@
 'use strict';
 
-var common = require('../helpers/common');
+var common = require('../helpers').common;
 var usergrid = common.usergrid;
 var UserClass = common.usergrid.User;
 
