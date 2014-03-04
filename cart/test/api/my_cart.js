@@ -14,114 +14,164 @@ var server = require('../app')(helpers.config);
 
 describe('API', function() {
 
-  describe('cart', function() {
+  describe('my cart', function() {
 
     this.timeout(10000);
-
-    var cartAttributes = [
-      { foo: 'foo' },
-      { foo: 'bar', bar: 'baz' }
-    ];
-    var carts = [];
+    var user;
+    var notMyCart;
+    var myCart;
 
     before(function(done) {
-      Cart.deleteAll(function(err) {
-        async.each(cartAttributes,
-          function(attrs, cb) {
-            Cart.create(attrs, function (err, reply) {
-              should.not.exist(err);
-              carts.push(reply);
-              cb();
+
+      User.delete('testuser', function (err, reply) {
+        User.create({ username: 'testuser' }, function (err, reply) {
+          if (err) { return done(err); }
+
+          user = reply;
+          Cart.deleteAll(function(err, reply) {
+            Cart.create({ foo: 'bar' }, function(err, cart) {
+              if (err) { return done(err); }
+              notMyCart = cart;
+              done();
             });
-          },
-          done);
+          });
+        });
       });
     });
 
     after(function(done) {
-      Cart.deleteAll(function(err) {
-        done();
-      });
+      async.waterfall([
+        function(cb) {
+          if (!myCart) { return cb(null, myCartEntity); }
+          var myCartEntity = Cart.new(myCart.uuid);
+          user.removeCart(myCartEntity, function (err, reply) {
+            cb(err, myCartEntity);
+          });
+        },
+        function(myCartEntity, cb) {
+          var carts = [notMyCart];
+          if (myCartEntity) { carts.push(myCartEntity); }
+          async.each(carts,
+            function(cart, cb) {
+              cart.delete(cb);
+            },
+            cb);
+        }
+      ],
+        done);
     });
 
-    it('list all', function(done) {
+    it('can create', function(done) {
+      var attrs = { foo: 'bobo' };
       request(server)
-        .get('/carts')
+        .post('/my/carts')
+        .send(attrs)
         .end(function(err, res) {
-          should.not.exist(err);
+          if (err) { return done(err); }
           res.status.should.eql(200);
-          var entities = res.body;
-          entities.should.be.an.Array;
-          entities.length.should.be.greaterThan(2);
+          myCart = res.body;
+          myCart.uuid.should.not.be.null;
+          myCart.foo.should.equal('bobo');
           done();
         });
     });
 
-    it('can query', function(done) {
+    it('can intercept and abort create', function(done) {
+      var attrs = { foo: 'bobo' };
       request(server)
-        .get('/carts')
-        .query('q=uuid=' + carts[1].get('uuid'))
+        .post('/my/carts')
+        .send(attrs)
         .end(function(err, res) {
-          should.not.exist(err);
+          if (err) { return done(err); }
+          res.status.should.eql(200);
+          myCart = res.body;
+          myCart.uuid.should.not.be.null;
+          myCart.foo.should.equal('bobo');
+          done();
+        });
+    });
+
+    it('can list all', function(done) {
+      request(server)
+        .get('/my/carts')
+        .end(function(err, res) {
+          if (err) { return done(err); }
           res.status.should.eql(200);
           var entities = res.body;
           entities.should.be.an.Array;
           entities.length.should.equal(1);
           var cart = entities[0];
-          cart.uuid.should.equal(carts[1].get('uuid'));
+          cart.uuid.should.equal(myCart.uuid);
           done();
         });
     });
 
-    it('can create', function(done) {
-      var attrs = { foo: 'skippy' };
+    it('can get my cart', function(done) {
       request(server)
-        .post('/carts')
-        .send(attrs)
+        .get('/my/carts/' + myCart.uuid)
         .end(function(err, res) {
-          should.not.exist(err);
+          if (err) { return done(err); }
           res.status.should.eql(200);
           var cart = res.body;
-          cart.uuid.should.not.be.null;
-          carts.push(cart);
-          cart.foo.should.equal('skippy');
+          cart.uuid.should.equal(myCart.uuid);
           done();
         });
     });
 
-    it('can update from uuid', function(done) {
+    it('cannot get not my cart', function(done) {
+      request(server)
+        .get('/my/carts/' + notMyCart.get('uuid'))
+        .end(function(err, res) {
+          if (err) { return done(err); }
+          res.status.should.eql(404);
+          done();
+        });
+    });
+
+    it('can update my cart', function(done) {
+      myCart.should.not.be.null;
       var body = { bar: 'babs' };
       request(server)
-        .put('/carts/' + carts[1].get('uuid'))
+        .put('/my/carts/' + myCart.uuid)
         .send(body)
         .end(function(err, res) {
           if (err) { return done(err); }
           res.status.should.eql(200);
           var cart = res.body;
+          cart.uuid.should.equal(myCart.uuid);
           cart.bar.should.equal('babs');
           done();
         });
     });
 
-    it('can close the cart', function(done) {
-      var uuid = carts[1].get('uuid');
+    it('cannot update not my cart', function(done) {
+      notMyCart.should.not.be.null;
+      var body = { bar: 'babs' };
       request(server)
-        .del('/carts/' + uuid)
+        .put('/my/carts/' + notMyCart.get('uuid'))
+        .send(body)
+        .end(function(err, res) {
+          res.status.should.eql(404);
+          done();
+        });
+    });
+
+    it('can close my cart', function(done) {
+      myCart.should.not.be.null;
+      request(server)
+        .del('/my/carts/' + myCart.uuid)
         .end(function(err, res) {
           res.status.should.eql(200);
 
-          // should still be visible here
+          // should no longer be visible
           request(server)
-            .get('/carts/' + uuid)
+            .get('/my/carts/' + myCart.uuid)
             .end(function(err, res) {
               if (err) { return done(err); }
-              res.status.should.eql(200);
-              var cart = res.body;
-              cart.status.should.equal('closed');
+              res.status.should.eql(404);
               done();
             });
         });
     });
-
   });
 });
