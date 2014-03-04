@@ -4,6 +4,11 @@ var _ = require('lodash');
 var async = require('async');
 
 module.exports = {
+  CREATE: 'create',
+  READ: 'read',
+  UPDATE: 'update',
+  DELETE: 'delete',
+
   before: before,
 
   clearAll: clearAll,
@@ -65,6 +70,7 @@ function verifyIntent(subject, op, target, data, cb) {
   var type = (_.isString(target)) ? target : target.get('type');
   var listeners = listenersFor(op, type);
   if (listeners.length === 0) { return cb(); }
+  if (data && data.uuid) { delete(data.uuid); } // uuid is immutable, so don't include - even if it's in the data
   var intent = new Intent(subject, op, target, data);
   async.each(listeners,
     function(listener, callback) {

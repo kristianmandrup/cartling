@@ -9,6 +9,8 @@ var _ = require('lodash');
 var commonController = _.bindAll(new helpers.common.usergrid.Controller(Cart));
 var onSuccess = commonController.onSuccess;
 var publish = events.publish;
+var intents = helpers.common.intents;
+var verify = intents.verifyIntent;
 
 var cartController = {
 
@@ -37,23 +39,27 @@ var cartController = {
       Cart.find(id, function(err, cart) {
         onSuccess(err, req, res, cart, function() {
           var target = req.query.merge;
-          if (target) {
-            cart.copyAndClose(target, function(err) {
-              onSuccess(err, req, res, null, function(res, reply) {
-                publish(me, events.DELETE, cart);
-                publish(me, events.UPDATE, target, reply);
-                res.json(reply);
-              });
+          verify(me, intents.DELETE, cart, { merge: target}, function(err) {
+            onSuccess(err, req, res, null, function() {
+              if (target) {
+                cart.copyAndClose(target, function(err) {
+                  onSuccess(err, req, res, null, function(res, reply) {
+                    publish(me, events.DELETE, cart);
+                    publish(me, events.UPDATE, target, reply);
+                    res.json(reply);
+                  });
+                });
+              } else {
+                cart.close(function(err, reply) {
+                  onSuccess(err, req, res, reply, function() {
+                    var event = { op: 'close' };
+                    publish(me, events.DELETE, cart);
+                    res.json(reply);
+                  });
+                });
+              }
             });
-          } else {
-            cart.close(function(err, reply) {
-              onSuccess(err, req, res, reply, function() {
-                var event = { op: 'close' };
-                publish(me, events.DELETE, cart);
-                res.json(reply);
-              });
-            });
-          }
+          });
         });
       });
     }

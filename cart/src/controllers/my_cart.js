@@ -50,11 +50,11 @@ var cartController = {
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
       var me = req.token.user;
-      verify(me, events.UPDATE, type, attributes, function(err) {
-        onSuccess(err, req, res, null, function() {
-          me.findCartsBy(criteria, 1, function(err, reply) {
-            first(err, req, res, reply, function(res, cart) {
-              log.debug('%s found %s', type, id);
+      me.findCartsBy(criteria, 1, function(err, reply) {
+        first(err, req, res, reply, function(res, cart) {
+          log.debug('%s found %s', type, id);
+          verify(me, events.UPDATE, cart, attributes, function(err) {
+            onSuccess(err, req, res, null, function() {
               cart.update(attributes, function(err, reply) {
                 onSuccess(err, req, res, reply, function() {
                   log.debug('%s updated %s', type, id);
@@ -92,10 +92,14 @@ var cartController = {
       var me = req.token.user;
       me.findCartsBy(criteria, 1, function(err, reply) {
         first(err, req, res, reply, function(res, cart) {
-          cart.close(function(err, reply) {
-            onSuccess(err, req, res, reply, function() {
-              publish(me, events.DELETE, cart);
-              res.json(reply);
+          verify(me, events.DELETE, cart, null, function(err) {
+            onSuccess(err, req, res, null, function() {
+              cart.close(function(err, reply) {
+                onSuccess(err, req, res, reply, function() {
+                  publish(me, events.DELETE, cart);
+                  res.json(reply);
+                });
+              });
             });
           });
         });

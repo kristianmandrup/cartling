@@ -9,6 +9,7 @@ var helpers = require('../helpers');
 var models = helpers.models;
 var Cart = models.Cart;
 var User = models.User;
+var intents = helpers.common.intents;
 
 var server = require('../app')(helpers.config);
 
@@ -78,15 +79,22 @@ describe('API', function() {
 
     it('can intercept and abort create', function(done) {
       var attrs = { foo: 'bobo' };
+      intents.before('create', 'cart', function(intent, done) {
+        intent.subject.get('username').should.equal('testuser');
+        intent.op.should.equal('create');
+        intent.target.should.equal('cart');
+        should.deepEqual(intent.data, attrs);
+        var err = new Error('no way, forget it');
+        err.statusCode = 401;
+        done(err);
+      });
       request(server)
         .post('/my/carts')
         .send(attrs)
         .end(function(err, res) {
+          intents.clearAll();
           if (err) { return done(err); }
-          res.status.should.eql(200);
-          myCart = res.body;
-          myCart.uuid.should.not.be.null;
-          myCart.foo.should.equal('bobo');
+          res.status.should.eql(401);
           done();
         });
     });
@@ -129,7 +137,7 @@ describe('API', function() {
     });
 
     it('can update my cart', function(done) {
-      myCart.should.not.be.null;
+      should.exist(myCart);
       var body = { bar: 'babs' };
       request(server)
         .put('/my/carts/' + myCart.uuid)
@@ -144,8 +152,31 @@ describe('API', function() {
         });
     });
 
+    it('can intercept and abort updating my cart', function(done) {
+      should.exist(myCart);
+      var body = { bar: 'babs' };
+      intents.before('update', 'cart', function(intent, done) {
+        intent.subject.get('username').should.equal('testuser');
+        intent.op.should.equal('update');
+        intent.target.get('uuid').should.equal(myCart.uuid);
+        should.deepEqual(intent.data, body);
+        var err = new Error('no way, forget it');
+        err.statusCode = 501;
+        done(err);
+      });
+      request(server)
+        .put('/my/carts/' + myCart.uuid)
+        .send(body)
+        .end(function(err, res) {
+          intents.clearAll();
+          if (err) { return done(err); }
+          res.status.should.eql(501);
+          done();
+        });
+    });
+
     it('cannot update not my cart', function(done) {
-      notMyCart.should.not.be.null;
+      should.exist(notMyCart);
       var body = { bar: 'babs' };
       request(server)
         .put('/my/carts/' + notMyCart.get('uuid'))
@@ -156,8 +187,28 @@ describe('API', function() {
         });
     });
 
+    it('can intercept and abort closing my cart', function(done) {
+      should.exist(myCart);
+      intents.before('delete', 'cart', function(intent, done) {
+        intent.subject.get('username').should.equal('testuser');
+        intent.op.should.equal('delete');
+        intent.target.get('uuid').should.equal(myCart.uuid);
+        var err = new Error('no way, forget it');
+        err.statusCode = 301;
+        done(err);
+      });
+      request(server)
+        .del('/my/carts/' + myCart.uuid)
+        .end(function(err, res) {
+          intents.clearAll();
+          if (err) { return done(err); }
+          res.status.should.eql(301);
+          done();
+        });
+    });
+
     it('can close my cart', function(done) {
-      myCart.should.not.be.null;
+      should.exist(myCart);
       request(server)
         .del('/my/carts/' + myCart.uuid)
         .end(function(err, res) {
@@ -167,11 +218,13 @@ describe('API', function() {
           request(server)
             .get('/my/carts/' + myCart.uuid)
             .end(function(err, res) {
+              intents.clearAll();
               if (err) { return done(err); }
               res.status.should.eql(404);
               done();
             });
         });
     });
+
   });
 });

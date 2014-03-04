@@ -9,6 +9,7 @@ var helpers = require('../helpers');
 var models = helpers.models;
 var Cart = models.Cart;
 var User = models.User;
+var intents = helpers.common.intents;
 
 var server = require('../app')(helpers.config);
 
@@ -89,6 +90,28 @@ describe('API', function() {
         });
     });
 
+    it('can intercept and abort create', function(done) {
+      var attrs = { foo: 'skippy' };
+      intents.before('create', 'cart', function(intent, done) {
+        should.not.exist(intent.subject);
+        intent.op.should.equal('create');
+        intent.target.should.equal('cart');
+        should.deepEqual(intent.data, attrs);
+        var err = new Error('no way, forget it');
+        err.statusCode = 401;
+        done(err);
+      });
+      request(server)
+        .post('/carts')
+        .send(attrs)
+        .end(function(err, res) {
+          intents.clearAll();
+          should.not.exist(err);
+          res.status.should.eql(401);
+          done();
+        });
+    });
+
     it('can update from uuid', function(done) {
       var body = { bar: 'babs' };
       request(server)
@@ -99,6 +122,47 @@ describe('API', function() {
           res.status.should.eql(200);
           var cart = res.body;
           cart.bar.should.equal('babs');
+          done();
+        });
+    });
+
+    it('can intercept and abort update', function(done) {
+      var body = { bar: 'babs' };
+      intents.before('update', 'cart', function(intent, done) {
+        should.not.exist(intent.subject);
+        intent.op.should.equal('update');
+        intent.target.should.equal('cart');
+        should.deepEqual(intent.data, body);
+        var err = new Error('no way, forget it');
+        err.statusCode = 501;
+        done(err);
+      });
+      request(server)
+        .put('/carts/' + carts[1].get('uuid'))
+        .send(body)
+        .end(function(err, res) {
+          intents.clearAll();
+          if (err) { return done(err); }
+          res.status.should.eql(501);
+          done();
+        });
+    });
+
+    it('can intercept and abort closing the cart', function(done) {
+      var uuid = carts[1].get('uuid');
+      intents.before('delete', 'cart', function(intent, done) {
+        should.not.exist(intent.subject);
+        intent.op.should.equal('delete');
+        intent.target.get('uuid').should.equal(uuid);
+        var err = new Error('no way, forget it');
+        err.statusCode = 301;
+        done(err);
+      });
+      request(server)
+        .del('/carts/' + uuid)
+        .end(function(err, res) {
+          intents.clearAll();
+          res.status.should.eql(301);
           done();
         });
     });

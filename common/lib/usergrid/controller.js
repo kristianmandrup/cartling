@@ -68,7 +68,7 @@ function Controller(UsergridClass) {
     log.debug('%s update %s', type, req.body);
     var self = this;
     var me = req.token.user;
-    verify(me, intents.UPDATE, type, attributes, function(err) {
+    verify(me, intents.UPDATE, type, attributes, function(err) { // todo: retrieve the entity instead of just using type?
       self.onSuccess(err, req, res, null, function() {
         UsergridClass.update(attributes, function(err, reply) {
           self.onSuccess(err, req, res, reply, function() {
@@ -89,12 +89,17 @@ function Controller(UsergridClass) {
     log.debug('%s delete %s', type, id);
     var self = this;
     var me = req.token.user;
-    UsergridClass.delete(id, function(err, reply) {
-      self.onSuccess(err, req, res, reply, function() {
-        log.debug('%s deleted %s', type, id);
-        publish(me, events.DELETE, entity);
-        if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
-        res.json(reply);
+    var exampleEntity = UsergridClass.new({ uuid: id} ); // todo: hmm. icky.. should I retrieve the entity?
+    verify(me, intents.DELETE, exampleEntity, null, function(err) {
+      self.onSuccess(err, req, res, null, function() {
+        UsergridClass.delete(id, function(err, reply) {
+          self.onSuccess(err, req, res, reply, function() {
+            log.debug('%s deleted %s', type, id);
+            publish(me, events.DELETE, entity);
+            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
+            res.json(reply);
+          });
+        });
       });
     });
   };
