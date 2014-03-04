@@ -122,8 +122,8 @@ function first(err, req, res, reply, cb) {
 function make404() {
   var errData = {
     statusCode: 404,
-    name: 'service_resource_not_found',
-    message: 'Service resource not found'
+    error: 'service_resource_not_found',
+    error_description: 'Service resource not found'
   };
   return new UsergridError(errData);
 }
