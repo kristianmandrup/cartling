@@ -30,7 +30,7 @@ function Cart() {
     this.getItems(function (err, items) {
       async.each(items,
         function(item, cb2) {
-          var newItemAttrs = _.omit(item._data, ['uuid', 'name', 'metadata']);
+          var newItemAttrs = _.omit(item._data, CartItem.immutableFields());
           CartItem.create(newItemAttrs, function (err, newItem) {
             if (err) { return cb2(err); }
             targetCart.addItem(newItem, cb2);

@@ -13,6 +13,11 @@ var ClassStatics = function(client) {
 
   return {
 
+    immutableFields:
+      function() {
+        return ['metadata', 'created', 'modified', 'type'];
+      },
+
     hasMany:
       function(connectionName, connectionClass) {
         if (!this._usergrid.connections) { this._usergrid.connections = {}; }

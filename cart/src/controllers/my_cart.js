@@ -46,7 +46,7 @@ var cartController = {
       var id = req.params.id;
       if (!id) { return res.json(400, 'missing id'); }
       var attributes = req.body;
-      log.debug('%s update %s', 'my cart', req.body);
+      log.debug('%s update %j', type, req.body);
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
       var me = req.token.user;
@@ -58,7 +58,7 @@ var cartController = {
               cart.update(attributes, function(err, reply) {
                 onSuccess(err, req, res, reply, function() {
                   log.debug('%s updated %s', type, id);
-                  publish(me, events.UPDATE, 'cart', attributes);
+                  publish(me, events.UPDATE, cart, attributes);
                   res.json(reply);
                 });
               });

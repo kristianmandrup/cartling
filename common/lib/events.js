@@ -2,8 +2,10 @@
 
 var ROOT = 'phrixus';
 var _ = require('lodash');
+var inflection = require('inflection');
 
 var provider;
+var logger;
 var loggerSubscription;
 var exports = {
   // basic operations
@@ -16,11 +18,16 @@ var exports = {
 
 // publishing is async
 function publish(subject, op, target) {
-  var type = (_.isString(target)) ? target : target.get('type');
-  var topic = getTopic(type);
-  // optimization: would be nice to tell if there are subscribers before I bother to create
-  var event = new Event(subject, op, target);
-  provider.publish(topic, event);
+  try {
+    var type = (_.isString(target)) ? target : target.get('type');
+    var topic = getTopic(type);
+    // optimization: would be nice to tell if there are subscribers before I bother to create
+    var event = new Event(subject, op, target);
+    provider.publish(topic, event);
+  }
+  catch (err) {
+    logger.error('unable to publish event', err);
+  }
 }
 
 // returns subscription
@@ -44,7 +51,7 @@ function configure(config) {
   }
 
   if (config.sendToLogger) {
-    var logger = require('./logger')();
+    logger = require('./logger')();
     loggerSubscription = subscribe(ROOT, function(msg, data) {
       logger.log(config.sendToLogger, 'event:', msg, data);
     });
@@ -67,5 +74,5 @@ function Event(subject, op, target) {
 }
 
 function getTopic(type) {
-  return ROOT + '.' + type;
+  return ROOT + '.' + inflection.pluralize(type);
 }

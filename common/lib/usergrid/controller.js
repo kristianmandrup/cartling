@@ -46,12 +46,12 @@ function Controller(UsergridClass) {
     var me = req.token.user;
     verify(me, intents.CREATE, type, attributes, function(err) {
       self.onSuccess(err, req, res, null, function() {
-        UsergridClass.create(attributes, function(err, reply) {
-          self.onSuccess(err, req, res, reply, function() {
-            log.debug('%s created %s', type, reply.get('uuid'));
-            publish(me, intents.CREATE, type, attributes);
-            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
-            res.json(reply);
+        UsergridClass.create(attributes, function(err, entity) {
+          self.onSuccess(err, req, res, entity, function() {
+            log.debug('%s created %s', type, entity.get('uuid'));
+            publish(me, intents.CREATE, entity);
+            if (cb && cb.name !== 'callbacks') { return cb(err, entity); }
+            res.json(entity);
           });
         });
       });
@@ -70,12 +70,12 @@ function Controller(UsergridClass) {
     var me = req.token.user;
     verify(me, intents.UPDATE, type, attributes, function(err) { // todo: retrieve the entity instead of just using type?
       self.onSuccess(err, req, res, null, function() {
-        UsergridClass.update(attributes, function(err, reply) {
-          self.onSuccess(err, req, res, reply, function() {
+        UsergridClass.update(attributes, function(err, entity) {
+          self.onSuccess(err, req, res, entity, function() {
             log.debug('%s updated %s', type, id);
-            publish(me, events.UPDATE, type, attributes);
-            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
-            res.json(reply);
+            publish(me, events.UPDATE, entity);
+            if (cb && cb.name !== 'callbacks') { return cb(err, entity); }
+            res.json(entity);
           });
         });
       });
@@ -92,12 +92,12 @@ function Controller(UsergridClass) {
     var exampleEntity = UsergridClass.new({ uuid: id} ); // todo: hmm. icky.. should I retrieve the entity?
     verify(me, intents.DELETE, exampleEntity, null, function(err) {
       self.onSuccess(err, req, res, null, function() {
-        UsergridClass.delete(id, function(err, reply) {
-          self.onSuccess(err, req, res, reply, function() {
+        UsergridClass.delete(id, function(err, entity) {
+          self.onSuccess(err, req, res, entity, function() {
             log.debug('%s deleted %s', type, id);
             publish(me, events.DELETE, entity);
-            if (cb && cb.name !== 'callbacks') { return cb(err, reply); }
-            res.json(reply);
+            if (cb && cb.name !== 'callbacks') { return cb(err, entity); }
+            res.json(entity);
           });
         });
       });

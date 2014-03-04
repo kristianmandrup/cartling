@@ -9,6 +9,7 @@ var helpers = require('../helpers');
 var models = helpers.models;
 var Cart = models.Cart;
 var User = models.User;
+var CartActivityLog = models.CartActivityLog;
 var intents = helpers.common.intents;
 
 var server = require('../app')(helpers.config);
@@ -23,17 +24,18 @@ describe('API', function() {
     var myCart;
 
     before(function(done) {
+      CartActivityLog.deleteAll(function(err) {
+        User.delete('testuser', function (err, reply) {
+          User.create({ username: 'testuser' }, function (err, reply) {
+            if (err) { return done(err); }
 
-      User.delete('testuser', function (err, reply) {
-        User.create({ username: 'testuser' }, function (err, reply) {
-          if (err) { return done(err); }
-
-          user = reply;
-          Cart.deleteAll(function(err, reply) {
-            Cart.create({ foo: 'bar' }, function(err, cart) {
-              if (err) { return done(err); }
-              notMyCart = cart;
-              done();
+            user = reply;
+            Cart.deleteAll(function(err, reply) {
+              Cart.create({ foo: 'bar' }, function(err, cart) {
+                if (err) { return done(err); }
+                notMyCart = cart;
+                done();
+              });
             });
           });
         });

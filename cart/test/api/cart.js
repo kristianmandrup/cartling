@@ -8,7 +8,7 @@ var async = require('async');
 var helpers = require('../helpers');
 var models = helpers.models;
 var Cart = models.Cart;
-var User = models.User;
+var CartActivityLog = models.CartActivityLog;
 var intents = helpers.common.intents;
 
 var server = require('../app')(helpers.config);
@@ -26,16 +26,18 @@ describe('API', function() {
     var carts = [];
 
     before(function(done) {
-      Cart.deleteAll(function(err) {
-        async.each(cartAttributes,
-          function(attrs, cb) {
-            Cart.create(attrs, function (err, reply) {
-              should.not.exist(err);
-              carts.push(reply);
-              cb();
-            });
-          },
-          done);
+      CartActivityLog.deleteAll(function(err) {
+        Cart.deleteAll(function(err) {
+          async.each(cartAttributes,
+            function(attrs, cb) {
+              Cart.create(attrs, function (err, reply) {
+                should.not.exist(err);
+                carts.push(reply);
+                cb();
+              });
+            },
+            done);
+        });
       });
     });
 
