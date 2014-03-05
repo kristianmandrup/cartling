@@ -8,7 +8,7 @@ var async = require('async');
 var helpers = require('../helpers');
 var models = helpers.models;
 var Cart = models.Cart;
-var CartActivityLog = models.CartActivityLog;
+var ActivityLog = models.ActivityLog;
 var intents = helpers.common.intents;
 
 var server = require('../app')(helpers.config);
@@ -26,7 +26,7 @@ describe('API', function() {
     var carts = [];
 
     before(function(done) {
-      CartActivityLog.deleteAll(function(err) {
+      ActivityLog.deleteAll(function(err) {
         Cart.deleteAll(function(err) {
           async.each(cartAttributes,
             function(attrs, cb) {

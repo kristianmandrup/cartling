@@ -2,7 +2,7 @@
 
 var _ = require('lodash');
 var common;
-var CartActivityLog;
+var ActivityLog;
 var eventRegistration;
 
 var exports = {
@@ -13,7 +13,7 @@ module.exports = function(config) {
     common = require('phrixus-common')(config);
     exports.routes = require('./routes');
 
-    CartActivityLog = require('./models/cart_activity_log');
+    ActivityLog = require('./models/activity_log');
     if (eventRegistration) {
       common.events.unsubscribe(eventRegistration);
     }
@@ -27,14 +27,15 @@ function logEventToUsergrid(topic, event) {
     var attrs = { op: event.op };
     if (event.subject) { attrs.username = event.subject.username; }
     if (event.target) {
-      var target = _.omit(event.target._data, CartActivityLog.immutableFields());
+      attrs.collection = event.target.get('type');
+      var target = _.omit(event.target._data, ActivityLog.immutableFields());
       attrs.target = JSON.stringify(target);
     }
-    CartActivityLog.create(attrs, function (err) {
+    ActivityLog.create(attrs, function (err) {
       if (err) { throw err; }
     });
   }
   catch (err) {
-    common.logger.error('unable to log to CartActivityLog', err);
+    common.logger.error('unable to log to ActivityLog', err);
   }
 }
