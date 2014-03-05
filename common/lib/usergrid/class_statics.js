@@ -14,8 +14,10 @@ var ClassStatics = function(client) {
   return {
 
     immutableFields:
-      function() {
-        return ['metadata', 'created', 'modified', 'type'];
+      function(includeUUID) {
+        var fields = ['metadata', 'created', 'modified', 'type'];
+        if (includeUUID) { fields.push('uuid'); }
+        return fields;
       },
 
     hasMany:
