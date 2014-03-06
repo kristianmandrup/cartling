@@ -42,19 +42,19 @@ function unsubscribe(subscriptionOrListener) {
 
 function configure(config) {
 
-  if (!provider || config.provider !== provider) {
+  if (!provider || (config.provider && config.provider !== provider)) {
     if (provider && loggerSubscription) {
       provider.unsubscribe(loggerSubscription);
       loggerSubscription = null;
     }
     provider = config.provider || require('pubsub-js');
-  }
 
-  if (config.sendToLogger) {
-    logger = require('./logger')();
-    loggerSubscription = subscribe(ROOT, function(msg, data) {
-      logger.log(config.sendToLogger, 'event:', msg, data);
-    });
+    if (config.sendToLogger) {
+      logger = require('./logger')();
+      loggerSubscription = subscribe(ROOT, function(topic, event) {
+        logger.log(config.sendToLogger, 'event(%s): %j', topic, JSON.stringify(event));
+      });
+    }
   }
 
   exports.publish = publish;
@@ -63,7 +63,7 @@ function configure(config) {
 }
 
 module.exports = function(config) {
-  if (config) { configure(config); }
+  if (config) { configure(config.events); }
   return exports;
 };
 
@@ -74,5 +74,6 @@ function Event(subject, op, target) {
 }
 
 function getTopic(type) {
+  if (type === ROOT) { return type; }
   return ROOT + '.' + inflection.pluralize(type);
 }

@@ -3,7 +3,8 @@
 var _ = require('lodash');
 var common;
 var ActivityLog;
-var eventRegistration;
+var cartEventRegistration;
+var itemEventRegistration;
 
 var exports = {
 };
@@ -14,10 +15,10 @@ module.exports = function(config) {
     exports.routes = require('./routes');
 
     ActivityLog = require('./models/activity_log');
-    if (eventRegistration) {
-      common.events.unsubscribe(eventRegistration);
-    }
-    eventRegistration = common.events.subscribe('cart', logEventToUsergrid);
+    if (cartEventRegistration) { common.events.unsubscribe(cartEventRegistration); }
+    if (itemEventRegistration) { common.events.unsubscribe(itemEventRegistration); }
+    cartEventRegistration = common.events.subscribe('cart', logEventToUsergrid);
+    itemEventRegistration = common.events.subscribe('cartitem', logEventToUsergrid);
   }
   return exports;
 };
