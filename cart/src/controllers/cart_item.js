@@ -36,9 +36,6 @@ var controller = {
         },
         function(cart, cb) {
           publish(req.token.user, events.CREATE, item);
-          cb(null, cart);
-        },
-        function(cart, cb) {
           cart.fetchItems(cb);
         }
       ],
@@ -75,9 +72,6 @@ var controller = {
         },
         function(cart, cb) {
           publish(req.token.user, events.DELETE, item);
-          cb(null, cart);
-        },
-        function(cart, cb) {
           cart.fetchItems(cb);
         }
       ],
@@ -118,9 +112,6 @@ var controller = {
         },
         function(cart, cb) {
           publish(req.token.user, events.UPDATE, item);
-          cb(null, cart);
-        },
-        function(cart, cb) {
           cart.fetchItems(cb);
         }
       ],

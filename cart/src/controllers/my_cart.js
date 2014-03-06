@@ -8,11 +8,12 @@ var models = require('../models');
 var Cart = models.Cart;
 var _ = require('lodash');
 var commonController = _.bindAll(new common.usergrid.Controller(Cart));
-var onSuccess = commonController.onSuccess;
+var sendError = commonController.sendError;
 var UsergridError = common.usergrid.UsergridError;
 var publish = events.publish;
 var verify = intents.verifyIntent;
 var type = Cart._usergrid.type;
+var async = require('async');
 
 var OPEN_CRITERIA = { status: 'open' };
 
@@ -23,22 +24,28 @@ var cartController = {
       log.debug('my cart list');
       var me = req.token.user;
       me.findCartsBy(OPEN_CRITERIA, function(err, reply) {
-        onSuccess(err, req, res, reply, function() {
-          res.json(reply);
-        });
+        if (err) { sendError(res, err); }
+        res.json(reply);
       });
     },
 
   create:
     function(req, res) {
-      commonController.create(req, res, function (err, cart) {
-        onSuccess(err, req, res, cart, function() {
+      async.waterfall([
+        function(cb) {
+          commonController.create(req, res, cb);
+        },
+        function(cart, cb) {
           var me = req.token.user;
           me.addCart(cart, function(err) {
-            res.json(cart);
+            cb(err, cart)
           });
+        },
+      ],
+        function(err, cart) {
+          if (err) { sendError(res, err); }
+          res.json(cart);
         });
-      });
     },
 
   update:
@@ -50,22 +57,28 @@ var cartController = {
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
       var me = req.token.user;
-      me.findCartsBy(criteria, 1, function(err, reply) {
-        first(err, req, res, reply, function(res, cart) {
+      async.waterfall([
+        function(cb) {
+          me.findCartsBy(criteria, 1, cb);
+        },
+        function(carts, cb) {
+          if (carts.length === 0) { return cb(make404()); }
+          var cart = carts[0];
           log.debug('%s found %s', type, id);
           verify(me, events.UPDATE, cart, attributes, function(err) {
-            onSuccess(err, req, res, null, function() {
-              cart.update(attributes, function(err, reply) {
-                onSuccess(err, req, res, reply, function() {
-                  log.debug('%s updated %s', type, id);
-                  publish(me, events.UPDATE, cart, attributes);
-                  res.json(reply);
-                });
-              });
-            });
+            cb(err, cart);
           });
+        },
+        function(cart, cb) {
+          cart.update(attributes, cb);
+        }
+      ],
+        function(err, cart) {
+          if (err) { sendError(res, err); }
+          log.debug('%s updated %s', type, id);
+          publish(me, events.UPDATE, cart, attributes);
+          res.json(cart);
         });
-      });
     },
 
   get:
@@ -75,11 +88,20 @@ var cartController = {
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
       var me = req.token.user;
-      me.findCartsBy(criteria, 1, function(err, reply) {
-        first(err, req, res, reply, function(res, cart) {
+      async.waterfall([
+        function(cb) {
+          me.findCartsBy(criteria, 1, cb);
+        },
+        function(carts, cb) {
+          if (carts.length === 0) { return cb(make404()); }
+          cb(null, carts[0]);
+        }
+      ],
+        function(err, cart) {
+          if (err) { sendError(res, err); }
+          log.debug('%s found %s', type, id);
           res.json(cart);
         });
-      });
     },
 
   close:
@@ -90,34 +112,31 @@ var cartController = {
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
       var me = req.token.user;
-      me.findCartsBy(criteria, 1, function(err, reply) {
-        first(err, req, res, reply, function(res, cart) {
+      async.waterfall([
+        function(cb) {
+          me.findCartsBy(criteria, 1, cb);
+        },
+        function(carts, cb) {
+          if (carts.length === 0) { return cb(make404()); }
+          var cart = carts[0];
+          log.debug('%s found %s', type, id);
           verify(me, events.DELETE, cart, null, function(err) {
-            onSuccess(err, req, res, null, function() {
-              cart.close(function(err, reply) {
-                onSuccess(err, req, res, reply, function() {
-                  publish(me, events.DELETE, cart);
-                  res.json(reply);
-                });
-              });
-            });
+            cb(err, cart);
           });
+        },
+        function(cart, cb) {
+          cart.close(cb);
+        }
+      ],
+        function(err, cart) {
+          if (err) { sendError(res, err); }
+          log.debug('%s closed %s', type, id);
+          publish(me, events.DELETE, cart);
+          res.json(cart);
         });
-      });
     }
 };
 module.exports = cartController;
-
-function first(err, req, res, reply, cb) {
-  if (!err) {
-    if(reply.length === 0) {
-      err = make404();
-    } else {
-      reply = reply[0];
-    }
-  }
-  onSuccess(err, req, res, reply, cb);
-}
 
 function make404() {
   var errData = {

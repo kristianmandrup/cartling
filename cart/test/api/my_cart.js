@@ -18,7 +18,7 @@ describe('API', function() {
 
   describe('my cart', function() {
 
-    this.timeout(9910000);
+    this.timeout(10000);
     var user;
     var notMyCart;
     var myCart;

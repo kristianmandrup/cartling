@@ -7,10 +7,11 @@ var models = require('../models');
 var Cart = models.Cart;
 var _ = require('lodash');
 var commonController = _.bindAll(new helpers.common.usergrid.Controller(Cart));
-var onSuccess = commonController.onSuccess;
+var sendError = commonController.sendError;
 var publish = events.publish;
 var intents = helpers.common.intents;
 var verify = intents.verifyIntent;
+var async = require('async');
 
 var cartController = {
 
@@ -20,14 +21,18 @@ var cartController = {
 
   get:
     function(req, res) {
-      commonController.get(req, res, function (err, cart) {
-        onSuccess(err, req, res, cart, function() {
-          cart.getItems(function(err, items) {
-            cart.set('items', items);
-            res.json(cart);
-          });
+      async.waterfall([
+        function(cb) {
+          commonController.get(req, res, cb);
+        },
+        function(cart, cb) {
+          cart.fetchItems(cb);
+        }
+      ],
+        function(err, cart) {
+          if (err) { sendError(res, err); }
+          res.json(cart);
         });
-      });
     },
 
   close:
@@ -36,32 +41,30 @@ var cartController = {
       if (!id) { return res.json(400, 'missing id'); }
       log.debug('cart close %s', id);
       var me = req.token.user;
-      Cart.find(id, function(err, cart) {
-        onSuccess(err, req, res, cart, function() {
-          var target = req.query.merge;
-          verify(me, intents.DELETE, cart, { merge: target}, function(err) {
-            onSuccess(err, req, res, null, function() {
-              if (target) {
-                cart.copyAndClose(target, function(err, reply) {
-                  onSuccess(err, req, res, null, function() {
-                    publish(me, events.DELETE, cart);
-                    publish(me, events.UPDATE, target, reply);
-                    res.json(reply);
-                  });
-                });
-              } else {
-                cart.close(function(err, reply) {
-                  onSuccess(err, req, res, reply, function() {
-                    var event = { op: 'close' };
-                    publish(me, events.DELETE, cart);
-                    res.json(reply);
-                  });
-                });
-              }
-            });
+      var target = req.query.merge;
+      async.waterfall([
+        function(cb) {
+          Cart.find(id, cb);
+        },
+        function(cart, cb) {
+          verify(me, intents.DELETE, cart, { merge: target }, function(err) {
+            cb(err, cart);
           });
+        },
+        function(cart, cb) {
+          if (target) {
+            cart.copyAndClose(target, cb);
+          } else {
+            cart.close(cb);
+          }
+        }
+      ],
+        function(err, cart) {
+          publish(me, events.DELETE, cart);
+          if (target) { publish(me, events.UPDATE, target); }
+          if (err) { sendError(res, err); }
+          res.json(cart);
         });
-      });
     }
 };
 module.exports = cartController;

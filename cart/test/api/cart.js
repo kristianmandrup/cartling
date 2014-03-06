@@ -27,8 +27,8 @@ describe('API', function() {
 
     before(function(done) {
       async.parallel([
-        ActivityLog.deleteAll.bind(ActivityLog),
-        Cart.deleteAll.bind(Cart)
+        Cart.deleteAll.bind(Cart),
+        ActivityLog.deleteAll.bind(ActivityLog)
       ],
         async.each(cartAttributes,
           function(attrs, cb) {
