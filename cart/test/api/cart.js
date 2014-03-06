@@ -26,25 +26,30 @@ describe('API', function() {
     var carts = [];
 
     before(function(done) {
-      ActivityLog.deleteAll(function(err) {
-        Cart.deleteAll(function(err) {
-          async.each(cartAttributes,
-            function(attrs, cb) {
-              Cart.create(attrs, function (err, reply) {
-                should.not.exist(err);
-                carts.push(reply);
-                cb();
-              });
-            },
-            done);
-        });
-      });
+      async.parallel([
+        ActivityLog.deleteAll.bind(ActivityLog),
+        Cart.deleteAll.bind(Cart)
+      ],
+        async.each(cartAttributes,
+          function(attrs, cb) {
+            Cart.create(attrs, function (err, reply) {
+              should.not.exist(err);
+              carts.push(reply);
+              cb();
+            });
+          }, done)
+      );
     });
 
     after(function(done) {
       Cart.deleteAll(function(err) {
         done();
       });
+    });
+
+    afterEach(function(done) {
+      intents.clearAll();
+      done();
     });
 
     it('list all', function(done) {
@@ -55,7 +60,7 @@ describe('API', function() {
           res.status.should.eql(200);
           var entities = res.body;
           entities.should.be.an.Array;
-          entities.length.should.be.greaterThan(2);
+          entities.length.should.equal(2);
           done();
         });
     });
@@ -97,8 +102,8 @@ describe('API', function() {
       intents.before('create', 'cart', function(intent, done) {
         should.not.exist(intent.subject);
         intent.op.should.equal('create');
-        intent.target.should.equal('cart');
-        should.deepEqual(intent.data, attrs);
+        intent.target.get('type').should.equal('cart');
+        intent.target.get('foo').should.equal(attrs.foo);
         var err = new Error('no way, forget it');
         err.statusCode = 401;
         done(err);
@@ -107,7 +112,6 @@ describe('API', function() {
         .post('/carts')
         .send(attrs)
         .end(function(err, res) {
-          intents.clearAll();
           should.not.exist(err);
           res.status.should.eql(401);
           done();
@@ -143,7 +147,6 @@ describe('API', function() {
         .put('/carts/' + carts[1].get('uuid'))
         .send(body)
         .end(function(err, res) {
-          intents.clearAll();
           if (err) { return done(err); }
           res.status.should.eql(501);
           done();
@@ -163,7 +166,6 @@ describe('API', function() {
       request(server)
         .del('/carts/' + uuid)
         .end(function(err, res) {
-          intents.clearAll();
           res.status.should.eql(301);
           done();
         });

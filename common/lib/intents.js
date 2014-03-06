@@ -81,7 +81,7 @@ function verifyIntent(subject, op, target, data, cb) {
       }
     },
     function(err) {
-      cb(err);
+      cb(err, target);
     }
   );
 }

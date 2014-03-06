@@ -18,50 +18,48 @@ describe('API', function() {
 
   describe('my cart', function() {
 
-    this.timeout(10000);
+    this.timeout(9910000);
     var user;
     var notMyCart;
     var myCart;
 
     before(function(done) {
-      ActivityLog.deleteAll(function(err) {
-        User.delete('testuser', function (err, reply) {
-          User.create({ username: 'testuser' }, function (err, reply) {
-            if (err) { return done(err); }
-
-            user = reply;
-            Cart.deleteAll(function(err, reply) {
+      async.parallel([
+        ActivityLog.deleteAll.bind(ActivityLog),
+        Cart.deleteAll.bind(Cart),
+        function(cb) {
+          User.delete('testuser', cb);
+        }
+      ],
+        function(cb) {
+          async.parallel([
+            function(cb) {
+              User.create({ username: 'testuser' }, function(err, reply) {
+                if (err) { return cb(err); }
+                user = reply;
+                cb();
+              });
+            },
+            function(cb) {
               Cart.create({ foo: 'bar' }, function(err, cart) {
                 if (err) { return done(err); }
                 notMyCart = cart;
-                done();
+                cb();
               });
-            });
-          });
-        });
-      });
+            }
+          ], done);
+        }
+      );
     });
 
     after(function(done) {
-      async.waterfall([
+      async.parallel([
+        ActivityLog.deleteAll.bind(ActivityLog),
+        Cart.deleteAll.bind(Cart),
         function(cb) {
-          if (!myCart) { return cb(null, myCartEntity); }
-          var myCartEntity = Cart.new(myCart.uuid);
-          user.removeCart(myCartEntity, function (err, reply) {
-            cb(err, myCartEntity);
-          });
-        },
-        function(myCartEntity, cb) {
-          var carts = [notMyCart];
-          if (myCartEntity) { carts.push(myCartEntity); }
-          async.each(carts,
-            function(cart, cb) {
-              cart.delete(cb);
-            },
-            cb);
+          User.delete('testuser', cb)
         }
-      ],
-        done);
+      ], done);
     });
 
     it('can create', function(done) {
@@ -84,8 +82,8 @@ describe('API', function() {
       intents.before('create', 'cart', function(intent, done) {
         intent.subject.get('username').should.equal('testuser');
         intent.op.should.equal('create');
-        intent.target.should.equal('cart');
-        should.deepEqual(intent.data, attrs);
+        intent.target.get('type').should.equal('cart');
+        intent.target.get('foo').should.equal(attrs.foo);
         var err = new Error('no way, forget it');
         err.statusCode = 401;
         done(err);

@@ -44,9 +44,10 @@ function Controller(UsergridClass) {
     var attributes = req.body;
     var self = this;
     var me = req.token.user;
-    verify(me, intents.CREATE, type, attributes, function(err) {
+    var entity = UsergridClass.new(attributes);
+    verify(me, intents.CREATE, entity, null, function(err) {
       self.onSuccess(err, req, res, null, function() {
-        UsergridClass.create(attributes, function(err, entity) {
+        entity.save(function(err, entity) {
           self.onSuccess(err, req, res, entity, function() {
             log.debug('%s created %s', type, entity.get('uuid'));
             publish(me, intents.CREATE, entity);
@@ -108,20 +109,25 @@ function Controller(UsergridClass) {
   // if err, translates err into an appropriate json response
   this.onSuccess = function(err, req, res, reply, next) {
     if (err) {
-      if (err.isValidationErrors) {
-        log.error(JSON.stringify(err));
-        res.json(400, err);
-      } else if (err.statusCode) {
-        log.error(err.message);
-        res.json(err.statusCode, err);
-      } else {
-        log.error(err.stack);
-        res.json(500, err); // todo: more error handling
-      }
+      this.sendError(res, err);
     } else {
       next(res, reply);
     }
   };
+
+  this.sendError = function(res, err) {
+    if (err.isValidationErrors) {
+      log.error(JSON.stringify(err));
+      res.json(400, err);
+    } else if (err.statusCode) {
+      log.error(err.message);
+      res.json(err.statusCode, err);
+    } else {
+      log.error(err.stack);
+      res.json(500, err); // todo: more error handling
+    }
+  };
+
 }
 
 module.exports = Controller;

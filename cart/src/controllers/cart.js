@@ -42,8 +42,8 @@ var cartController = {
           verify(me, intents.DELETE, cart, { merge: target}, function(err) {
             onSuccess(err, req, res, null, function() {
               if (target) {
-                cart.copyAndClose(target, function(err) {
-                  onSuccess(err, req, res, null, function(res, reply) {
+                cart.copyAndClose(target, function(err, reply) {
+                  onSuccess(err, req, res, null, function() {
                     publish(me, events.DELETE, cart);
                     publish(me, events.UPDATE, target, reply);
                     res.json(reply);

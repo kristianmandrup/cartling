@@ -34,6 +34,18 @@ module.exports = function(app, oauth) {
     usergridMiddleware,
     mycart.close);
 
+  app.post('/my/carts/:id/items',
+    oauth.authenticate('cart'),
+    cartItem.addItem);
+
+  app.put('/my/carts/:id/items/:itemId',
+    oauth.authenticate('cart'),
+    cartItem.updateItem);
+
+  app.delete('/my/carts/:id/items/:itemId',
+    oauth.authenticate('cart'),
+    cartItem.removeItem);
+
 
   // Cart (direct, no context)
 
@@ -58,17 +70,15 @@ module.exports = function(app, oauth) {
     cart.close);
 
 
-  // CartItems
-
-  app.post('/carts/:cartId/items',
+  app.post('/carts/:id/items',
     oauth.authenticate('cart'),
-    cartItem.create);
+    cartItem.addItem);
 
-  app.put('/carts/:cartId/items/:id',
+  app.put('/carts/:id/items/:itemId',
     oauth.authenticate('cart'),
-    cartItem.update);
+    cartItem.updateItem);
 
-  app.delete('/carts/:cartId/items/:id',
+  app.delete('/carts/:id/items/:itemId',
     oauth.authenticate('cart'),
-    cartItem.delete);
+    cartItem.removeItem);
 };
