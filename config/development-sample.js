@@ -1,4 +1,17 @@
+/*
+ 1) Be sure you've run bin/register.
+ 2) Copy this file to config/development.js.
+ 3) Then, edit the CAPITALIZED attributes below (see the usergrid section).
+ */
 'use strict';
+
+var registration;
+try {
+  registration = require('./registration.json');
+} catch (error) {
+  console.log('Please run bin/register to create the oauth application and registration.json file.');
+  throw error;
+}
 
 module.exports = {
 
@@ -58,11 +71,3 @@ module.exports = {
 
   registration: registration
 };
-
-var registration;
-try {
-  registration = require('./registration.json');
-} catch (error) {
-  console.log('Please run bin/register to create the oauth application and registration.json file.');
-  throw error;
-}
