@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
+var inflection = require('inflection');
 var common;
 var ActivityLog;
 var cartEventRegistration;
@@ -28,7 +29,7 @@ function logEventToUsergrid(topic, event) {
     var attrs = { op: event.op };
     if (event.subject) { attrs.username = event.subject.username; }
     if (event.target) {
-      attrs.collection = event.target.get('type');
+      attrs.collection = inflection.pluralize(event.target.get('type'));
       var target = _.omit(event.target._data, ActivityLog.immutableFields());
       attrs.target = JSON.stringify(target);
     }
