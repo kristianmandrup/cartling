@@ -30,14 +30,16 @@ describe('API', function() {
         Cart.deleteAll.bind(Cart),
         ActivityLog.deleteAll.bind(ActivityLog)
       ],
-        async.each(cartAttributes,
-          function(attrs, cb) {
-            Cart.create(attrs, function (err, reply) {
-              should.not.exist(err);
-              carts.push(reply);
-              cb();
-            });
-          }, done)
+        function(cb) {
+          async.each(cartAttributes,
+            function(attrs, cb) {
+              Cart.create(attrs, function (err, reply) {
+                should.not.exist(err);
+                carts.push(reply);
+                cb();
+              });
+            }, done);
+        }
       );
     });
 

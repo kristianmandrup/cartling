@@ -30,7 +30,7 @@ describe('API', function() {
         CartItem.deleteAll.bind(CartItem),
         Cart.deleteAll.bind(Cart)
       ],
-        function(err, reply) {
+        function(cb) {
           Cart.create(CART_ATTRS, function (err, entity) {
             if (err) { return done(err); }
             cart = entity;
@@ -43,7 +43,7 @@ describe('API', function() {
 
     after(function(done) {
       async.parallel([
-//        ActivityLog.deleteAll.bind(ActivityLog),
+        ActivityLog.deleteAll.bind(ActivityLog),
         CartItem.deleteAll.bind(CartItem),
         Cart.deleteAll.bind(Cart)
       ],
