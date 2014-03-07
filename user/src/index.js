@@ -10,7 +10,7 @@ var exports = {
 module.exports = function(config) {
   if (config) {
     common = require('phrixus-common')(config);
-    log = common.log;
+    log = common.logger;
 
     exports.routes = require('./routes');
     exports.User = require('./models/user');
