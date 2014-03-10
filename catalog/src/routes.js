@@ -20,5 +20,5 @@ module.exports = function(app, oauth) {
 
   app.delete('/products/:id',
 //    oauth.authenticate('cart'),
-    product.close);
+    product.delete);
 };

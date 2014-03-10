@@ -42,6 +42,9 @@ cart.routes(app, oauth);
 var user = require('../user')(config);
 user.routes(app, oauth);
 
+var catalog = require('../catalog')(config);
+catalog.routes(app, oauth);
+
 
 // start express //
 app.listen(app.get('port'), function() {
