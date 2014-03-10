@@ -1,0 +1,43 @@
+{
+  "name": "phrixus-catalog",
+  "description": "Just a stubbed-out demo.",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.js",
+  "author": "Scott Ganyo <sganyo@apigee.com>",
+  "contributors": [
+    {
+      "name": "Scott Ganyo",
+      "email": "sganyo@apigee.com",
+      "url": "https://github.com/scottganyo"
+    }
+  ],
+  "homepage": "https://github.com/apigee/phrixus",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/apigee/phrixus.git"
+  },
+  "keywords": [
+    "ecommerce",
+    "volos",
+    "usergrid",
+    "shopping",
+    "cart",
+    "basket"
+  ],
+  "dependencies": {
+    "lodash": "2.4.x",
+    "async": "0.2.x",
+    "phrixus-common": "x.x.x"
+  },
+  "devDependencies": {
+    "should" : "x.x.x",
+    "supertest" : "x.x.x",
+    "mocha" : "x.x.x",
+    "underscore" : "x.x.x",
+    "express": "3.4.x"
+  },
+  "scripts": {
+  }
+}

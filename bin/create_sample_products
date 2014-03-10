@@ -1,0 +1,39 @@
+#!/usr/local/bin/node
+
+'use strict';
+
+var _ = require('lodash');
+var config = require('../config');
+var catalog = require('phrixus-catalog')(config);
+var Product = catalog.models.Product;
+var async = require('async');
+
+var products = [
+  { sku: 1, name: 'Toothpaste',    description: 'Keeps your teeth clean', price: 4.49 },
+  { sku: 2, name: 'Trench coat',   description: 'Keeps your back dry',    price: 749.00 },
+  { sku: 3, name: 'Sandals',       description: 'Keeps your feet safe',   price: 49.89 },
+  { sku: 4, name: 'Deadbolt lock', description: 'Keeps your house safe',  price: 39.99 },
+  { sku: 5, name: 'Silk Neck Tie', description: 'Makes your neck pretty', price: 179.49 }
+];
+
+async.waterfall([
+  function(cb) {
+    Product.deleteAll(cb);
+  },
+  function(result, cb) {
+    async.each(products, function(product, cb) {
+      Product.create(product, cb);
+    },
+      function(err) {
+        cb(err);
+      });
+  }
+],
+  function(err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('done');
+    }
+  }
+);
