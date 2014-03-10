@@ -6,11 +6,13 @@
 # find each other.
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
-# source "$DIR/bin/unlink.sh"
+source "$DIR/bin/unlink"
 
 pushd "$DIR/node_modules"
 
-ln -s ../common phrixus-common
-ln -s ../cart   phrixus-cart
+ln -s ../common  phrixus-common
+ln -s ../cart    phrixus-cart
+ln -s ../user    phrixus-user
+ln -s ../catalog phrixus-catalog
 
 popd
