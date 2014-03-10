@@ -10,40 +10,40 @@ module.exports = function(app, oauth) {
   // My Cart (logged in user's carts)
 
   app.post('/my/carts',
-    oauth.authenticate('cart'),
+    oauth.authenticate('mycart'),
     usergridMiddleware,
     mycart.create);
 
   app.get('/my/carts',
-    oauth.authenticate('cart'),
+    oauth.authenticate('mycart'),
     usergridMiddleware,
     mycart.list);
 
   app.get('/my/carts/:id',
-    oauth.authenticate('cart'),
+    oauth.authenticate('mycart'),
     usergridMiddleware,
     mycart.get);
 
   app.put('/my/carts/:id',
-    oauth.authenticate('cart'),
+    oauth.authenticate('mycart'),
     usergridMiddleware,
     mycart.update);
 
   app.delete('/my/carts/:id',
-    oauth.authenticate('cart'),
+    oauth.authenticate('mycart'),
     usergridMiddleware,
     mycart.close);
 
   app.post('/my/carts/:id/items',
-    oauth.authenticate('cart'),
+    oauth.authenticate('mycart'),
     cartItem.addItem);
 
   app.put('/my/carts/:id/items/:itemId',
-    oauth.authenticate('cart'),
+    oauth.authenticate('mycart'),
     cartItem.updateItem);
 
   app.delete('/my/carts/:id/items/:itemId',
-    oauth.authenticate('cart'),
+    oauth.authenticate('mycart'),
     cartItem.removeItem);
 
 

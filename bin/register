@@ -21,7 +21,7 @@ var devRequest = {
 var appRequest = {
   name: 'Phrixus',
   developerId: undefined,
-  scopes: 'user cart'
+  scopes: 'user cart mycart'
 };
 
 var default_user = {
