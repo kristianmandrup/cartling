@@ -12,8 +12,8 @@ Phrixus is intended to be a REST library that will be integrated into a larger e
 2. edit config/development.js to reflect your usergrid settings
 3. install & start redis
 4. run bin/register
-5. run bin/app.js
-6. start making curl requests!
+5. run bin/app
+6. check the output and start making curl requests!
 
 
 Functionality
@@ -78,4 +78,3 @@ Note: This is stub functionality that may be replaced by an existing user manage
 | GET /user/:id | retrieve a user |
 | PUT /user/:id | update a user |
 | DELETE /user/:id | delete a user |
-
