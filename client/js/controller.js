@@ -16,7 +16,7 @@ function storeController($scope, $routeParams, DataService) {
   $scope.user = DataService.user;
 }
 
-function userController($scope, DataService) {
+function userController($scope, DataService, config) {
 
   $scope.user = DataService.user;
 
@@ -44,9 +44,8 @@ function userController($scope, DataService) {
   $scope.oauthLogin = function(provider) {
 
     $scope.oauthCallback = function(e) {
-//      if (e.origin !== "") return; // todo: origin check
+      if (e.origin !== config.base) { return; }
       var params = e.data;
-      console.log(e);
       if (params.username) {
         console.log('username: ' + params.username);
         console.log('accessToken: ' + params.accessToken);
@@ -57,7 +56,7 @@ function userController($scope, DataService) {
       }
     };
 
-    var url = 'http://localhost:3000/auth/' + provider;
+    var url = config.base + '/auth/' + provider;
     var width = 1020;
     var height = 600;
     var left = (screen.availWidth/2)-(width/2);
@@ -71,7 +70,7 @@ function userController($scope, DataService) {
   };
 }
 
-function oauthCallbackController($location) {
+function oauthCallbackController($location, config) {
 
   var queryString = {};
   $location.absUrl().replace(
@@ -79,7 +78,6 @@ function oauthCallbackController($location) {
     function($0, $1, $2, $3) { queryString[decodeURIComponent($1)] = decodeURIComponent($3); }
   );
 
-  // todo: replace '*' with origin
-  window.opener.postMessage(queryString, "*");
+  window.opener.postMessage(queryString, config.base);
   window.close();
 }
