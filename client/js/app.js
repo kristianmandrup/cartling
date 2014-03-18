@@ -4,6 +4,10 @@
 // the route provides parses the URL and injects the appropriate partial page
 var storeApp = angular.module('PhrixusStore', ['ngRoute', 'phrixus'])
 
+storeApp.constant('config', {
+  base: 'http://localhost:3000' // do NOT include trailing '/'
+});
+
 storeApp.config(['$routeProvider', function($routeProvider) {
   $routeProvider.
     when('/store', {
@@ -25,7 +29,7 @@ storeApp.config(['$routeProvider', function($routeProvider) {
 
 // create a data service that provides the entities that will be shared
 // by all views instead of creating fresh ones for each view.
-storeApp.factory("DataService", function(Phrixus) {
+storeApp.factory("DataService", function(Phrixus, config) {
 
   var user = new User(Phrixus);
 
@@ -48,7 +52,7 @@ storeApp.factory("DataService", function(Phrixus) {
   // Stripe. You can do that here:
   // https://manage.stripe.com/register
   cart.addCheckoutParameters("Stripe", "pk_test_xxxx", {
-      chargeurl: "https://localhost:1234/processStripe.aspx"
+      chargeurl: config.base + "/processStripe"
     }
   );
 

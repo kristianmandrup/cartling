@@ -1,17 +1,18 @@
 'use strict';
 
 var phrixus = angular.module('phrixus', ['ngResource']);
-var baseUrl = 'http://localhost:3000/'; // todo: config
 
 // Cart Resource
-phrixus.factory('Phrixus', function ($resource, $http) {
+phrixus.factory('Phrixus', function ($resource, $http, config) {
+
+  var baseUrl = config.base;
 
   var Cart = $resource(
-    baseUrl + 'my/carts/:id/'
+    baseUrl + '/my/carts/:id/'
   );
 
   var User = $resource(
-    baseUrl + 'users/:id/:verb', {
+    baseUrl + '/users/:id/:verb', {
       createGuest: {
         method: 'POST',
         params: { guest: true }
@@ -20,11 +21,10 @@ phrixus.factory('Phrixus', function ($resource, $http) {
   );
 
   var login = function(username, password) {
-    var url = baseUrl + 'login';
+    var url = baseUrl + '/login';
     var data = {
       username: username,
-      password: password,
-      scope: 'mycart'
+      password: password
     };
     return $http.post(url, data);
   };
