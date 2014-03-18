@@ -43,7 +43,7 @@ function Controller(UsergridClass) {
     if (!req.body) { return res.json(400, 'body required'); }
     var attributes = req.body;
     var self = this;
-    var me = req.token.user;
+    var me = req.user;
     var entity = UsergridClass.new(attributes);
     verify(me, intents.CREATE, entity, null, function(err) {
       self.onSuccess(err, req, res, null, function() {
@@ -68,7 +68,7 @@ function Controller(UsergridClass) {
     attributes.uuid = id;
     log.debug('%s update %s', type, req.body);
     var self = this;
-    var me = req.token.user;
+    var me = req.user;
     verify(me, intents.UPDATE, type, attributes, function(err) { // todo: retrieve the entity instead of just using type?
       self.onSuccess(err, req, res, null, function() {
         UsergridClass.update(attributes, function(err, entity) {
@@ -89,7 +89,7 @@ function Controller(UsergridClass) {
     if (!id) { return res.json(400, 'missing id'); }
     log.debug('%s delete %s', type, id);
     var self = this;
-    var me = req.token.user;
+    var me = req.user;
     var exampleEntity = UsergridClass.new({ uuid: id} ); // todo: hmm. icky.. should I retrieve the entity?
     verify(me, intents.DELETE, exampleEntity, null, function(err) {
       self.onSuccess(err, req, res, null, function() {

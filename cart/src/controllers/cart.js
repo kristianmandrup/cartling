@@ -40,7 +40,7 @@ var cartController = {
       var id = req.params.id;
       if (!id) { return res.json(400, 'missing id'); }
       log.debug('cart close %s', id);
-      var me = req.token.user;
+      var me = req.user;
       var target = req.query.merge;
       async.waterfall([
         function(cb) {

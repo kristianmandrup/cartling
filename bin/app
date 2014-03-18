@@ -6,10 +6,15 @@ var _ = require('lodash');
 var express = require('express');
 var app = express();
 var config = require('../config');
+var querystring = require('querystring');
 
 app.use(express.logger());
 app.use(express.compress());
 app.use(express.json());
+app.use(express.urlencoded());
+
+var passport = require('../lib/passport');
+app.use(passport.initialize());
 
 
 // apply app config //
@@ -17,7 +22,7 @@ app.use(express.json());
 _.each(config.app, function(v,k) { app.set(k,v); });
 
 
-// OAuth //
+// Volos OAuth //
 
 var oauthConfig = config.oauth.config || {};
 oauthConfig.validGrantTypes = [ 'client_credentials', 'authorization_code', 'implicit_grant', 'password' ];
@@ -26,15 +31,46 @@ oauthConfig.beforeCreateToken = beforeCreateToken;
 var oauthCore = config.oauth.provider.create(oauthConfig);
 var oauth = oauthCore.expressMiddleware();
 
-
-// routes //
-
-app.get('/authorize', oauth.handleAuthorize());
-app.post('/accesstoken', oauth.handleAccessToken());
-app.post('/invalidate', oauth.invalidateToken());
-app.post('/refresh', oauth.refreshToken());
+app.get('/volos/authorize', oauth.handleAuthorize());
+app.post('/volos/accesstoken', oauth.handleAccessToken());
+app.post('/volos/invalidate', oauth.invalidateToken());
+app.post('/volos/refresh', oauth.refreshToken());
 //app.use(oauth.authenticate());
 
+
+// authentication routes //
+
+// local login (uses Volos OAuth)
+app.post('/login', function(req, res) {
+  var creds = config.registration.app;
+  req.body.grant_type = 'password';
+  req.body.client_id = creds.key;
+  req.body.client_secret = creds.secret;
+  req.body.scope = 'mycart';
+  oauth.handleAccessToken()(req, res);
+});
+
+// passport routes - allow user creation and login from facebook / twitter
+app.get('/auth/facebook',          passport.authenticate('facebook', { scope: ['email'] }));
+app.get('/auth/facebook/callback', passportCallback('facebook'));
+
+app.get('/auth/google',            passport.authenticate('google', { scope: ['email'] }));
+app.get('/auth/google/callback',   passportCallback('google'));
+
+// requires session support - ick
+//app.get('/auth/twitter',           passport.authenticate('twitter'));
+//app.get('/auth/twitter/callback',  passportCallback('twitter'));
+
+//app.get('/auth/volos',          passport.authenticate('volos', { scope: ['mycart'] }));
+//app.get('/auth/volos/callback', passport.authenticate('volos', { successRedirect: '/oauth2callback.html',
+//                                                                 failureRedirect: '/oauth2callback.html' }));
+
+app.get('/auth/local', passport.authenticate('local'));
+
+
+// application routes (uses volos oauth) //
+
+app.use(express.static(__dirname + '/../client'));
 
 var cart = require('../cart')(config);
 cart.routes(app, oauth);
@@ -47,21 +83,55 @@ catalog.routes(app, oauth);
 
 
 // start express //
+
 app.listen(app.get('port'), function() {
   printInstructions();
 });
 module.exports = app;
 
 
+// utility & integration functions //
+
+function passportCallback(provider) {
+  return function(req, res, next) {
+    passport.authenticate(provider, function(err, user) {
+      if (err) { return next(err); }
+      if (!user) { return res.redirect(oauthCallback); }
+      var username = user.get('username');
+      getVolosToken(username, function(err, reply) { // we'll use a volos token, not provider's
+        if (err) { return next(err); }
+        var params = { username: username, accessToken: reply.access_token };
+        var qs = querystring.stringify(params);
+        return res.redirect('/oauth2callback.html?' + qs);
+      });
+    })(req, res, next);
+  };
+}
+
+function getVolosToken(username, cb) {
+  var creds = config.registration.app;
+  var body = {
+    grant_type: 'client_credentials',
+    client_id: creds.key,
+    client_secret: creds.secret,
+    username: username, // for reference - we'll store it in the attributes
+    scope: 'mycart'
+  };
+  oauthCore.generateToken(body, cb);
+}
+
 // store the username with the token
 function beforeCreateToken(parsedBody, options, next) {
-  if (parsedBody.grant_type === 'password') {
+  if (parsedBody.username) {
     var attributes = { username: parsedBody.username };
     options.attributes = attributes;
   }
   next();
 }
 
+
+// todo: create a configurable integration point for external user management
+// todo: include requested scopes and return granted ones?
 // use Usergrid as the user store and let it check the passwords
 function checkPassword(username, password, cb) {
   user.User.getAccessToken(username, password, cb);

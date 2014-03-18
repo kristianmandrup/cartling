@@ -27,7 +27,7 @@ var controller = {
         },
         function(cart, cb) {
           item = CartItem.new(itemAttrs);
-          verify(req.token.user, intents.CREATE, item, { cart: cart }, function(err) {
+          verify(req.user, intents.CREATE, item, { cart: cart }, function(err) {
             cb(err, cart);
           });
         },
@@ -35,7 +35,7 @@ var controller = {
           cart.addItem(item, cb);
         },
         function(cart, cb) {
-          publish(req.token.user, events.CREATE, item);
+          publish(req.user, events.CREATE, item);
           cart.fetchItems(cb);
         }
       ],
@@ -63,7 +63,7 @@ var controller = {
           });
         },
         function(cart, cb) {
-          verify(req.token.user, intents.DELETE, item, { cart: cart }, function(err) {
+          verify(req.user, intents.DELETE, item, { cart: cart }, function(err) {
             cb(err, cart);
           });
         },
@@ -71,7 +71,7 @@ var controller = {
           cart.deleteItem(itemId, cb);
         },
         function(cart, cb) {
-          publish(req.token.user, events.DELETE, item);
+          publish(req.user, events.DELETE, item);
           cart.fetchItems(cb);
         }
       ],
@@ -101,7 +101,7 @@ var controller = {
           });
         },
         function(cart, cb) {
-          verify(req.token.user, intents.UPDATE, item, itemAttrs, function(err) {
+          verify(req.user, intents.UPDATE, item, itemAttrs, function(err) {
             cb(err, cart);
           });
         },
@@ -111,7 +111,7 @@ var controller = {
           });
         },
         function(cart, cb) {
-          publish(req.token.user, events.UPDATE, item);
+          publish(req.user, events.UPDATE, item);
           cart.fetchItems(cb);
         }
       ],
@@ -126,7 +126,7 @@ module.exports = controller;
 // scopes to logged in user as appropriate - based on url
 function findCart(req, cartId, cb) {
   if (req.url.indexOf('/my/') > 0) {
-    var me = req.token.user;
+    var me = req.user;
     me.findCart(cartId, cb);
   } else {
     Cart.find(cartId, cb);

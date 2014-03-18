@@ -5,7 +5,7 @@ var user = require('./controllers/user');
 module.exports = function(app, oauth) {
 
   app.post('/users',
-    oauth.authenticate('user'),
+//    oauth.authenticate('user'),
     user.create);
 
   app.get('/users',

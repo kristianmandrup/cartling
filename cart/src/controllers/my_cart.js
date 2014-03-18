@@ -22,7 +22,7 @@ var cartController = {
   list:
     function(req, res) {
       log.debug('my cart list');
-      var me = req.token.user;
+      var me = req.user;
       me.findCartsBy(OPEN_CRITERIA, function(err, reply) {
         if (err) { sendError(res, err); }
         res.json(reply);
@@ -36,7 +36,7 @@ var cartController = {
           commonController.create(req, res, cb);
         },
         function(cart, cb) {
-          var me = req.token.user;
+          var me = req.user;
           me.addCart(cart, function(err) {
             cb(err, cart)
           });
@@ -56,7 +56,7 @@ var cartController = {
       log.debug('%s update %j', type, req.body);
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
-      var me = req.token.user;
+      var me = req.user;
       async.waterfall([
         function(cb) {
           me.findCartsBy(criteria, 1, cb);
@@ -87,7 +87,7 @@ var cartController = {
       if (!id) { return res.json(400, 'missing id'); }
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
-      var me = req.token.user;
+      var me = req.user;
       async.waterfall([
         function(cb) {
           me.findCartsBy(criteria, 1, cb);
@@ -111,7 +111,7 @@ var cartController = {
       log.debug('%s close %s', type, id);
       var criteria = { _id: id };
       _.assign(criteria, OPEN_CRITERIA);
-      var me = req.token.user;
+      var me = req.user;
       async.waterfall([
         function(cb) {
           me.findCartsBy(criteria, 1, cb);
