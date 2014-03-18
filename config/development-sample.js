@@ -20,7 +20,6 @@ module.exports = {
   },
 
   // https://apigee.com/usergrid/#!/getting-started/setup
-  // https://apigee.com/usergrid/#!/getting-started/setup
   usergrid : {
     url: 'https://api.usergrid.com',
     orgName: 'ORGANIZATION',
@@ -67,6 +66,29 @@ module.exports = {
     management: require('volos-management-redis'),
     provider: require('volos-oauth-redis')
 //    config: { }
+  },
+
+  passport: {
+    // https://developers.facebook.com/x/apps/594397020630491/dashboard/
+    facebook: {
+      clientID: '',
+      clientSecret: '',
+      callbackURL: '/auth/facebook/callback'
+    },
+
+    // https://dev.twitter.com/apps/5739904/show
+    twitter: {
+      consumerKey: '',
+      consumerSecret: '',
+      callbackURL: '/auth/twitter/callback'
+    },
+
+    // https://cloud.google.com/console/project/apps~phrixus-test/apiui/credential
+    google: {
+      clientID: '',
+      clientSecret: '',
+      callbackURL: '/auth/google/callback'
+    }
   },
 
   registration: registration
