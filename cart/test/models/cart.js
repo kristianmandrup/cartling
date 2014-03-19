@@ -30,22 +30,11 @@ describe('Models', function() {
           });
         },
         function (cart, cb) {
-          if (cart) {
-            cart.getItems(function (err, items) {
-              async.each(items,
-                function (item, cb) {
-                  cart.removeItem(item, function (err, reply) {
-                    item.delete(cb);
-                  });
-                },
-                function(err) {
-                  cart.delete(cb);
-                }
-              );
-            });
-          } else {
-            cb();
-          }
+          if (!cart) { return cb(); }
+          cart.deleteAllItems(function(err) {
+              cart.delete(cb);
+            }
+          );
         },
       ],
         function (err, reply) {
@@ -58,11 +47,12 @@ describe('Models', function() {
     });
 
     after(function(done) {
-      if (cart) {
+      if (!cart) { return done(); }
+      cart.deleteAllItems(function(err) {
         cart.delete(function(err) {
           done();
         });
-      }
+      });
     });
 
 
@@ -71,11 +61,10 @@ describe('Models', function() {
       var cartItem;
 
       after(function(done) {
-        if (cartItem) {
-          cartItem.delete(function(err) {
-            done();
-          });
-        }
+        if (!cartItem) { return done(); }
+        cartItem.delete(function(err) {
+          done();
+        });
       });
 
       it('should be able to add a CartItem', function(done) {
@@ -188,6 +177,53 @@ describe('Models', function() {
         });
       });
 
+      describe('raw items', function() {
+
+        afterEach(function(done) {
+          cart.deleteAllItems(done);
+        });
+
+        it('should save and retrieve ok', function(done) {
+
+          var itemData = [
+            { sku: 123, quantity: 1 },
+            { sku: 234, quantity: 2 }
+          ];
+
+          cart.set('items', itemData);
+          cart.save(function(err) {
+            should.not.exist(err);
+            cart.fetchItems(function(err, cart) {
+              should.not.exist(err);
+              var items = cart.get('items');
+              should.exist(items);
+              items.length.should.equal(2);
+              CartItem.isInstance(items[0]).should.be.true;
+              CartItem.isInstance(items[1]).should.be.true;
+              done();
+            });
+          });
+        });
+
+        it('should fail if any items are invalid', function(done) {
+
+          var itemData = [
+            { sku: 123, quantity: 1 },
+            { quantity: 2 }
+          ];
+
+          cart.set('items', itemData);
+          cart.save(function(err) {
+            should.exist(err);
+            err.hasErrors().should.be.true;
+            err.getErrors('sku').should.be.an.Array;
+            err.getErrors('sku').length.should.equal(1);
+            err.getErrors('sku')[0].should.equal('sku is required');
+            done();
+          });
+        });
+
+      });
     });
   });
 });

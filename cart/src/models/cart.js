@@ -29,12 +29,9 @@ function Cart() {
   this.copyItems = function(targetCart, cb) {
     this.getItems(function (err, items) {
       async.each(items,
-        function(item, cb2) {
-          var newItemAttrs = _.omit(item._data, CartItem.immutableFields(true));
-          CartItem.create(newItemAttrs, function (err, newItem) {
-            if (err) { return cb2(err); }
-            targetCart.addItem(newItem, cb2);
-          });
+        function(item, cb) {
+          var newItemAttrs = _.omit(item._data, CartItem.immutableFields(true)); // create clone w/o uuid, etc
+          targetCart.addItem(CartItem.new(newItemAttrs), cb);
         },
         cb);
     });

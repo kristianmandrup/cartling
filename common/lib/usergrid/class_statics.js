@@ -28,7 +28,7 @@ var ClassStatics = function(client) {
 
     isInstance:
       function(instance) {
-        return instance instanceof this._usergrid.constructor;
+        return instance._class === this;
       },
 
     defaults:

@@ -25,7 +25,6 @@ describe('Models', function() {
         User.create(user_attrs, function(err, reply) {
           if (err) { return done(err); }
           user = reply;
-
           Cart.delete(cart_attrs.name, function(err, reply) {
             done();
           });
@@ -34,11 +33,10 @@ describe('Models', function() {
     });
 
     after(function(done) {
-      if (user) {
-        user.delete(function(err) {
-          done();
-        });
-      }
+      if (!user) { return done(); }
+      user.delete(function(err, reply) {
+        done();
+      });
     });
 
     describe('hasMany Carts', function() {
@@ -46,11 +44,10 @@ describe('Models', function() {
       var cart;
 
       after(function(done) {
-        if (cart) {
-          cart.delete(function(err) {
-            done();
-          });
-        }
+        if (!cart) { return done(); }
+        cart.delete(function(err, reply) {
+          done();
+        });
       });
 
       it('should be able to add a Cart', function(done) {

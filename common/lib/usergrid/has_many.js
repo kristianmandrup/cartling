@@ -75,11 +75,13 @@ var addConnectionFunctions = function(owner, hasMany) {
         function(cb) {
           owner.getConnectedEntities(name, Class, function(err, entities) {
             if (err) { return cb(err); }
-            _.each(entities, function(entity) {
-              entity.delete(function(err) {
+            async.each(entities, // todo: do by query instead
+              function(entity, cb) {
+                entity.delete(cb);
+              }, function(err) {
                 cb(err, owner);
-              });
-            });
+              }
+            );
           });
         },
 
