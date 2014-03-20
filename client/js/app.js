@@ -31,13 +31,18 @@ storeApp.config(['$routeProvider', function($routeProvider) {
 // by all views instead of creating fresh ones for each view.
 storeApp.factory("DataService", function(Phrixus, config) {
 
-  var user = new User(Phrixus);
+  var dataService = {};
+
+  var user = new User(Phrixus, dataService);
+  dataService.user = user;
 
   // create store
   var store = new Store();
+  dataService.store = store;
 
   // create shopping cart
   var cart = new ShoppingCart("PhrixusStore", user, Phrixus);
+  dataService.cart = cart;
 
   // enable PayPal checkout
   // note: the second parameter identifies the merchant; in order to use the
@@ -56,12 +61,8 @@ storeApp.factory("DataService", function(Phrixus, config) {
     }
   );
 
-  // return data object with store and cart
-  return {
-    store: store,
-    cart: cart,
-    user: user
-  };
+  // return data object
+  return dataService;
 });
 
 // add some handy stuff to $rootScope

@@ -23,9 +23,19 @@ var cartController = {
     function(req, res) {
       log.debug('my cart list');
       var me = req.user;
-      me.findCartsBy(OPEN_CRITERIA, function(err, reply) {
+      var criteria = req.query || {};
+      _.assign(criteria, OPEN_CRITERIA);
+      me.findCartsBy(criteria, function(err, carts) {
         if (err) { sendError(res, err); }
-        res.json(reply);
+        async.each(carts,
+          function(cart, cb) {
+            cart.fetchItems(cb);
+          },
+          function(err) {
+            if (err) { sendError(res, err); }
+            res.json(carts);
+          }
+        );
       });
     },
 
@@ -95,6 +105,9 @@ var cartController = {
         function(carts, cb) {
           if (carts.length === 0) { return cb(make404()); }
           cb(null, carts[0]);
+        },
+        function(cart, cb) {
+          cart.fetchItems(cb);
         }
       ],
         function(err, cart) {

@@ -8,9 +8,10 @@ phrixus.factory('Phrixus', function ($resource, $http, config) {
   var baseUrl = config.base;
 
   var Cart = $resource(
-    baseUrl + '/my/carts/:id/'
+    baseUrl + '/my/carts/:id'
   );
 
+  // todo: utilize guest users
   var User = $resource(
     baseUrl + '/users/:id/:verb', {
       createGuest: {
@@ -29,6 +30,11 @@ phrixus.factory('Phrixus', function ($resource, $http, config) {
     return $http.post(url, data);
   };
 
+  var getUserCart = function(cartName) {
+    var url = baseUrl + '/my/carts?cartName=' + cartName;
+    return $http.get(url);
+  };
+
   // todo: is this the best way to deal with this?
   var setAccessTokenHeader = function(access_token) {
     if (access_token) {
@@ -42,6 +48,7 @@ phrixus.factory('Phrixus', function ($resource, $http, config) {
     Cart: Cart,
     User: User,
     login: login,
+    getUserCart: getUserCart,
     setAccessTokenHeader: setAccessTokenHeader
   };
 });

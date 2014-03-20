@@ -5,6 +5,7 @@ var AUTH_CLIENT_ID = Usergrid.AUTH_CLIENT_ID;
 var AUTH_APP_USER = Usergrid.AUTH_APP_USER;
 var request = require('request');
 var _ = require('lodash');
+var inflection = require('inflection');
 
 // changed to return the statusCode with the error
 Usergrid.client.prototype.request = function (options, callback) {
@@ -129,6 +130,7 @@ Usergrid.entity.prototype.destroy = function (callback) {
 };
 
 // changed to allow passing options - actually, just takes the 'qs' key for now
+// also changes to pluralize the type
 Usergrid.entity.prototype.getConnections = function (connection, opts, callback) {
 
   if (_.isFunction(opts)) { callback = opts; opts = undefined; }
@@ -136,7 +138,7 @@ Usergrid.entity.prototype.getConnections = function (connection, opts, callback)
   var self = this;
 
   //connector info
-  var connectorType = this.get('type');
+  var connectorType = inflection.pluralize(this.get('type'));
   var connector = this.getEntityId(this);
   if (!connector) {
     if (typeof(callback) === 'function') {

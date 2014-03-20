@@ -1,8 +1,31 @@
 'use strict';
 
-function User(Phrixus) {
+function User(Phrixus, DataService) {
   this.Phrixus = Phrixus;
+  this.DataService = DataService;
+
+  this.load();
+
+  var self = this;
+  $(window).unload(function () {
+    self.save();
+  });
 }
+
+User.prototype.save = function() {
+  localStorage.user = JSON.stringify({ username: this.username, accessToken: this.accessToken });
+};
+
+User.prototype.load = function() {
+  var user = localStorage ? localStorage.user : null;
+  if (user) {
+    try {
+      user = JSON.parse(user);
+      this.setUsername(user.username);
+      this.setAccessToken(user.accessToken);
+    } catch (err) {}
+  }
+};
 
 User.prototype.setUsername = function(username) {
   this.username = username;
@@ -15,6 +38,7 @@ User.prototype.setPassword = function(password) {
 User.prototype.setAccessToken = function(accessToken) {
   this.accessToken = accessToken;
   this.Phrixus.setAccessTokenHeader(accessToken);
+  this.DataService.cart.loadItemsFromPhrixus();
 };
 
 User.prototype.login = function() {
@@ -36,6 +60,7 @@ User.prototype.login = function() {
 
 User.prototype.logout = function() {
   this.setAccessToken(null);
+  this.DataService.cart.clearItems();
 };
 
 User.prototype.isLoggedIn = function() {
