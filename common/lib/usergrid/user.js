@@ -14,12 +14,24 @@ UserClass.validates({
   username: [ validators.required ]
 });
 
-  // cb reply returns token
-UserClass.getAccessToken =
-    function(username, password, cb) {
-      var u = this.new({ username: username});
-      u.getAccessToken(password, cb);
-    };
+// cb reply returns token
+UserClass.getAccessToken = function(username, password, cb) {
+  var u = this.new({ username: username});
+  u.getAccessToken(password, cb);
+};
+
+UserClass.findOrCreate = function(criteria, cb) {
+  var self = this;
+  var findCriteria = _.omit(criteria, 'password');
+  this.first(findCriteria, function(err, entity) {
+    if (err) { return cb(err); }
+    if (entity) {
+      cb(null, entity);
+    } else {
+      self.create(criteria, cb);
+    }
+  });
+};
 
 function User() {
 
