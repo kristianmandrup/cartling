@@ -3,13 +3,14 @@
 //----------------------------------------------------------------
 // shopping cart
 //
-function ShoppingCart(cartName, user, Phrixus) {
+function ShoppingCart(cartName, dataService, Phrixus) {
   this.cartName = cartName;
   this.clearCart = false;
   this.checkoutParameters = {};
   this.items = [];
 
-  this.user = user;
+  this.user = dataService.user;
+  this.store = dataService.store;
   this.Phrixus = Phrixus;
 
   // load items from local storage when initializing
@@ -26,17 +27,26 @@ function ShoppingCart(cartName, user, Phrixus) {
   });
 }
 
-// load items from local storage
 ShoppingCart.prototype.loadItems = function () {
+  if (this.user.isLoggedIn()) {
+    this.loadItemsFromPhrixus();
+  } else {
+    this.loadLocalStorageItems();
+  }
+}
 
-  var items = localStorage != null ? localStorage[this.cartName + "_items"] : null;
-  if (items != null && JSON != null) {
+// load items from local storage
+ShoppingCart.prototype.loadLocalStorageItems = function () {
+
+  var items = localStorage !== null ? localStorage[this.cartName + "_items"] : null;
+  if (items !== null && JSON !== null) {
     try {
       items = JSON.parse(items);
       for (var i = 0; i < items.length; i++) {
-        var item = Store.getProduct(items[i].sku);
-        if (item.sku != null && item.name != null && item.price != null && item.quantity != null) {
-          item = new CartItem(item.sku, item.name, item.price, item.quantity);
+        var item = items[i];
+        var product = this.store.getProduct(items[i].sku);
+        if (product) {
+          item = new CartItem(item.sku, product.name, product.price, item.quantity);
           this.items.push(item);
         }
       }
@@ -61,16 +71,18 @@ ShoppingCart.prototype.loadItemsFromPhrixus = function () {
             var item = cart.items[i];
             self.addItemNoSave(item.sku, item.itemName, item.price, item.quantity);
           }
+          self.saveItems();
         }
       },
       function(failure) {
         console.log(failure);
+        this.loadLocalStorageItems(); // fallback
       }
     );
   }
 };
 
-// save items to local storage
+// save items to local storage & usergrid
 ShoppingCart.prototype.saveItems = function() {
 
   if (localStorage && JSON) {

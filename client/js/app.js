@@ -41,7 +41,7 @@ storeApp.factory("DataService", function(Phrixus, config) {
   dataService.store = store;
 
   // create shopping cart
-  var cart = new ShoppingCart("PhrixusStore", user, Phrixus);
+  var cart = new ShoppingCart("PhrixusStore", dataService, Phrixus);
   dataService.cart = cart;
 
   // enable PayPal checkout
