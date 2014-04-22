@@ -47,6 +47,7 @@ Usergrid.client.prototype.request = function (options, callback) {
     qs: qs
   };
   request(callOptions, function (err, r, data) {
+    if (err) { callback(err, data); }
     if (self.buildCurl) {
       options.uri = r.request.uri.href;
       self.buildCurlCall(options);
