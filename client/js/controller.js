@@ -47,8 +47,6 @@ function userController($scope, DataService, config) {
       if (e.origin !== config.base) { return; }
       var params = e.data;
       if (params.username) {
-        console.log('username: ' + params.username);
-        console.log('accessToken: ' + params.accessToken);
         $scope.user.setUsername(params.username);
         $scope.user.setAccessToken(params.accessToken);
         $scope.$apply();
