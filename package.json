@@ -51,5 +51,6 @@
     "underscore" : "x.x.x"
   },
   "scripts": {
+    "install": "bin/link"
   }
 }
