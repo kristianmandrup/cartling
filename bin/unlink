@@ -6,9 +6,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
 
 pushd "$DIR/node_modules"
 
-rm phrixus-common
-rm phrixus-cart
-rm phrixus-user
-rm phrixus-catalog
+rm -f phrixus-common
+rm -f phrixus-cart
+rm -f phrixus-user
+rm -f phrixus-catalog
 
 popd
