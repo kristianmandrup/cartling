@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Run after running 'npm install'. Instead of using 'node link' to install the
 # various modules of Volos as global modules, this will simply symlink the local

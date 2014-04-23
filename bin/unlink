@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Used by link.sh. You may also exec directly to remove node_modules symlinks to volos modules.
 
