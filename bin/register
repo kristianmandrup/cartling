@@ -1,8 +1,7 @@
-#!/usr/local/bin/node
+#!/usr/bin/env node
+'use strict';
 
 // register an app to use phrixus //
-
-'use strict';
 
 var config = require('../config');
 var oauthConfig = config.oauth.config || {};

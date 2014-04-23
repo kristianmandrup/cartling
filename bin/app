@@ -1,5 +1,4 @@
-#!/usr/local/bin/node
-
+#!/usr/bin/env node
 'use strict';
 
 var _ = require('lodash');
@@ -7,6 +6,21 @@ var express = require('express');
 var app = express();
 var config = require('../config');
 var querystring = require('querystring');
+
+// create Volos quota
+var memoryQuota = require('volos-quota-redis');
+var quota = memoryQuota.create({
+  timeUnit: 'minute',
+  interval: 1,
+  allow: 2
+});
+
+// create Volos cache
+var memoryCache = require('volos-cache-redis');
+var cache = memoryCache.create('cache', {
+  ttl: 1000
+});
+app.use(cache.expressMiddleware());
 
 app.use(express.logger());
 app.use(express.compress());
