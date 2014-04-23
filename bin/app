@@ -61,10 +61,6 @@ app.get('/auth/google/callback',   passportCallback('google'));
 //app.get('/auth/twitter',           passport.authenticate('twitter'));
 //app.get('/auth/twitter/callback',  passportCallback('twitter'));
 
-//app.get('/auth/volos',          passport.authenticate('volos', { scope: ['mycart'] }));
-//app.get('/auth/volos/callback', passport.authenticate('volos', { successRedirect: '/oauth2callback.html',
-//                                                                 failureRedirect: '/oauth2callback.html' }));
-
 app.get('/auth/local', passport.authenticate('local'));
 
 
