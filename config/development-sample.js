@@ -5,14 +5,6 @@
  */
 'use strict';
 
-var registration;
-try {
-  registration = require('./registration.json');
-} catch (error) {
-  console.log('Please run bin/register to create the oauth application and registration.json file.');
-  throw error;
-}
-
 module.exports = {
 
   app: {
