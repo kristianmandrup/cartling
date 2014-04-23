@@ -18,7 +18,7 @@ However, the quickest way to start playing with the system is to see the librari
 example web-based ecommerce app:
 
 1. copy config/development-sample.js to config/development.js
-2. edit config/development.js to reflect your usergrid settings
+2. edit config/development.js to reflect your usergrid settings (and optionally, passport settings)
 3. install & start redis
 4. run `npm install` (this will link the phrixus modules in this repo locally)
 5. run `bin/register`
