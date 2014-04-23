@@ -65,17 +65,17 @@ app.post('/login', function(req, res) {
 });
 
 // passport routes - allow user creation and login from facebook / twitter
-app.get('/auth/facebook',          passport.authenticate('facebook', { scope: ['email'] }));
-app.get('/auth/facebook/callback', passportCallback('facebook'));
+app.get('/auth/facebook',                     passport.authenticate('facebook', { scope: ['email'] }));
+app.get(config.passport.facebook.callbackURL, passportCallback('facebook'));
 
-app.get('/auth/google',            passport.authenticate('google', { scope: ['email'] }));
-app.get('/auth/google/callback',   passportCallback('google'));
+app.get('/auth/google',                       passport.authenticate('google', { scope: ['email'] }));
+app.get(config.passport.google.callbackURL,   passportCallback('google'));
 
 // requires session support - ick
 //app.get('/auth/twitter',           passport.authenticate('twitter'));
 //app.get('/auth/twitter/callback',  passportCallback('twitter'));
 
-app.get('/auth/local', passport.authenticate('local'));
+//app.get('/auth/local', passport.authenticate('local'));
 
 
 // application routes (uses volos oauth) //

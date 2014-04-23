@@ -2,14 +2,12 @@
 
 // winston is the baseline for our logging API
 var logger;
-var file = 'phrixus.log';
+var config = {};
 
-function configure(config) {
+function configure(options) {
+  if (config) { config = options; }
   if (config.provider) {
     logger = config.provider;
-  }
-  if (config.file) {
-    file = config.file;
   }
 }
 
@@ -20,20 +18,21 @@ function getLogger() {
 
 function createLogger() {
   var winston = require('winston');
-  logger = new (winston.Logger)({
-    transports: [
-      new (winston.transports.Console)({
-        colorize: true,
-        timestamp: true,
-        level: 'debug'
-      }),
-      new (winston.transports.File)({
-        filename: file,
-        timestamp: true,
-        level: 'info'
-      })
-    ]
-  });
+  var transports = [
+    new (winston.transports.Console)({
+      colorize: true,
+      timestamp: true,
+      level: config.level
+    })
+  ];
+  if (config.file) {
+    transports.push(new (winston.transports.File)({
+      filename: config.file.name,
+      timestamp: true,
+      level: config.file.level ? config.file.level : config.level
+    }));
+  }
+  logger = new (winston.Logger)({ transports: transports });
 }
 
 module.exports = function(config) {

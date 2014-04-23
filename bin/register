@@ -10,23 +10,10 @@ var User = require('../user')(config).User;
 var fs = require('fs');
 var path = require('path');
 
-var devRequest = {
-  firstName: 'Phrixus',
-  lastName: 'Developer',
-  email: 'phrixus@developer.com',
-  userName: 'phrixus'
-};
-
-var appRequest = {
-  name: 'Phrixus',
-  developerId: undefined,
-  scopes: 'user cart mycart'
-};
-
-var default_user = {
-  username: 'default',
-  password: 'password'
-};
+var devRequest = config.register.developer;
+var appRequest = config.register.application;
+appRequest.scopes = 'user cart mycart';
+var default_user = config.register.user;
 
 console.log('Creating developer %s', devRequest.userName);
 management.createDeveloper(devRequest , function(err, developer) {
@@ -56,7 +43,6 @@ management.createDeveloper(devRequest , function(err, developer) {
         },
         defaultUser: default_user
       };
-
 
       var regFile = path.join(path.dirname(module.filename), '../config/registration.json');
       fs.writeFile(regFile, JSON.stringify(registration), function(err, reply) {

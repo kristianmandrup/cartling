@@ -5,12 +5,18 @@
  */
 'use strict';
 
+// Copy this file to config/development.js, config/test.js, or config/production.js as needed for your environments.
+// ** The usergrid section is REQUIRED. **
+// The passport section is required in order to use the client Facebook and Google login buttons.
+
 module.exports = {
 
   app: {
+    // note: if you change the port, you must change the port in phrixus/client/js/app.js
     port: (process.env.PORT || 3000)
   },
 
+  // !! you MUST set url, orgName, appName, clientId, and clientSecret !!
   // https://apigee.com/usergrid/#!/getting-started/setup
   usergrid : {
     url: 'https://api.usergrid.com',
@@ -20,6 +26,23 @@ module.exports = {
     clientSecret: 'CLIENT_SECRET',
     logging: false,
     buildCurl: false
+  },
+
+  // !! if passport is not configured, the Facebook and Google login buttons in the web client will not work !!
+  passport: {
+    // see: https://developers.facebook.com/apps/
+    facebook: {
+      clientID: 'CLIENT_ID',
+      clientSecret: 'CLIENT_SECRET',
+      callbackURL: '/auth/facebook/callback'
+    },
+
+    // see: https://console.developers.google.com/project
+    google: {
+      clientID: 'CLIENT_ID',
+      clientSecret: 'CLIENT_SECRET',
+      callbackURL: '/auth/google/callback'
+    }
   },
 
   /*
@@ -36,50 +59,53 @@ module.exports = {
   /*
    default logger is winston (https://github.com/flatiron/winston)
    by default, logs to console w/ coloring
-   specify "file: <filename>" to send output to a file (JSON format)
-   or specify "provider: <provider" to change/configure provider
+   specify "provider: <provider>" to set a custom provider (javascript object)
+     (if this is done, it is assumed to be configured and all other configuration will be skipped)
+   otherwise, you may specify:
+     "level: <level>" to set the baseline level for console and file output
+     "file: { name: <filename>, level: <level> }" to send output to a file (JSON format)
    */
   logger: {
-//    provider: winston
-//    file: '/Users/sganyo/dev/phrixus/log/phrixus.log'
+    level: 'debug'
+//    file: {
+//      name: '/var/log/phrixus.log',
+//      level: 'info'
+//    }
   },
 
   /*
    default events provider is pubsub-js (https://github.com/mroderick/PubSubJS)
-   specify "sendToLogger: <info>" to send all events to the logger at the specified level (omit to skip)
-   specify "provider: <provider>" to change/configure provider
+   specify "sendToLogger: <info>" to send all events to the logger at the specified level (omit to skip logging)
+   specify "provider: <provider>" to set a provider (javascript object)
    */
   events: {
     sendToLogger: 'debug'
-//    provider: pubsub-js
   },
 
+  /*
+   default provider is redis, but you could use any volos provider (eg. apigee)
+   */
   oauth: {
     management: require('volos-management-redis'),
     provider: require('volos-oauth-redis')
-//    config: { }
   },
 
-  passport: {
-    // https://developers.facebook.com/x/apps/594397020630491/dashboard/
-    facebook: {
-      clientID: '',
-      clientSecret: '',
-      callbackURL: '/auth/facebook/callback'
+  /*
+   Set to custom values to control the create actions of the bin/register script.
+   */
+  register: {
+    developer: {
+      firstName: 'Phrixus',
+      lastName: 'Developer',
+      email: 'phrixus@developer.com',
+      userName: 'phrixus'
     },
-
-    // https://dev.twitter.com/apps/5739904/show
-    twitter: {
-      consumerKey: '',
-      consumerSecret: '',
-      callbackURL: '/auth/twitter/callback'
+    application: {
+      name: 'Phrixus'
     },
-
-    // https://cloud.google.com/console/project/apps~phrixus-test/apiui/credential
-    google: {
-      clientID: '',
-      clientSecret: '',
-      callbackURL: '/auth/google/callback'
+    user: {
+      username: 'default',
+      password: 'password'
     }
   }
 };
