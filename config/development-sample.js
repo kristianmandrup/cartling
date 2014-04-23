@@ -81,7 +81,5 @@ module.exports = {
       clientSecret: '',
       callbackURL: '/auth/google/callback'
     }
-  },
-
-  registration: registration
+  }
 };
