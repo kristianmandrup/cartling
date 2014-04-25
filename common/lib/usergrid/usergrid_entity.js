@@ -55,11 +55,15 @@ var UsergridEntity = function() {
               var functionName = 'deleteAll' + inflection.camelize(connection.name);
               self[functionName].call(self, cb);
             },
-            function(owner, cb) {
-              async.each(connection.items, // todo: do as createAll()?
-                function(item, cb) {
-                  var functionName = 'add' + inflection.singularize(inflection.camelize(connection.name));
-                  self[functionName].call(self, item, cb);
+            function(reply, cb) {
+              var EntityClass = self._class._usergrid.connections[connection.name];
+              EntityClass.create(connection.items, cb); // optimized to single call for multiple-create case
+            },
+            function(entities, cb) {
+              var func = self['add' + inflection.singularize(inflection.camelize(connection.name))];
+              async.each(entities,
+                function(entity, cb) {
+                  func.call(self, entity, cb);
                 }, cb);
             }
           ], cb);
