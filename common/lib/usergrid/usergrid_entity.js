@@ -44,22 +44,38 @@ var UsergridEntity = function() {
       }
     });
 
+    // validate connected entities
+    // todo: capture all entities errors?
+    if (connectedEntities) {
+      for (var i = 0; i < connectedEntities.length; i++) {
+        var connection = connectedEntities[i];
+        var EntityClass = self._class._usergrid.connections[connection.name];
+        for (var j = 0; j < connection.items.length; j++) {
+          var item = connection.items[j];
+          var entity = (EntityClass.isInstance(item)) ? item : EntityClass.new(item);
+          if (!entity.isValid()) {
+            return cb(entity.getErrors());
+          }
+        }
+      }
+    }
+
     // this deletes and replaces all connected entities that are included in the request
     // todo: this heuristic is heavy-handed and may not work in all cases
     usergrid_sdk.entity.prototype.save.call(this, translateSDKCallback(function(err, reply) { // super.save()
       if (err || !connectedEntities) { return cb(err, self); }
       async.each(connectedEntities,
         function(connection, cb) {
-          async.waterfall([ // delete and replace all connected entities when included
-            function(cb) {
+          async.waterfall([
+            function(cb) { // delete all connected entities of this type
               var functionName = 'deleteAll' + inflection.camelize(connection.name);
               self[functionName].call(self, cb);
             },
-            function(reply, cb) {
+            function(reply, cb) { // optimize to single remote call for multiple-create case
               var EntityClass = self._class._usergrid.connections[connection.name];
-              EntityClass.create(connection.items, cb); // optimized to single call for multiple-create case
+              EntityClass.create(connection.items, cb);
             },
-            function(entities, cb) {
+            function(entities, cb) { // create connections
               var func = self['add' + inflection.singularize(inflection.camelize(connection.name))];
               async.each(entities,
                 function(entity, cb) {
