@@ -12,6 +12,7 @@ var addConnectionFunctions = function(owner, hasMany) {
     var pluralName = inflection.camelize(name);
     var singularName = inflection.singularize(pluralName);
 
+    // todo: support add array of items optimization
     var functions = {
       add:
         function(entity, cb) {
@@ -79,13 +80,19 @@ var addConnectionFunctions = function(owner, hasMany) {
         function(cb) {
           owner.getConnectedEntities(name, Class, function(err, entities) {
             if (err) { return cb(err); }
-            async.each(entities, // todo: do by query instead
-              function(entity, cb) {
-                entity.delete(cb);
-              }, function(err) {
-                cb(err, owner);
-              }
-            );
+            if (!entities.length) { return cb(null, owner); }
+            var criteria = _.reduce(entities,
+              function(result, entity) {
+                result = result ? result + ' or ' : '';
+                return result + "uuid=" + entity.get('uuid');
+              }, null);
+            var options = buildQuery(criteria);
+            options.type = entities[0].get('type');
+            owner._client.delete(options, function(err, data) {
+              if (err) { return cb(err); }
+              _.each(entities, function(entity) { entity.set(null); });
+              cb(null, owner);
+            });
           });
         },
 

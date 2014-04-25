@@ -202,4 +202,44 @@ Usergrid.client.prototype.delete = function(opts, callback) {
       callback(err, data);
     }
   });
-}
+};
+
+Usergrid.client.prototype.batchCreate = function (type, entities, callback) {
+  if (!entities.length) { callback(); }
+
+  var data = _.map(entities, function(entity) {
+    var data = (entity instanceof Usergrid.entity) ? entity.get() : entity;
+    return _.omit(data, 'metadata', 'created', 'modified', 'type', 'activated');
+  });
+
+  var options =  {
+    method: 'POST',
+    endpoint: type,
+    body: data
+  };
+
+  var self = this;
+  this.request(options, function (err, data) {
+    if (err && self.logging) {
+      console.log('could not save entities');
+      if (typeof(callback) === 'function') { callback(err, data); }
+      return;
+    }
+
+    var entities = _.map(data.entities, function(data) {
+      var options = {
+        type: type,
+        client: self,
+        uuid: data.uuid,
+        data: data || {}
+      };
+      var entity = new Usergrid.entity(options);
+      entity._json = JSON.stringify(options.data, null, 2);
+      return entity;
+    });
+
+    if (typeof(callback) === 'function') {
+      return callback(err, entities);
+    }
+  });
+};

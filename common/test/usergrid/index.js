@@ -139,16 +139,16 @@ describe('Base Model', function() {
             should.not.exist(err);
             reply.should.equal(2);
 
-            Bar.all(function (err, reply) {
+            Bar.all(function(err, reply) {
               should.not.exist(err);
               reply.length.should.equal(1);
               reply[0].get('bar').should.equal(3);
 
-              Bar.deleteAll(function (err, reply) {
+              Bar.deleteAll(function(err, reply) {
                 should.not.exist(err);
                 reply.should.equal(1);
 
-                Bar.all(function (err, reply) {
+                Bar.all(function(err, reply) {
                   should.not.exist(err);
                   reply.length.should.equal(0);
 
@@ -160,6 +160,38 @@ describe('Base Model', function() {
         });
       }
     );
+  });
+
+  it('batch create', function(done) {
+    var barAttrs = [{bar: 1}, {bar: 2}, {bar: 3}];
+    Bar.create(barAttrs, function(err, entities) {
+      should.not.exist(err);
+
+      Bar.all(function (err, reply) {
+        should.not.exist(err);
+        reply.length.should.equal(barAttrs.length);
+
+        barAttrs[1].bar.should.equal(reply[1].get('bar'));
+        done();
+      });
+    });
+  });
+
+  it('batch create also validates', function(done) {
+    var criteria = { foo: 'baz'};
+    Foo.create([criteria], function(err, entity) {
+      should.exist(err);
+      err.hasErrors().should.be.true;
+      err.getErrors('name').should.be.an.Array;
+      err.getErrors('name').length.should.equal(1);
+      err.getErrors('name')[0].should.equal('name is required');
+
+      Foo.findBy(criteria, function(err, entities) {
+        should.not.exist(err);
+        entities.length.should.equal(0);
+        done();
+      });
+    });
   });
 
 

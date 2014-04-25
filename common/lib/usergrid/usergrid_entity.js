@@ -44,6 +44,8 @@ var UsergridEntity = function() {
       }
     });
 
+    // this deletes and replaces all connected entities that are included in the request
+    // todo: this heuristic is heavy-handed and may not work in all cases
     usergrid_sdk.entity.prototype.save.call(this, translateSDKCallback(function(err, reply) { // super.save()
       if (err || !connectedEntities) { return cb(err, self); }
       async.each(connectedEntities,
@@ -53,10 +55,10 @@ var UsergridEntity = function() {
               var functionName = 'deleteAll' + inflection.camelize(connection.name);
               self[functionName].call(self, cb);
             },
-            function(cart, cb) {
-              async.each(connection.items,
+            function(owner, cb) {
+              async.each(connection.items, // todo: do as createAll()?
                 function(item, cb) {
-                  cart.addItem(item, cb);
+                  owner.addItem(item, cb);
                 }, cb);
             }
           ], cb);

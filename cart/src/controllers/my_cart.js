@@ -50,7 +50,7 @@ var cartController = {
           me.addCart(cart, function(err) {
             cb(err, cart);
           });
-        },
+        }
       ],
         function(err, cart) {
           if (err) { sendError(res, err); }

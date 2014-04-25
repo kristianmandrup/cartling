@@ -77,12 +77,27 @@ var ClassStatics = function(client) {
         }));
       },
 
-    // creates entity immediately on the server w/ attributes and returns the entity
+    // creates and entity or entities immediately on the server w/ attributes and returns the entity / entities
+    // attributes may be an attribute object or an array of entity objects or attribute objects
     create:
       function(attributes, cb) {
-        // todo: validate no uuid?
-        var entity = this.new(attributes);
-        entity.save(cb);
+        if (_.isArray(attributes)) {
+          var self = this;
+          for (var i = 0; i < attributes.length; i++) {
+            var each = attributes[i];
+            var entity = (each instanceof UsergridEntity) ? each : self.new(attributes);
+            if (!entity.isValid()) { return cb(entity.getErrors()); } // todo: capture all entities errors?
+          }
+          client.batchCreate(this._usergrid.type, attributes, function(err, entities) {
+            if (err) { return cb(err); }
+            var wrapped = _.map(entities, function(entity) {
+              return wrap(self, entity);
+            });
+            cb(null, wrapped);
+          });
+        } else {
+          this.new(attributes).save(cb);
+        }
       },
 
     // updates entity immediately on the server w/ attributes and returns the entity
@@ -154,9 +169,7 @@ var ClassStatics = function(client) {
     new:
       function(attributes) {
         if (_.isString(attributes)) { attributes = { uuid: attributes }; } // assume it's a uuid
-        var data = {};
-        _.assign(data, this._usergrid.defaults);
-        _.assign(data, attributes);
+        var data =_.assign({}, this._usergrid.defaults, attributes);
         data.type = this._usergrid.type;
         return wrap(this, new usergrid_sdk.entity({data: data, client: client}));
       }
@@ -170,8 +183,7 @@ function options(_class, hash) {
   var opts;
   var type = { type: _class._usergrid.type };
   if (hash) {
-    opts = _.clone(hash);
-    _.assign(opts, type);
+    opts = _.assign({}, hash, type);
   } else {
     opts = type;
   }
