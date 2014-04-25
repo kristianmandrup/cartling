@@ -58,7 +58,8 @@ var UsergridEntity = function() {
             function(owner, cb) {
               async.each(connection.items, // todo: do as createAll()?
                 function(item, cb) {
-                  owner.addItem(item, cb);
+                  var functionName = 'add' + inflection.singularize(inflection.camelize(connection.name));
+                  self[functionName].call(self, item, cb);
                 }, cb);
             }
           ], cb);

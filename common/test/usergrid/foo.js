@@ -8,6 +8,9 @@ var FooClass = {};
 usergrid.define(FooClass, Foo);
 module.exports = FooClass;
 
+var BarClass = require('./bar');
+FooClass.hasMany('bars', BarClass);
+
 FooClass.validates({
   name:  [ validators.required ],
   email: [ validators.email ]

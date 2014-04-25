@@ -108,6 +108,26 @@ describe('Base Model', function() {
     });
   });
 
+  it('should save and retrieve sub-collections', function(done) {
+    var barAttrs = [{bar: 1}, {bar: 2}];
+    foo.set('bars', barAttrs);
+    foo.save(function(err) {
+      should.not.exist(err);
+      foo.fetchBars(function(err, cart) {
+        should.not.exist(err);
+        var bars = cart.get('bars');
+        should.exist(bars);
+        bars.length.should.equal(2);
+        Bar.isInstance(bars[0]).should.be.true;
+        Bar.isInstance(bars[1]).should.be.true;
+        foo.deleteAllBars(function(err, reply) {
+          should.not.exist(err);
+          done();
+        });
+      });
+    });
+  });
+
   it('delete', function(done) {
     if (!foo) { done(); }
     foo.delete(function(err) {
