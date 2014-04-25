@@ -68,9 +68,10 @@ describe('API', function() {
     });
 
     it('can query', function(done) {
+      var uuid = carts[1].get('uuid');
       request(server)
         .get('/carts')
-        .query('q=uuid=' + carts[1].get('uuid'))
+        .query('q=uuid eq ' + uuid)
         .end(function(err, res) {
           should.not.exist(err);
           res.status.should.eql(200);

@@ -55,9 +55,9 @@ describe('Base Model', function() {
       err.getErrors('name').length.should.equal(1);
       err.getErrors('name')[0].should.equal('name is required');
 
-      Foo.find(TEST_ID, function(err, entity) {
+      Foo.findBy(criteria, function(err, entities) {
         should.not.exist(err);
-        checkEntity(entity);
+        entities.length.should.equal(0);
         done();
       });
     });

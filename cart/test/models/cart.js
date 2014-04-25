@@ -35,7 +35,7 @@ describe('Models', function() {
               cart.delete(cb);
             }
           );
-        },
+        }
       ],
         function (err, reply) {
           Cart.create(cart_attrs, function(err, reply) {
