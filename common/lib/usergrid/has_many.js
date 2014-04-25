@@ -21,9 +21,13 @@ var addConnectionFunctions = function(owner, hasMany) {
               entity.save(cb);
             },
             function(entity, cb) {
-              owner.connect(name, entity, function(err) {
-                cb(err, owner);
-              });
+              if (entity.getConnectingPaths() && entity.getConnectingPaths().name) { // already connected
+                cb(null, owner);
+              } else {
+                owner.connect(name, entity, function (err) {
+                  cb(err, owner);
+                });
+              }
             }
           ], cb);
         },

@@ -106,6 +106,16 @@ var UsergridEntity = function() {
     });
   };
 
+  // hash of (plural) name -> path
+  this.getConnectingPaths = function() {
+    return this._data.metadata.connecting;
+  };
+
+  // hash of (plural) name -> path
+  this.getConnectionPaths = function() {
+    return this._data.metadata.connected;
+  };
+
   // validation
 
   this.addError = function(attribute, error) {

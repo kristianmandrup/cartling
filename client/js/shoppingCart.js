@@ -15,16 +15,6 @@ function ShoppingCart(cartName, dataService, Phrixus) {
 
   // load items from local storage when initializing
   this.loadItems();
-
-  // save items to local storage when unloading
-  var self = this;
-  $(window).unload(function () {
-    if (self.clearCart) {
-      self.clearItems();
-    }
-    self.saveItems();
-    self.clearCart = false;
-  });
 }
 
 ShoppingCart.prototype.loadItems = function () {

@@ -48,7 +48,7 @@ var cartController = {
         function(cart, cb) {
           var me = req.user;
           me.addCart(cart, function(err) {
-            cb(err, cart)
+            cb(err, cart);
           });
         },
       ],
