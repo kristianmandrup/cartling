@@ -101,7 +101,7 @@ describe('user app', function() {
         });
     });
 
-    it.only('fails to get a token with a bad password', function(done) {
+    it('fails to get a token with a bad password', function(done) {
       var body = {
         username: 'foo'
       };
