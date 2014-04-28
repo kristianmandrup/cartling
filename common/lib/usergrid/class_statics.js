@@ -85,7 +85,7 @@ var ClassStatics = function(client) {
           var self = this;
           for (var i = 0; i < attributes.length; i++) { // validate all
             var each = attributes[i];
-            var entity = (this.isInstance(each)) ? each : self.new(attributes);
+            var entity = (this.isInstance(each)) ? each : self.new(attributes[i]);
             if (!entity.isValid()) { return cb(entity.getErrors()); } // todo: capture all entities errors?
           }
           client.batchCreate(this._usergrid.type, attributes, function(err, entities) { // create with single call
