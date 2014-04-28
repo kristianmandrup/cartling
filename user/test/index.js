@@ -16,24 +16,20 @@ describe('user app', function() {
   var users = [];
 
   before(function(done) {
-    var oldUsernames = ['foo', 'bar', 'skippy'];
-    async.each(oldUsernames,
-      function(username, cb) {
-        User.delete(username, cb);
-      },
-      function(err) {
-        async.each(userAttributes,
-          function(newUser, cb) {
-            User.create(newUser, function(err, reply) {
-              if (err) { return cb(err); }
-              users.push(reply);
-              cb();
-            });
-          },
-          function (err) {
-            done(err);
+    User.deleteAll(function(err) {
+      should.not.exist(err);
+      async.each(userAttributes,
+        function(newUser, cb) {
+          User.create(newUser, function(err, reply) {
+            if (err) { return cb(err); }
+            users.push(reply);
+            cb();
           });
-      });
+        },
+        function (err) {
+          done(err);
+        });
+    });
   });
 
   after(function(done) {
@@ -101,6 +97,22 @@ describe('user app', function() {
           res.status.should.eql(200);
           var reply = res.body;
           should.exist(reply.access_token);
+          done();
+        });
+    });
+
+    it.only('fails to get a token with a bad password', function(done) {
+      var body = {
+        username: 'foo'
+      };
+      request(server)
+        .post('/users/authenticate')
+        .send(body)
+        .end(function(err, res) {
+          should.not.exist(err);
+          res.status.should.eql(400);
+          var reply = res.body;
+          reply.name.should.equal('invalid_grant');
           done();
         });
     });

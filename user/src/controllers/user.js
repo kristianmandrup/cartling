@@ -15,6 +15,17 @@ var userController = {
   get: commonController.get,
   create: commonController.create,
   update: commonController.update,
-  delete: commonController.delete
+  delete: commonController.delete,
+
+  authenticate: function(req, res) {
+    if (!req.body) { return res.json(400, 'body required'); }
+    var username = req.body.username;
+    var password = req.body.password;
+    User.getAccessToken(username, password, function(err, reply) {
+      commonController.onSuccess(err, req, res, reply, function() {
+        res.json(reply);
+      });
+    });
+  }
 };
 module.exports = userController;
