@@ -8,6 +8,8 @@ var FooClass = {};
 usergrid.define(FooClass, Foo);
 module.exports = FooClass;
 
+FooClass.attrs('name', 'email');
+
 var BarClass = require('./bar');
 FooClass.hasMany('bars', BarClass);
 

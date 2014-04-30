@@ -10,6 +10,8 @@ var UserClass = {};
 usergrid.define(UserClass, User);
 module.exports = UserClass;
 
+UserClass.attrs('username', 'activated');
+
 UserClass.validates({
   username: [ validators.required ]
 });

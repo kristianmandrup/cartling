@@ -114,6 +114,16 @@ var UsergridEntity = function() {
     return this;
   };
 
+  // defines a property for a persistent attribute on this instance
+  this.attr = function(name, readOnly) {
+    var funcs = {};
+    funcs.get = function() { return this.get(name); };
+    if (!readOnly) {
+      funcs.set = function(v) { this.set(name, v); };
+    }
+    Object.defineProperty(this, name, funcs);
+  };
+
   // connections
 
   // connectedType is the defined() type of the connected entity

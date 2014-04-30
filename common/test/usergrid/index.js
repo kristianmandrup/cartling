@@ -108,6 +108,38 @@ describe('Base Model', function() {
     });
   });
 
+  it('update an instance-declared attribute and save', function(done) {
+    foo.attr('boo');
+    foo.boo.should.equal('bif');
+    foo.boo = 'bop';
+    foo.save(function(err, reply) {
+      should.not.exist(err);
+      reply.boo.should.equal('bop');
+      done();
+    });
+  });
+
+  it('should have read only metadata', function(done) {
+    should.exist(foo.uuid);
+    (function() { foo.uuid = 'xxx'; }).should.throw();
+    should.exist(foo.created);
+    (function() { foo.created = 'xxx'; }).should.throw();
+    should.exist(foo.modified);
+    (function() { foo.modified = 'xxx'; }).should.throw();
+    should.exist(foo.type);
+    (function() { foo.type = 'xxx'; }).should.throw();
+    done();
+  });
+
+  it('update a class-declared attribute and save', function(done) {
+    foo.email = 'test@test.com';
+    foo.save(function(err, reply) {
+      should.not.exist(err);
+      reply.email.should.equal(foo.email);
+      done();
+    });
+  });
+
   it('should save and retrieve sub-collections', function(done) {
     var barAttrs = [{bar: 1}, {bar: 2}];
     foo.set('bars', barAttrs);

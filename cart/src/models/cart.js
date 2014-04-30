@@ -10,6 +10,8 @@ var CartClass = {};
 usergrid.define(CartClass, Cart);
 module.exports = CartClass;
 
+CartClass.attrs('status');
+
 CartClass.defaults({
   status: 'open'
 });
@@ -30,7 +32,7 @@ function Cart() {
     this.getItems(function (err, items) {
       async.each(items,
         function(item, cb) {
-          var newItemAttrs = _.omit(item._data, CartItem.immutableFields(true)); // create clone w/o uuid, etc
+          var newItemAttrs = _.omit(item._data, CartItem.getMetadataAttributes(true)); // create clone w/o uuid, etc
           targetCart.addItem(CartItem.new(newItemAttrs), cb);
         },
         cb);

@@ -30,7 +30,7 @@ function logEventToUsergrid(topic, event) {
     if (event.subject) { attrs.username = event.subject.username; }
     if (event.target) {
       attrs.collection = inflection.pluralize(event.target.get('type'));
-      var target = _.omit(event.target._data, ActivityLog.immutableFields());
+      var target = _.omit(event.target._data, ActivityLog.getMetadataAttributes());
       attrs.target = JSON.stringify(target);
     }
     ActivityLog.create(attrs, function (err) {

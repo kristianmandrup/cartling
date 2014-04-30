@@ -8,6 +8,8 @@ var CartItemClass = {};
 usergrid.define(CartItemClass, CartItem);
 module.exports = CartItemClass;
 
+CartItemClass.attrs('sku', 'quantity');
+
 CartItemClass.validates({
   sku:      [ is.required ],
   quantity: [ is.required, is.numeric ]

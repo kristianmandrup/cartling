@@ -13,11 +13,21 @@ var ClassStatics = function(client) {
 
   return {
 
-    immutableFields:
+    // defines properties for persistent attribute on instances of this class
+    // note: all immutable fields will be included regardless (as read only properties)
+    // names may be specified as individual strings or an array of strings
+    attrs:
+      function(names) {
+        var attributes = Array.prototype.slice.call(arguments);
+        attributes = _.omit(attributes, this.getMetadataAttributes(true));
+        this._usergrid.fields = attributes;
+      },
+
+    getMetadataAttributes:
       function(includeUUID) {
-        var fields = ['metadata', 'created', 'modified', 'type'];
-        if (includeUUID) { fields.push('uuid'); }
-        return fields;
+        var attrs = ['metadata', 'created', 'modified', 'type'];
+        if (includeUUID) { attrs.push('uuid'); }
+        return attrs;
       },
 
     hasMany:
@@ -86,7 +96,7 @@ var ClassStatics = function(client) {
           for (var i = 0; i < attributes.length; i++) { // validate all
             var each = attributes[i];
             var entity = (this.isInstance(each)) ? each : self.new(attributes[i]);
-            if (!entity.isValid()) { return cb(entity.getErrors()); } // todo: capture all entities errors?
+            if (!entity.isValid()) { return cb(entity.getErrors()); } // todo: collect all entities errors?
           }
           client.batchCreate(this._usergrid.type, attributes, function(err, entities) { // create with single call
             if (err) { return cb(err); }
@@ -166,6 +176,8 @@ var ClassStatics = function(client) {
         });
       },
 
+
+    // attributes may be string (assumes it's a uuid) or an object containing data attributes
     new:
       function(attributes) {
         if (_.isString(attributes)) { attributes = { uuid: attributes }; } // assume it's a uuid
@@ -179,9 +191,9 @@ var ClassStatics = function(client) {
 // utility methods
 
 // clones hash and adds type for usergrid context
-function options(_class, hash) {
+function options(Class, hash) {
   var opts;
-  var type = { type: _class._usergrid.type };
+  var type = { type: Class._usergrid.type };
   if (hash) {
     opts = _.assign({}, hash, type);
   } else {
@@ -193,22 +205,38 @@ function options(_class, hash) {
 // Create a new typed entity from the passed sdk Usergrid.Entity.
 // Assigns prototypes as follows:
 //   [defined entity] -> [this UsergridEntity()] -> [sdk Usergrid.Entity()]
-function wrap(_class, entity) {
+function wrap(Class, entity) {
   UsergridEntity.prototype = entity;
-  _class._usergrid.constructor.prototype = new UsergridEntity();
-  entity = new _class._usergrid.constructor();
-  entity._class = _class;
-  addConnectionFunctions(entity, _class._usergrid.connections);
+  Class._usergrid.constructor.prototype = new UsergridEntity();
+  entity = new Class._usergrid.constructor();
+  entity._class = Class;
+  defineAttributes(entity);
+  addConnectionFunctions(entity, Class._usergrid.connections);
   return entity;
 }
 
-function wrapCollection(_class, collection) {
+function wrapCollection(Class, collection) {
   var entities = [];
   while (collection.hasNextEntity()) {
     var entity = collection.getNextEntity();
-    entities.push(wrap(_class, entity));
+    entities.push(wrap(Class, entity));
   }
   return entities;
+}
+
+function defineAttributes(entity) {
+  var Class = entity._class;
+  var i;
+  var fields = Class._usergrid.fields;
+  if (fields) {
+    for (i = 0; i < fields.length; i++) {
+      entity.attr(fields[i]);
+    }
+  }
+  fields = Class.getMetadataAttributes(true);
+  for (i = 0; i < fields.length; i++) {
+    entity.attr(fields[i], true);
+  }
 }
 
 module.exports = ClassStatics;
