@@ -23,7 +23,7 @@ ShoppingCart.prototype.loadItems = function () {
   } else {
     this.loadLocalStorageItems();
   }
-}
+};
 
 // load items from local storage
 ShoppingCart.prototype.loadLocalStorageItems = function () {
@@ -66,6 +66,9 @@ ShoppingCart.prototype.loadItemsFromPhrixus = function () {
       },
       function(failure) {
         console.log(failure);
+        if (failure.data.error === 'invalid_grant') {
+          if (self.user) { self.user.logout(); }
+        }
         this.loadLocalStorageItems(); // fallback
       }
     );
