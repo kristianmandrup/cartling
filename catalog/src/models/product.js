@@ -8,6 +8,8 @@ var ProductClass = {};
 usergrid.define(ProductClass, Product);
 module.exports = ProductClass;
 
+ProductClass.attrs('name', 'cal', 'description', 'nutrients', 'price', 'sku');
+
 ProductClass.validates({
   sku:      [ is.required ]
 });

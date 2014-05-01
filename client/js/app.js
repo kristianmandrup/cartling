@@ -37,7 +37,7 @@ storeApp.factory("DataService", function(Phrixus, config) {
   dataService.user = user;
 
   // create store
-  var store = new Store();
+  var store = new Store(Phrixus);
   dataService.store = store;
 
   // create shopping cart

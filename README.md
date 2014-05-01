@@ -21,9 +21,10 @@ example web-based ecommerce app:
 2. edit config/development.js to reflect your usergrid settings (and optionally, passport settings)
 3. install & start redis
 4. run `npm install` (this will link the phrixus modules in this repo locally)
-5. run `bin/register`
-6. run `bin/app`
-7. check the output and open your browser to [http://localhost:3000]() (or start making curl requests)
+5. run `bin/create_sample_products`
+6. run `bin/register`
+7. run `bin/app`
+8. check the output and open your browser to [http://localhost:3000]() (or start making curl requests)
 
 
 Cart Functionality

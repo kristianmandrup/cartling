@@ -1,18 +1,48 @@
 #!/usr/bin/env node
 'use strict';
 
-var _ = require('lodash');
 var config = require('../config');
 var catalog = require('phrixus-catalog')(config);
 var Product = catalog.models.Product;
 var async = require('async');
 
+function ProductAttrs(sku, name, description, price, cal, carot, vitc, folate, potassium, fiber) {
+  this.sku = sku; // product code (SKU = stock keeping unit)
+  this.name = name;
+  this.description = description;
+  this.price = price;
+  this.cal = cal;
+  this.nutrients = {
+    "Carotenoid": carot,
+    "Vitamin C": vitc,
+    "Folates": folate,
+    "Potassium": potassium,
+    "Fiber": fiber
+  };
+}
+
 var products = [
-  { sku: 1, name: 'Toothpaste',    description: 'Keeps your teeth clean', price: 4.49 },
-  { sku: 2, name: 'Trench coat',   description: 'Keeps your back dry',    price: 749.00 },
-  { sku: 3, name: 'Sandals',       description: 'Keeps your feet safe',   price: 49.89 },
-  { sku: 4, name: 'Deadbolt lock', description: 'Keeps your house safe',  price: 39.99 },
-  { sku: 5, name: 'Silk Neck Tie', description: 'Makes your neck pretty', price: 179.49 }
+  new ProductAttrs("APL", "Apple", "Eat one every day to keep the doctor away!", 12, 90, 0, 2, 0, 1, 2),
+  new ProductAttrs("AVC", "Avocado", "Guacamole anyone?", 16, 90, 0, 1, 1, 1, 2),
+  new ProductAttrs("BAN", "Banana", "These are rich in Potassium and easy to peel.", 4, 120, 0, 2, 1, 2, 2),
+  new ProductAttrs("CTP", "Cantaloupe", "Delicious and refreshing.", 3, 50, 4, 4, 1, 2, 0),
+  new ProductAttrs("FIG", "Fig", "OK, not that nutritious, but sooo good!", 10, 100, 0, 0, 0, 1, 2),
+  new ProductAttrs("GRF", "Grapefruit", "Pink or red, always healthy and delicious.", 11, 50, 4, 4, 1, 1, 1),
+  new ProductAttrs("GRP", "Grape", "Wine is great, but grapes are even better.", 8, 100, 0, 3, 0, 1, 1),
+  new ProductAttrs("GUA", "Guava", "Exotic, fragrant, tasty!", 8, 50, 4, 4, 0, 1, 2),
+  new ProductAttrs("KIW", "Kiwi", "These come from New Zealand.", 14, 90, 1, 4, 0, 2, 2),
+  new ProductAttrs("LYC", "Lychee", "Unusual and highly addictive!", 18, 125, 1, 4, 0, 2, 2),
+  new ProductAttrs("MAN", "Mango", "Messy to eat, but well worth it.", 8, 70, 3, 4, 0, 1, 1),
+  new ProductAttrs("ORG", "Orange", "Vitamin C anyone? Go ahead, make some juice.", 9, 70, 1, 4, 2, 1, 2),
+  new ProductAttrs("PAP", "Papaya", "Super-popular for breakfast.", 5, 60, 3, 4, 2, 2, 2),
+  new ProductAttrs("PCH", "Peach", "Add some cream and enjoy.", 19, 70, 1, 2, 0, 1, 2),
+  new ProductAttrs("PER", "Pear", "Delicious fresh, or cooked in red wine, or distilled.", 8, 100, 0, 2, 0, 1, 2),
+  new ProductAttrs("PMG", "Pomegranate", "Delicious, healthy, beautiful, and sophisticated!", 19, 110, 0, 2, 0, 2, 0),
+  new ProductAttrs("PNP", "Pineapple", "Enjoy it (but don't forget to peel first).", 4, 60, 0, 3, 0, 0, 1),
+  new ProductAttrs("PSM", "Persimmon", "Believe it or not, they are berries!", 6, 120, 4, 3, 0, 1, 3),
+  new ProductAttrs("STR", "Strawberry", "Beautiful, healthy, and delicious.", 7, 40, 0, 4, 1, 1, 2),
+  new ProductAttrs("TNG", "Tangerine", "Easier to peel than oranges!", 8, 50, 3, 4, 1, 1, 2),
+  new ProductAttrs("WML", "Watermelon", "Nothing comes close on those hot summer days.", 4, 90, 4, 4, 0, 1, 1)
 ];
 
 async.waterfall([
@@ -20,12 +50,7 @@ async.waterfall([
     Product.deleteAll(cb);
   },
   function(result, cb) {
-    async.each(products, function(product, cb) {
-      Product.create(product, cb);
-    },
-      function(err) {
-        cb(err);
-      });
+    Product.create(products, cb);
   }
 ],
   function(err) {

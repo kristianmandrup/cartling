@@ -21,6 +21,10 @@ phrixus.factory('Phrixus', function ($resource, $http, config) {
     }
   );
 
+  var Product = $resource(
+      baseUrl + '/products/:id'
+  );
+
   var login = function(username, password) {
     var url = baseUrl + '/login';
     var data = {
@@ -47,6 +51,7 @@ phrixus.factory('Phrixus', function ($resource, $http, config) {
   return {
     Cart: Cart,
     User: User,
+    Product: Product,
     login: login,
     getUserCart: getUserCart,
     setAccessTokenHeader: setAccessTokenHeader

@@ -7,7 +7,7 @@ module.exports = function(app, oauth) {
   // Product
 
   app.get('/products',
-    oauth.authenticate('cart'),
+//    oauth.authenticate('cart'),
     product.list);
 
 //  app.post('/products',

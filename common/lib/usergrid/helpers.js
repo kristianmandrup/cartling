@@ -30,13 +30,16 @@ module.exports = {
     // note: _id is translated into either 'uuid' (if it is a uuid) or 'name'
     // eg. { a: 'b', c: 'd' } -> "a = 'b' and c = 'd'"
     function(criteria, limit) {
-      if (!criteria) { return { qs: {} }; }
+      if (!criteria && !limit) { return { qs: {} }; }
+      if (!criteria) { criteria = {}; }
       var queryString;
       if (_.isString(criteria)) {
         queryString = criteria;
       } else {
         var orderby = criteria['order by'];
         if (orderby) { delete criteria['order by']; }
+//        limit = limit || criteria.limit;
+//        delete criteria.limit;
         if (criteria._id) {
           if (isUUID(criteria._id)) {
             criteria.uuid = criteria._id;
