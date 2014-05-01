@@ -29,7 +29,7 @@ describe('User Model', function() {
         if (username !== 'sleepy') { attrs.guest = true; }
         User.create(attrs, function (err, reply) {
           if (err) { cb(err); }
-          times.push(reply.get('modified'));
+          times.push(reply.modified);
           cb();
         });
       },
@@ -50,7 +50,7 @@ describe('User Model', function() {
               User.find('sleepy', function (err, reply) {
                 should.not.exist(err);
                 should.exist(reply);
-                reply.get('username').should.equal('sleepy');
+                reply.username.should.equal('sleepy');
                 done();
               });
             });

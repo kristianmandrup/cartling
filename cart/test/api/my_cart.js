@@ -80,9 +80,9 @@ describe('API', function() {
     it('can intercept and abort create', function(done) {
       var attrs = { foo: 'bobo' };
       intents.before('create', 'cart', function(intent, done) {
-        intent.subject.get('username').should.equal('testuser');
+        intent.subject.username.should.equal('testuser');
         intent.op.should.equal('create');
-        intent.target.get('type').should.equal('cart');
+        intent.target.type.should.equal('cart');
         intent.target.get('foo').should.equal(attrs.foo);
         var err = new Error('no way, forget it');
         err.statusCode = 401;
@@ -128,7 +128,7 @@ describe('API', function() {
 
     it('cannot get not my cart', function(done) {
       request(server)
-        .get('/my/carts/' + notMyCart.get('uuid'))
+        .get('/my/carts/' + notMyCart.uuid)
         .end(function(err, res) {
           if (err) { return done(err); }
           res.status.should.eql(404);
@@ -156,9 +156,9 @@ describe('API', function() {
       should.exist(myCart);
       var body = { bar: 'babs' };
       intents.before('update', 'cart', function(intent, done) {
-        intent.subject.get('username').should.equal('testuser');
+        intent.subject.username.should.equal('testuser');
         intent.op.should.equal('update');
-        intent.target.get('uuid').should.equal(myCart.uuid);
+        intent.target.uuid.should.equal(myCart.uuid);
         should.deepEqual(intent.data, body);
         var err = new Error('no way, forget it');
         err.statusCode = 501;
@@ -179,7 +179,7 @@ describe('API', function() {
       should.exist(notMyCart);
       var body = { bar: 'babs' };
       request(server)
-        .put('/my/carts/' + notMyCart.get('uuid'))
+        .put('/my/carts/' + notMyCart.uuid)
         .send(body)
         .end(function(err, res) {
           res.status.should.eql(404);
@@ -190,9 +190,9 @@ describe('API', function() {
     it('can intercept and abort closing my cart', function(done) {
       should.exist(myCart);
       intents.before('delete', 'cart', function(intent, done) {
-        intent.subject.get('username').should.equal('testuser');
+        intent.subject.username.should.equal('testuser');
         intent.op.should.equal('delete');
-        intent.target.get('uuid').should.equal(myCart.uuid);
+        intent.target.uuid.should.equal(myCart.uuid);
         var err = new Error('no way, forget it');
         err.statusCode = 301;
         done(err);

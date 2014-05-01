@@ -21,7 +21,7 @@ CartClass.hasMany('items', CartItemClass);
 
 function Cart() {
   this.isClosed = function() {
-    return 'closed' === this.get('status');
+    return 'closed' === this.status;
   };
 
   this.close = function(cb) {

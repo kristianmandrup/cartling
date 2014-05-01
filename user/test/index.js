@@ -76,7 +76,7 @@ describe('user app', function() {
     it('can update using uuid', function(done) {
       var body = { bar: 'babs' };
       request(server)
-        .put('/users/' + users[1].get('uuid'))
+        .put('/users/' + users[1].uuid)
         .send(body)
         .end(function(err, res) {
           should.not.exist(err);
@@ -119,7 +119,7 @@ describe('user app', function() {
 
     it('can delete a user', function(done) {
       request(server)
-        .del('/users/' + users[1].get('uuid'))
+        .del('/users/' + users[1].uuid)
         .end(function(err, res) {
           should.not.exist(err);
           res.status.should.eql(200);

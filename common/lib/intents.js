@@ -67,7 +67,7 @@ function listenersFor(op, type) {
 // if err, action should be abandoned & error is propogated
 // no data is allowed to be changed by the function
 function verifyIntent(subject, op, target, data, cb) {
-  var type = (_.isString(target)) ? target : target.get('type');
+  var type = (_.isString(target)) ? target : target.type;
   var listeners = listenersFor(op, type);
   if (listeners.length === 0) { return cb(); }
   if (data && data.uuid) { delete(data.uuid); } // uuid is immutable, so don't include - even if it's in the data

@@ -85,7 +85,7 @@ describe('Models', function() {
           should.not.exist(err);
           should.exist(items);
           items.length.should.equal(1);
-          items[0].get('uuid').should.equal(cartItem.get('uuid'));
+          items[0].uuid.should.equal(cartItem.uuid);
           CartItem.isInstance(items[0]).should.be.true;
           Cart.isInstance(items[0]).should.not.be.true;
           done();
@@ -112,8 +112,8 @@ describe('Models', function() {
                   newCart.delete(function (err) {
                     should.not.exist(err);
                     items.length.should.equal(1);
-                    items[0].get('uuid').should.not.equal(cartItem.get('uuid'));
-                    items[0].get('sku').should.equal(cartItem.get('sku'));
+                    items[0].uuid.should.not.equal(cartItem.uuid);
+                    items[0].sku.should.equal(cartItem.sku);
                     done();
                   });
                 }
@@ -142,10 +142,10 @@ describe('Models', function() {
                 function (cb) {
                   newCart.delete(function (err) {
                     should.not.exist(err);
-                    cart.get('status').should.equal('closed');
+                    cart.status.should.equal('closed');
                     items.length.should.equal(1);
-                    items[0].get('uuid').should.not.equal(cartItem.get('uuid'));
-                    items[0].get('sku').should.equal(cartItem.get('sku'));
+                    items[0].uuid.should.not.equal(cartItem.uuid);
+                    items[0].sku.should.equal(cartItem.sku);
                     done();
                   });
                 }
@@ -165,7 +165,7 @@ describe('Models', function() {
             should.exist(items);
             items.length.should.equal(0);
 
-            CartItem.find(cartItem.get('uuid'), function(err, cartItem) {
+            CartItem.find(cartItem.uuid, function(err, cartItem) {
               should.not.exist(err);
               should.exist(cartItem);
               cartItem.delete(function() {
@@ -195,7 +195,7 @@ describe('Models', function() {
             should.not.exist(err);
             cart.fetchItems(function(err, cart) {
               should.not.exist(err);
-              var items = cart.get('items');
+              var items = cart.items;
               should.exist(items);
               items.length.should.equal(2);
               CartItem.isInstance(items[0]).should.be.true;

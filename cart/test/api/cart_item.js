@@ -34,7 +34,7 @@ describe('API', function() {
           Cart.create(CART_ATTRS, function (err, entity) {
             if (err) { return done(err); }
             cart = entity;
-            cartUUID = entity.get('uuid');
+            cartUUID = entity.uuid;
             done();
           });
         }
@@ -104,8 +104,8 @@ describe('API', function() {
       intents.before('create', 'cartitem', function(intent, done) {
         should.not.exist(intent.subject);
         intent.op.should.equal('create');
-        intent.target.get('type').should.equal('cartitem');
-        intent.target.get('sku').should.equal(CART_ATTRS.sku);
+        intent.target.type.should.equal('cartitem');
+        intent.target.sku.should.equal(CART_ATTRS.sku);
         var err = new Error('no way, forget it');
         err.statusCode = 401;
         done(err);
@@ -124,8 +124,8 @@ describe('API', function() {
       intents.before('update', 'cartitem', function(intent, done) {
         should.not.exist(intent.subject);
         intent.op.should.equal('update');
-        intent.target.get('type').should.equal('cartitem');
-        intent.target.get('sku').should.equal(CART_ATTRS.sku);
+        intent.target.type.should.equal('cartitem');
+        intent.target.sku.should.equal(CART_ATTRS.sku);
         var err = new Error('no way, forget it');
         err.statusCode = 401;
         done(err);
@@ -144,8 +144,8 @@ describe('API', function() {
       intents.before('delete', 'cartitem', function(intent, done) {
         should.not.exist(intent.subject);
         intent.op.should.equal('delete');
-        intent.target.get('type').should.equal('cartitem');
-        intent.target.get('uuid').should.equal(cartItem.uuid);
+        intent.target.type.should.equal('cartitem');
+        intent.target.uuid.should.equal(cartItem.uuid);
         var err = new Error('no way, forget it');
         err.statusCode = 401;
         done(err);

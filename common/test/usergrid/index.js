@@ -147,7 +147,7 @@ describe('Base Model', function() {
       should.not.exist(err);
       foo.fetchBars(function(err, cart) {
         should.not.exist(err);
-        var bars = cart.get('bars');
+        var bars = cart.bars;
         should.exist(bars);
         bars.length.should.equal(2);
         Bar.isInstance(bars[0]).should.be.true;

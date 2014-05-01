@@ -19,8 +19,8 @@ var ClassStatics = function(client) {
     attrs:
       function(names) {
         var attributes = Array.prototype.slice.call(arguments);
-        attributes = _.omit(attributes, this.getMetadataAttributes(true));
-        this._usergrid.fields = attributes;
+        attributes = _.without(attributes, this.getMetadataAttributes(true));
+        this._usergrid.attrs = attributes;
       },
 
     getMetadataAttributes:
@@ -227,7 +227,7 @@ function wrapCollection(Class, collection) {
 function defineAttributes(entity) {
   var Class = entity._class;
   var i;
-  var fields = Class._usergrid.fields;
+  var fields = Class._usergrid.attrs;
   if (fields) {
     for (i = 0; i < fields.length; i++) {
       entity.attr(fields[i]);

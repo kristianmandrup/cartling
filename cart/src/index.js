@@ -29,7 +29,7 @@ function logEventToUsergrid(topic, event) {
     var attrs = { op: event.op };
     if (event.subject) { attrs.username = event.subject.username; }
     if (event.target) {
-      attrs.collection = inflection.pluralize(event.target.get('type'));
+      attrs.collection = inflection.pluralize(event.target.type);
       var target = _.omit(event.target._data, ActivityLog.getMetadataAttributes());
       attrs.target = JSON.stringify(target);
     }

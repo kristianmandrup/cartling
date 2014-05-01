@@ -15,11 +15,11 @@ var UsergridEntity = function() {
   // persistence
 
   this.getUUID = function() {
-    return this.get('uuid');
+    return this.uuid;
   };
 
   this.isPersisted = function() {
-    return !!this.getUUID();
+    return !!this.uuid;
   };
 
   this.save = function(cb) {

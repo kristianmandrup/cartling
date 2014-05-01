@@ -50,7 +50,7 @@ function Controller(UsergridClass) {
       self.onSuccess(err, req, res, null, function() {
         entity.save(function(err, entity) {
           self.onSuccess(err, req, res, entity, function() {
-            log.debug('%s created %s', type, entity.get('uuid'));
+            log.debug('%s created %s', type, entity.uuid);
             publish(me, intents.CREATE, entity);
             if (cb && cb.name !== 'callbacks') { return cb(err, entity); }
             res.json(entity);

@@ -68,7 +68,7 @@ describe('API', function() {
     });
 
     it('can query', function(done) {
-      var uuid = carts[1].get('uuid');
+      var uuid = carts[1].uuid;
       request(server)
         .get('/carts')
         .query('q=uuid eq ' + uuid)
@@ -79,7 +79,7 @@ describe('API', function() {
           entities.should.be.an.Array;
           entities.length.should.equal(1);
           var cart = entities[0];
-          cart.uuid.should.equal(carts[1].get('uuid'));
+          cart.uuid.should.equal(carts[1].uuid);
           done();
         });
     });
@@ -105,7 +105,7 @@ describe('API', function() {
       intents.before('create', 'cart', function(intent, done) {
         should.not.exist(intent.subject);
         intent.op.should.equal('create');
-        intent.target.get('type').should.equal('cart');
+        intent.target.type.should.equal('cart');
         intent.target.get('foo').should.equal(attrs.foo);
         var err = new Error('no way, forget it');
         err.statusCode = 401;
@@ -124,7 +124,7 @@ describe('API', function() {
     it('can update from uuid', function(done) {
       var body = { bar: 'babs' };
       request(server)
-        .put('/carts/' + carts[1].get('uuid'))
+        .put('/carts/' + carts[1].uuid)
         .send(body)
         .end(function(err, res) {
           if (err) { return done(err); }
@@ -147,7 +147,7 @@ describe('API', function() {
         done(err);
       });
       request(server)
-        .put('/carts/' + carts[1].get('uuid'))
+        .put('/carts/' + carts[1].uuid)
         .send(body)
         .end(function(err, res) {
           if (err) { return done(err); }
@@ -157,11 +157,11 @@ describe('API', function() {
     });
 
     it('can intercept and abort closing the cart', function(done) {
-      var uuid = carts[1].get('uuid');
+      var uuid = carts[1].uuid;
       intents.before('delete', 'cart', function(intent, done) {
         should.not.exist(intent.subject);
         intent.op.should.equal('delete');
-        intent.target.get('uuid').should.equal(uuid);
+        intent.target.uuid.should.equal(uuid);
         var err = new Error('no way, forget it');
         err.statusCode = 301;
         done(err);
@@ -175,7 +175,7 @@ describe('API', function() {
     });
 
     it('can close the cart', function(done) {
-      var uuid = carts[1].get('uuid');
+      var uuid = carts[1].uuid;
       request(server)
         .del('/carts/' + uuid)
         .end(function(err, res) {

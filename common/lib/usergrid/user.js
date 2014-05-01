@@ -43,7 +43,7 @@ function User() {
       method: 'POST',
       endpoint: 'token',
       body: {
-        username: this.get('username'),
+        username: this.username,
         password: password,
         grant_type: 'password'
       }

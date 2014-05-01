@@ -68,7 +68,7 @@ describe('Models', function() {
           should.not.exist(err);
           should.exist(carts);
           carts.length.should.equal(1);
-          carts[0].get('uuid').should.equal(cart.get('uuid'));
+          carts[0].uuid.should.equal(cart.uuid);
           Cart.isInstance(carts[0]).should.be.true;
           User.isInstance(carts[0]).should.not.be.true;
           done();

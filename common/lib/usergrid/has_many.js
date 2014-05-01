@@ -9,6 +9,7 @@ var addConnectionFunctions = function(owner, hasMany) {
   if (!hasMany) { return; }
   _.each(hasMany, function(Class, name) {
 
+    owner.attr(name);
     var pluralName = inflection.camelize(name);
     var singularName = inflection.singularize(pluralName);
 
@@ -84,10 +85,10 @@ var addConnectionFunctions = function(owner, hasMany) {
             var criteria = _.reduce(entities,
               function(result, entity) {
                 result = result ? result + ' or ' : '';
-                return result + "uuid=" + entity.get('uuid');
+                return result + "uuid=" + entity.uuid;
               }, null);
             var options = buildQuery(criteria);
-            options.type = entities[0].get('type');
+            options.type = entities[0].type;
             owner._client.delete(options, function(err, data) {
               if (err) { return cb(err); }
               _.each(entities, function(entity) { entity.set(null); });

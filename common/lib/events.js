@@ -19,7 +19,7 @@ var exports = {
 // publishing is async
 function publish(subject, op, target) {
   try {
-    var type = (_.isString(target)) ? target : target.get('type');
+    var type = (_.isString(target)) ? target : target.type;
     var topic = getTopic(type);
     // optimization: would be nice to tell if there are subscribers before I bother to create
     var event = new Event(subject, op, target);
