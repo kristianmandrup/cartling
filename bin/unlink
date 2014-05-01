@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Used by link.sh. You may also exec directly to remove node_modules symlinks to volos modules.
+# Used by link. You may also exec directly to remove node_modules symlinks to volos modules.
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
 
