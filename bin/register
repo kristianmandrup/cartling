@@ -9,29 +9,39 @@ var management = config.oauth.management.create(oauthConfig);
 var User = require('../user')(config).User;
 var fs = require('fs');
 var path = require('path');
+var async = require('async');
 
 var devRequest = config.register.developer;
 var appRequest = config.register.application;
 appRequest.scopes = 'user cart mycart';
 var default_user = config.register.user;
 
-console.log('Creating developer %s', devRequest.userName);
-management.createDeveloper(devRequest , function(err, developer) {
-  if (err) { throw err; }
+async.waterfall([
+    function(cb) {
+      console.log('Removing existing developer %s', devRequest.userName);
+      management.deleteDeveloper(devRequest.email, function(err) {
+        cb();
+      });
+    },
+    function(cb) {
+      console.log('Creating developer %s', devRequest.userName);
+      management.createDeveloper(devRequest, cb);
+    },
+    function(developer, cb) {
+      appRequest.developerId = developer.id;
+      console.log('Creating application %s for developer %s', appRequest.name, developer.id);
+      management.createApp(appRequest, cb);
+    },
+    function(app, cb) {
+      console.log();
+      console.log('Application credentials:');
+      console.log(app.credentials);
 
-  appRequest.developerId = developer.id;
-  console.log('Creating application %s for developer %s', appRequest.name, developer.id);
-
-  management.createApp(appRequest, function(err, app) {
-    if (err) { throw err; }
-
-    console.log();
-    console.log('Application credentials:');
-    console.log(app.credentials);
-
-    User.findOrCreate(default_user, function(err, reply) {
-      if (err) { throw err; }
-
+      User.findOrCreate(default_user, function(err, reply) {
+        cb(err, app);
+      });
+    },
+    function(app, cb) {
       console.log();
       console.log('Default User:');
       console.log(default_user);
@@ -49,8 +59,12 @@ management.createDeveloper(devRequest , function(err, developer) {
         console.log();
         console.log('registration written to: %s', regFile);
 
-        process.exit();
+        cb();
       });
-    });
-  });
-});
+    }
+  ],
+  function(err) {
+    if (err) { throw err; }
+    process.exit();
+  }
+);
