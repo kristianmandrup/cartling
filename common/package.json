@@ -2,7 +2,6 @@
   "name": "phrixus-common",
   "description": "Common lib for Phrixus: A Node.js eCommerce system built on Apigee Volos and Apache Usergrid.",
   "version": "0.0.1",
-  "private": true,
   "license": "MIT",
   "main": "lib/index.js",
   "author": "Scott Ganyo <sganyo@apigee.com>",
