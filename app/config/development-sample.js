@@ -86,6 +86,7 @@ module.exports = {
    default provider is redis, but you could use any volos provider (eg. apigee)
    */
   oauth: {
+    config: { encryptionKey: 'This is my secret key' },
     management: require('volos-management-redis'),
     provider: require('volos-oauth-redis')
   },

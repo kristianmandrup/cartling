@@ -3,10 +3,10 @@
 
 // register an app to use phrixus //
 
-var config = require('../config');
+var config = require('../app/config');
 var oauthConfig = config.oauth.config || {};
 var management = config.oauth.management.create(oauthConfig);
-var User = require('../user')(config).User;
+var User = require('phrixus-user')(config).User;
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
@@ -37,7 +37,7 @@ async.waterfall([
       console.log('Application credentials:');
       console.log(app.credentials);
 
-      User.findOrCreate(default_user, function(err, reply) {
+      User.findOrCreate(default_user, function(err) {
         cb(err, app);
       });
     },
@@ -54,8 +54,9 @@ async.waterfall([
         defaultUser: default_user
       };
 
-      var regFile = path.join(path.dirname(module.filename), '../config/registration.json');
-      fs.writeFile(regFile, JSON.stringify(registration), function(err, reply) {
+      var regFile = path.join(path.dirname(module.filename), '../app/config/registration.json');
+      fs.writeFile(regFile, JSON.stringify(registration), function(err) {
+        if (err) { cb(err); }
         console.log();
         console.log('registration written to: %s', regFile);
 

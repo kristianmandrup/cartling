@@ -4,7 +4,7 @@
 var _ = require('lodash');
 var express = require('express');
 var app = express();
-var config = require('../config');
+var config = require('./config');
 var querystring = require('querystring');
 
 // create Volos quota
@@ -27,7 +27,7 @@ app.use(express.compress());
 app.use(express.json());
 app.use(express.urlencoded());
 
-var passport = require('../lib/passport');
+var passport = require('./lib/passport');
 app.use(passport.initialize());
 
 
@@ -80,15 +80,15 @@ app.get(config.passport.google.callbackURL,   passportCallback('google'));
 
 // application routes (uses volos oauth) //
 
-app.use(express.static(__dirname + '/../client'));
+app.use(express.static(__dirname + '/client'));
 
-var cart = require('../cart')(config);
+var cart = require('phrixus-cart')(config);
 cart.routes(app, oauth);
 
-var user = require('../user')(config);
+var user = require('phrixus-user')(config);
 user.routes(app, oauth);
 
-var catalog = require('../catalog')(config);
+var catalog = require('phrixus-catalog')(config);
 catalog.routes(app, oauth);
 
 

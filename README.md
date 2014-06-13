@@ -11,21 +11,34 @@ The included modules can be deployed anywhere and used by a variety of ecommerce
 they may even optionally be deployed and executed in [Apigee Edge](http://apigee.com).
 
 
-Getting Started
-===============
+Getting Started Locally
+=======================
 Phrixus is intended to be a set of REST modules that may be integrated into a larger ecommerce solution.
 However, the quickest way to start playing with the system is to see the libraries integrated into an
 example web-based ecommerce app:
 
-1. copy config/development-sample.js to config/development.js
-2. edit config/development.js to reflect your usergrid settings (and optionally, passport settings)
+1. copy app/config/development-sample.js to app/config/development.js ('development' is selected as default config)
+2. edit app/config/development.js to reflect your usergrid settings (and optionally, passport settings)
 3. install & start redis
-4. run `npm install` (this will link the phrixus modules in this repo locally)
+4. run `npm install` (this will link the Phrixus modules in this repo locally)
 5. run `bin/create_sample_products`
 6. run `bin/register`
-7. run `bin/app`
+7. run `node app/app.js`
 8. check the output and open your browser to [http://localhost:3000]() (or start making curl requests)
 
+Deploying to Apigee
+===================
+1. copy app/config/apigee-sample.js to app/config/apigee-{env}.js (where {env} is your apigee environment, ie. 'test')
+2. edit app/config/apigee-{env}.js to reflect your hosted usergrid settings (and optionally, passport settings)  
+3. run `NODE_ENV=apigee-{env} bin/create_sample_products`
+4. run `NODE_ENV=apigee-{env} bin/register`
+3. use apigeetool to deploy the app directory
+
+// todo: make registration and populate part of a deployment command line?
+
+A note about configuration
+==========================
+App configuration is done using a standard mechanism based on NODE_ENV. 
 
 Cart Functionality
 ==================

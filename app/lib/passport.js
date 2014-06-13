@@ -1,7 +1,7 @@
 'use strict';
 
 var config = require('../config');
-var common = require('../common')(config);
+var common = require('phrixus-common')(config);
 var passport = require('passport');
 var User = common.usergrid.User;
 var _ = require('lodash');

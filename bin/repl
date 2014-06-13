@@ -20,7 +20,7 @@ var _ = require("lodash");
 context.__ = _;
 
 // config
-var config = require('../config');
+var config = require('../app/config');
 context.config = config;
 
 // usergrid
@@ -28,11 +28,11 @@ var usergrid = require('usergrid');
 context.ug = new usergrid.client(_.assign({ authType: usergrid.AUTH_CLIENT_ID}, config.usergrid));
 
 // User
-var common = require('../common')(config); // this must happen before any models are referenced!
+var common = require('phrixus-common')(config); // this must happen before any models are referenced!
 context.User = common.usergrid.User;
 
 // Cart models
-context.model = require('../cart/src/models');
+context.model = require('phrixus-cart');
 
 // callback function to assign values and print to console
 context._cb = function(err,reply) {

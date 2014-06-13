@@ -17,7 +17,19 @@
     "type": "git",
     "url": "git://github.com/apigee/phrixus.git"
   },
+  "keywords": [
+    "ecommerce",
+    "volos",
+    "usergrid",
+    "shopping",
+    "cart",
+    "basket"
+  ],
   "dependencies": {
+    "phrixus-common": "x.x.x",
+    "phrixus-cart": "x.x.x",
+    "phrixus-user": "x.x.x",
+    "phrixus-catalog": "x.x.x",
     "usergrid": "0.10.x",
     "volos-cache-redis": "0.9.x",
     "volos-quota-redis": "0.9.x",
@@ -44,6 +56,5 @@
     "underscore" : "x.x.x"
   },
   "scripts": {
-    "install": "bin/link"
   }
 }
