@@ -23,7 +23,7 @@ var cache = memoryCache.create('cache', {
 app.use(cache.expressMiddleware());
 
 app.use(express.logger());
-app.use(express.compress());
+//app.use(express.compress());
 app.use(express.json());
 app.use(express.urlencoded());
 
