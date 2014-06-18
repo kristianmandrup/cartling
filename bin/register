@@ -18,18 +18,24 @@ var default_user = config.register.user;
 
 async.waterfall([
     function(cb) {
-      console.log('Removing existing developer %s', devRequest.userName);
-      management.deleteDeveloper(devRequest.email, function(err) {
-        cb();
+      management.createDeveloper(devRequest, function(err, reply) {
+        if (err && err.statusCode === 409) { // dup - ok, move on
+          management.getDeveloper(devRequest.email, cb);
+        } else {
+          cb(err, reply);
+        }
       });
-    },
-    function(cb) {
-      console.log('Creating developer %s', devRequest.userName);
-      management.createDeveloper(devRequest, cb);
     },
     function(developer, cb) {
       appRequest.developerId = developer.id;
-      console.log('Creating application %s for developer %s', appRequest.name, developer.id);
+      management.getDeveloperApp(developer.email, appRequest.name, function(err, reply) {
+        if (err && err.statusCode === 404) { err = reply = null; } // dup - ok, move on
+        cb(err, reply);
+      });
+    },
+    function(app, cb) {
+      if (app) { return cb(null, app); }
+      console.log('Creating application %s for developer %s', appRequest.name, appRequest.developerId);
       management.createApp(appRequest, cb);
     },
     function(app, cb) {
