@@ -32,7 +32,8 @@ Deploying to Apigee
 2. edit app/config/apigee-{env}.js to reflect your hosted usergrid settings (and optionally, passport settings)  
 3. run `NODE_ENV=apigee-{env} bin/create_sample_products`
 4. run `NODE_ENV=apigee-{env} bin/register`
-3. use apigeetool to deploy the app directory
+5. run 'npm install' in the app directory
+6. use apigeetool to deploy the app directory
 
 // todo: make registration and populate part of a deployment command line?
 

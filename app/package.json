@@ -35,6 +35,10 @@
     "volos-quota-redis": "0.9.x",
     "volos-management-redis": "0.9.x",
     "volos-oauth-redis": "0.9.x",
+    "volos-cache-memory": "0.9.x",
+    "volos-quota-apigee": "0.9.x",
+    "volos-management-apigee": "0.9.x",
+    "volos-oauth-apigee": "0.9.x",
     "lodash": "2.4.x",
     "winston": "0.7.x",
     "express": "3.4.x",
@@ -47,14 +51,16 @@
     "passport-local": "1.0.x",
     "passport-facebook": "1.0.x",
     "passport-google-oauth": "0.1.x",
-    "request": "2.34.x"
+    "request": "2.34.x",
+    "apigee-access": "1.0.x"
   },
   "devDependencies": {
-    "should" : "x.x.x",
-    "supertest" : "x.x.x",
-    "mocha" : "x.x.x",
-    "underscore" : "x.x.x"
+    "should": "x.x.x",
+    "supertest": "x.x.x",
+    "mocha": "x.x.x",
+    "underscore": "x.x.x"
   },
   "scripts": {
+    "start": "./app"
   }
 }

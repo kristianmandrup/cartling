@@ -13,7 +13,7 @@ results
 
 npm-debug.log
 node_modules
-config/development.js
-config/test.js
-config/production.js
+app/config/*development.js
+app/config/*test.js
+app/config/*production.js
 registration.json

@@ -35,7 +35,8 @@
     "passport-local": "1.0.x",
     "passport-facebook": "1.0.x",
     "passport-google-oauth": "0.1.x",
-    "request": "2.34.x"
+    "request": "2.34.x",
+    "apigee-access": "1.0.x"
   },
   "devDependencies": {
     "should" : "x.x.x",
@@ -44,6 +45,7 @@
     "underscore" : "x.x.x"
   },
   "scripts": {
-    "install": "bin/link"
+    "install": "bin/link",
+    "start": "app/app"
   }
 }

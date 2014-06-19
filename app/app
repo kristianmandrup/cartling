@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
+var Apigee = require('apigee-access');
 var _ = require('lodash');
 var express = require('express');
 var app = express();
@@ -23,7 +24,9 @@ var cache = memoryCache.create('cache', {
 app.use(cache.expressMiddleware());
 
 app.use(express.logger());
-//app.use(express.compress());
+if (Apigee.getMode() !== Apigee.APIGEE_MODE) { // doesn't work on edge
+  app.use(express.compress());
+}
 app.use(express.json());
 app.use(express.urlencoded());
 
