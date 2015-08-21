@@ -1,0 +1,41 @@
+{
+  "name": "phrixus-models",
+  "description": "Models lib for Phrixus: A Node.js eCommerce system",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "author": "Scott Ganyo <sganyo@apigee.com>",
+  "contributors": [
+    {
+      "name": "Scott Ganyo",
+      "email": "sganyo@apigee.com",
+      "url": "https://github.com/scottganyo"
+    }
+  ],
+  "homepage": "https://github.com/apigee/phrixus",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/apigee/phrixus.git"
+  },
+  "keywords": [
+    "ecommerce",
+    "shopping",
+    "cart",
+    "basket"
+  ],
+  "dependencies": {
+    "lodash": "2.4.x",
+    "winston": "0.7.x",
+    "validator" : "3.2.x",
+    "pubsub-js" : "1.4.x",
+    "inflection" : "1.3.x"
+  },
+  "devDependencies": {
+    "should" : "x.x.x",
+    "supertest" : "x.x.x",
+    "underscore" : "x.x.x",
+    "mocha" : "x.x.x"
+  },
+  "scripts": {
+  }
+}

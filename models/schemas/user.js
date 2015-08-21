@@ -1,4 +1,8 @@
+var CartClass = require('./cart');
 var UserClass;
+UserClass.hasMany('carts', CartClass);
+
+module.exports = UserClass;
 
 UserClass.validates({
   guest:    [ is.boolean ]
@@ -20,5 +24,3 @@ UserClass.reapGuests = function(age, cb) {
     if (err) { log.error('guest user reaper failed %s', err); }
   });
 };
-
-module.exports = UserClass;
