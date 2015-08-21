@@ -1,23 +1,9 @@
 'use strict';
 
 var common = require('../helpers').common;
-var usergrid = common.usergrid;
 var async = require('async');
 var _ = require('lodash');
 var CartItem = require('./cart_item');
-
-var CartClass = {};
-usergrid.define(CartClass, Cart);
-module.exports = CartClass;
-
-CartClass.attrs('status');
-
-CartClass.defaults({
-  status: 'open'
-});
-
-var CartItemClass = require('./cart_item');
-CartClass.hasMany('items', CartItemClass);
 
 function Cart() {
   this.isClosed = function() {
