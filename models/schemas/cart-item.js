@@ -1,14 +1,14 @@
-var CartItemClass = {};
+var keystone = require('keystone'),
+    Types = keystone.Field.Types;
 
-CartItemClass.attrs('sku', 'quantity');
-
-CartItemClass.validates({
-  sku:      [ is.required ],
-  quantity: [ is.required, is.numeric ]
+var CartItem = new keystone.List('CartItem', {
+    autokey: { path: 'slug', from: 'product.sku', unique: true },
+    defaultSort: '+product.sku'
 });
 
-CartItemClass.defaults({
-  quantity: 1
+CartItem.add({
+    quantity: { type: Number, required: true, default: 1 },
+    product: { type: Types.Relationship, ref: 'Product' }
 });
 
-module.exports = CartItemClass;
+module.exports = CartItem;

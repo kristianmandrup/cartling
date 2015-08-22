@@ -1,7 +1,5 @@
 'use strict';
 
-var Apigee = require('apigee-access');
-
 var env = environment();
 var config = require('./' + environment());
 
@@ -21,12 +19,6 @@ function registration() {
 }
 
 function environment() {
-  var env;
-  if (Apigee.getMode() === Apigee.APIGEE_MODE) {
-    // todo: can't get the environment name because I don't have a request, assuming 'test'
-    env = 'apigee-test';
-  } else {
-    env = process.env.NODE_ENV;
-  }
+  var env = process.env.NODE_ENV;
   return env ? env.toLowerCase() : 'development';
 }

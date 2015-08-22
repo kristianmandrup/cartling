@@ -1,42 +1,40 @@
 {
-  "name": "phrixus-user",
-  "description": "User module for Phrixus: A Node.js eCommerce system built on Apigee Volos and Apache Usergrid.",
+  "name": "cartling-user",
+  "description": "User module for Cartling: A Node.js eCommerce system",
   "version": "0.0.1",
   "license": "MIT",
   "main": "src/index.js",
-  "author": "Scott Ganyo <sganyo@apigee.com>",
+  "author": "Kristian Mandrup <kmandrup@gmail.com>",
   "contributors": [
     {
-      "name": "Scott Ganyo",
-      "email": "sganyo@apigee.com",
-      "url": "https://github.com/scottganyo"
+      "name": "Kristian Mandrup",
+      "email": "kmandrup@gmail.com",
+      "url": "https://github.com/kristianmandrup"
     }
   ],
-  "homepage": "https://github.com/apigee/phrixus",
+  "homepage": "https://github.com/kristianmandrup/cartling-user",
   "repository": {
     "type": "git",
-    "url": "git://github.com/apigee/phrixus.git"
+    "url": "git://github.com/kristianmandrup/cartling-user.git"
   },
   "keywords": [
     "ecommerce",
-    "volos",
-    "usergrid",
     "shopping",
     "cart",
-    "basket"
+    "user"
   ],
   "dependencies": {
     "lodash": "2.4.x",
     "async": "0.2.x",
-    "phrixus-common": "x.x.x"
+    "inflection" : "1.3.x",
+    "cartling-common": "x",
+    "cartling-models": "x"
   },
   "devDependencies": {
-    "should" : "x.x.x",
-    "supertest" : "x.x.x",
-    "mocha" : "x.x.x",
-    "underscore" : "x.x.x",
-    "express": "3.4.x"
-  },
-  "scripts": {
+    "should" : "x",
+    "supertest" : "x",
+    "mocha" : "x",
+    "underscore" : "x",
+    "koa": "^0.21.x"
   }
 }

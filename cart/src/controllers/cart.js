@@ -3,8 +3,9 @@
 var helpers = require('../helpers');
 var log = helpers.common.logger;
 var events = helpers.common.events;
-var models = require('../models');
+var models = require('cartling-models');
 var Cart = models.Cart;
+
 var _ = require('lodash');
 var commonController = _.bindAll(new helpers.common.usergrid.Controller(Cart));
 var sendError = commonController.sendError;
@@ -14,9 +15,15 @@ var verify = intents.verifyIntent;
 var async = require('async');
 
 var cartController = {
-  create: commonController.create,
-  update: commonController.update,
-  list: commonController.list,
+  create: function*(args) {
+    yield Cart.create(args);
+  },
+  update: function*(args) {
+    yield Cart.update(args);
+  },
+  list: function*() {
+    yield Cart.find();
+  },
   get: require('./cart/get'),
   close: require('./cart/close')
 }

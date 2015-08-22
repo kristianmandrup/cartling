@@ -1,12 +1,15 @@
-var CartClass = {};
+var keystone = require('keystone'),
+    Types = keystone.Field.Types;
 
-CartClass.attrs('status');
+var CartItem = require('./cart-item');
 
-CartClass.defaults({
-  status: 'open'
+var Cart = new keystone.List('Cart', {
+    defaultSort: '+status'
 });
 
-var CartItemClass = require('./cart_item');
-CartClass.hasMany('items', CartItemClass);
+Cart.add({
+    status: { type: String, required: true, default: 'open' },
+    items: [CartItem]
+});
 
-module.exports = CartClass;
+module.exports = CartItem;

@@ -1,5 +1,14 @@
-var ActivityLogClass = {};
+var keystone = require('keystone'),
+    Types = keystone.Field.Types;
 
-ActivityLogClass.attrs('op', 'username', 'collection', 'target');
+var ActivityLog = new keystone.List('ActivityLog', {
+    defaultSort: '+username'
+});
 
-module.exports = ActivityLogClass;
+ActivityLog.add({
+    username: { type: String, required: true },
+    collection: { type: String, required: true },
+    target: { type: String, required: true }
+});
+
+module.exports = ActivityLog;

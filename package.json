@@ -1,31 +1,26 @@
 {
-  "name": "phrixus",
-  "description": "A Node.js eCommerce system built on Apigee Volos and Apache Usergrid.",
+  "name": "cartling",
+  "description": "A Node.js Cart management system",
   "version": "0.0.1",
   "private": true,
   "license": "MIT",
-  "author": "Scott Ganyo <sganyo@apigee.com>",
+  "author": "Kristian Mandrup <kmandrup@gmail.com>",
   "contributors": [
     {
-      "name": "Scott Ganyo",
-      "email": "sganyo@apigee.com",
-      "url": "https://github.com/scottganyo"
+      "name": "Kristian Mandrup",
+      "email": "kmandrup@gmail.com",
+      "url": "https://github.com/kristianmandrup"
     }
   ],
-  "homepage": "https://github.com/apigee/phrixus",
+  "homepage": "https://github.com/kristianmandrup/cartling",
   "repository": {
     "type": "git",
-    "url": "git://github.com/apigee/phrixus.git"
+    "url": "git://github.com/kristianmandrup/cartling.git"
   },
   "dependencies": {
-    "usergrid": "0.10.x",
-    "volos-cache-redis": "0.9.x",
-    "volos-quota-redis": "0.9.x",
-    "volos-management-redis": "0.9.x",
-    "volos-oauth-redis": "0.9.x",
     "lodash": "2.4.x",
-    "winston": "0.7.x",
-    "express": "3.4.x",
+    "koa": "0.3.x",
+    "keystone": "^0.3.x",
     "validator": "3.2.x",
     "pubsub-js": "1.4.x",
     "async": "0.2.x",
@@ -35,8 +30,7 @@
     "passport-local": "1.0.x",
     "passport-facebook": "1.0.x",
     "passport-google-oauth": "0.1.x",
-    "request": "2.34.x",
-    "apigee-access": "1.0.x"
+    "request": "2.34.x"
   },
   "devDependencies": {
     "should" : "x.x.x",

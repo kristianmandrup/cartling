@@ -16,18 +16,6 @@ module.exports = {
     port: (process.env.PORT || 3000)
   },
 
-  // !! you MUST set url, orgName, appName, clientId, and clientSecret !!
-  // https://apigee.com/usergrid/#!/getting-started/setup
-  usergrid : {
-    url: 'https://api.usergrid.com',
-    orgName: 'ORGANIZATION',
-    appName: 'APPLICATION',
-    clientId: 'CLIENT_ID',
-    clientSecret: 'CLIENT_SECRET',
-    logging: false,
-    buildCurl: false
-  },
-
   // !! if passport is not configured, the Facebook and Google login buttons in the web client will not work !!
   passport: {
     // see: https://developers.facebook.com/apps/
@@ -83,30 +71,11 @@ module.exports = {
   },
 
   /*
-   default provider is redis, but you could use any volos provider (eg. apigee)
+   default provider is redis
    */
   oauth: {
     config: { encryptionKey: 'This is my secret key' },
     management: require('volos-management-redis'),
     provider: require('volos-oauth-redis')
-  },
-
-  /*
-   Set to custom values to control the create actions of the bin/register script.
-   */
-  register: {
-    developer: {
-      firstName: 'Phrixus',
-      lastName: 'Developer',
-      email: 'phrixus@developer.com',
-      userName: 'phrixus'
-    },
-    application: {
-      name: 'Phrixus'
-    },
-    user: {
-      username: 'default',
-      password: 'password'
-    }
   }
 };

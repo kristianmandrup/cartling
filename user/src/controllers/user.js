@@ -4,15 +4,29 @@ var common = require('phrixus-common')();
 var log = common.logger;
 var events = common.events;
 events.USER = common.events.ROOT + '.user';
-var User = require('../models/user');
 var _ = require('lodash');
 
+var models = require('cartling-models');
+var User = models.User;
+
 var userController = {
-  list: function() {},
-  get: function() {},
-  create: function() {},
-  update: function() {},
-  delete: function() {},
+  list: function*() {
+    // return all users from User model
+    yield User.find();
+  },
+  get: function*(id) {
+    // return user by id
+    yield User.find({id: id});
+  },
+  create: function*(args) {
+    yield User.create(args);
+  },
+  update: function*(args) {
+    yield User.update(args);
+  },
+  delete: function*(id) {
+    yield User.find().delete();
+  },
 
   authenticate: function(req, res) {
     if (!req.body) { return res.json(400, 'body required'); }

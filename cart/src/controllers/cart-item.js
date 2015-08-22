@@ -1,7 +1,7 @@
 'use strict';
 
 var helpers = require('../helpers');
-var models = require('../models');
+var models = require('cartling-models');
 var Cart = models.Cart;
 var CartItem = models.CartItem;
 var _ = require('lodash');
