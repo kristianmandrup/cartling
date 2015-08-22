@@ -5,17 +5,20 @@ var async = require('async');
 var _ = require('lodash');
 var CartItem = require('./cart_item');
 
-function Cart() {
-  this.isClosed = function() {
-    return 'closed' === this.status;
-  };
+class Cart {
+  constructor(args) {
+    this.model = new CartItem.model(args);
+  }
 
-  this.close = function(cb) {
-    this.update({ status: 'closed' }, cb);
-  };
+  isClosed() {
+    return this.model.status === 'closed';
+  }
+  close(cb) {
+    this.model.update({ status: 'closed' }, cb);
+  }
 
-  this.copyItems = function(targetCart, cb) {
-    this.getItems(function (err, items) {
+  copyItems(targetCart, cb) {
+    this.model.getItems(function (err, items) {
       async.each(items,
         function(item, cb) {
           var newItemAttrs = _.omit(item._data, CartItem.getMetadataAttributes(true)); // create clone w/o uuid, etc
@@ -25,7 +28,7 @@ function Cart() {
     });
   };
 
-  this.copyAndClose = function(targetCart, cb) {
+  copyAndClose(targetCart, cb) {
     var self = this;
     this.copyItems(targetCart, function (err) {
       if (err) { return cb(err); }
