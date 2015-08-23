@@ -22,6 +22,6 @@ export default {
 
   get: function*() {
     let body = yield parse(this);
-    Product.find({id: body.id});
+    yield Product.find({id: body.id});
   }
 };

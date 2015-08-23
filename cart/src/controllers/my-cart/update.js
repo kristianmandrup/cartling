@@ -13,36 +13,30 @@ var make404 = require('../util').make404;
 
 var OPEN_CRITERIA = { status: 'open' };
 
-export default function*() {
-  let body = yield parse(this);
-  let req = this.req;
-  let res = this.res;
+export default async function() {
+  try {
+    let body = yield parse(this);
+    let req = this.req;
+    let res = this.res;
 
-  var id = this.params.id;
-  if (!id) { return res.json(400, 'missing id'); }
-  var attributes = body;
-  log.debug('%s update %j', type, req.body);
-  var criteria = { _id: id };
-  _.assign(criteria, OPEN_CRITERIA);
-  var me = req.user;
+    var id = this.params.id;
+    if (!id) { return res.json(400, 'missing id'); }
+    var attributes = body;
+    log.debug('%s update %j', type, attributes);
+    var me = req.user;
 
-  async.waterfall([
-    function*() {
-      yield me.findCartsBy(criteria, 1);
-    },
-    function*(carts) {
-      if (carts.length === 0) { yield make404(); }
-      var cart = carts[0];
-      log.debug('%s found %s', type, id);
-      yield verify(me, events.UPDATE, cart, attributes);
-    },
-    function*(cart) {
-      yield cart.update(attributes);
+    let carts = await me.findCartsBy({id: id});
+    if (carts.length === 0) {
+      errors.make404();
     }
-  ], function(err, cart) {
-      if (err) { sendError(res, err); }
-      log.debug('%s updated %s', type, id);
-      publish(me, events.UPDATE, cart, attributes);
-      res.json(cart);
-  });
+    let cart = carts[0];
+    log.debug('%s found %s', type, id);
+    await cart.update(attributes);
+    log.debug('%s updated %s', type, id);
+    // publish(me, events.UPDATE, cart, attributes);
+    res.json(cart);
+  } catch(err) {
+    errors.sendError(res, err);
+  }
+
 }

@@ -8,7 +8,8 @@ var intents = helpers.common.intents;
 var verify = intents.verifyIntent;
 var async = require('async');
 
-export default function*() {
+export default async function() {
+  try {
     let body = yield parse(this);
     this.verifyParams({
       id: 'string'
@@ -21,27 +22,12 @@ export default function*() {
 
     var me = this.req.user;
     var target = this.req.query.merge;
-
-    async.waterfall([
-      function*() {
-        yield Cart.findOne(id);
-      },
-      function*(cart) {
-        verify(me, intents.DELETE, cart, { merge: target });
-      },
-      function*(cart) {
-        if (target) {
-          yield cart.copyAndClose(target);
-        } else {
-          yield cart.close();
-        }
-      }
-    ],
-      function(err, cart) {
-        publish(me, events.DELETE, cart);
-        if (target) { publish(me, events.UPDATE, target); }
-        if (err) { sendError(res, err); }
-        res.json(cart);
-      });
+    let cart = await Cart.findOne(id);
+    await target ? cart.copyAndClose(target) : cart.close();
+    publish(me, events.DELETE, cart);
+    if (target) { publish(me, events.UPDATE, target); }
+    res.json(cart);
+  } catch(err) {
+    errors.sendError(res, err);
   }
-};
+}

@@ -10,24 +10,17 @@ var intents = helpers.common.intents;
 var verify = intents.verifyIntent;
 var async = require('async');
 
-export default function*() {
-  this.verifyParams({
-    id: 'string'
-  });
-
-  var id = this.params.id;
-  let body = yield parse(this);
-
-  async.waterfall([
-    function*() {
-      yield Cart.get(id);
-    },
-    function*(cart) {
-      yield cart.fetchItems();
-    }
-  ],
-  function(err, cart) {
-    if (err) { sendError(res, err); }
+export default async function() {
+  try {
+    this.verifyParams({
+      id: 'string'
+    });
+    var id = this.params.id;
+    let body = yield parse(this);
+    let cart = await Cart.get(id);
+    await cart.fetchItems();
     res.json(cart);
-  });
+  } catch (err) {
+    errors.sendError(res, err);
+  }
 };

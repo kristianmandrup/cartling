@@ -2,6 +2,7 @@ import parse from 'co-parse';
 
 var common = require('../helpers').common;
 var log = common.logger;
+var errors = common.errors;
 var events = common.events;
 var intents = common.intents;
 var Cart = models.Cart;
@@ -13,26 +14,18 @@ var async = require('async');
 
 var OPEN_CRITERIA = { status: 'open' };
 
-export default function*() {
-  // let body = yield parse(this);
-  let req = this.req;
-  let res = this.res;
-  log.debug('my cart list');
-  var me = req.user;
-  var criteria = req.query || {};
-  _.assign(criteria, OPEN_CRITERIA);
+export default async function() {
+  try {
+    let req = this.req;
+    let res = this.res;
+    // log.debug('my cart list');
+    var me = req.user;
+    var criteria = req.query || {};
 
-  me.findCartsBy(criteria, function(err, carts) {
-    if (err) { sendError(res, err); }
-
-    async.each(carts,
-      function*(cart) {
-        yield cart.fetchItems();
-      },
-      function*(err) {
-        if (err) { yield sendError(res, err); }
-        yield res.json(carts);
-      }
-    );
-  });
+    let carts = await me.findCartsBy(criteria);
+    let items = await cart.fetchItems();
+    res.json(carts);
+  } catch (err) {
+    errors.sendError(res, err);
+  }
 }

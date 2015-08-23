@@ -1,42 +1,27 @@
 var helpers = require('../helpers');
-var log = helpers.common.logger;
-var events = helpers.common.events;
-var _ = require('lodash');
+var common = helpers.common;
+var log = common.logger;
+var events = common.events;
+var errors = common.errors;
 var publish = events.publish;
-var intents = helpers.common.intents;
-var verify = intents.verifyIntent;
-var async = require('async');
 var findCart = require('../util').findCart;
 
-export default function*(next) {
-  this.verifyParams({
-    id: 'string'
-  });
-
-  let body = yield parse(this);
-  if (!body) { return this.res.json(400, 'body required'); }
-  var id = this.params.id;
-  var itemAttrs = body;
-  var item;
-
-  async.waterfall([
-    function*() {
-      yield findCart(id);
-    },
-    function*(cart) {
-      item = CartItem.new(itemAttrs);
-      yield verify(req.user, intents.CREATE, item, { cart: cart });
-    },
-    function*(cart) {
-      yield cart.addItem(item);
-    },
-    function*(cart) {
-      publish(req.user, events.CREATE, item);
-      yield cart.fetchItems();
-    }
-  ],
-  function(err, cart) {
-    if (err) { sendError(res, err); }
+export default async function(next) {
+  try {
+    this.verifyParams({
+      id: 'string'
+    });
+    let body = yield parse(this);
+    if (!body) { return this.res.json(400, 'body required'); }
+    var id = this.params.id;
+    var itemAttrs = body;
+    let cart = await findCart(id);
+    let item = CartItem.new(itemAttrs);
+    await cart.addItem(item);
+    publish(req.user, events.CREATE, item);
+    await cart.fetchItems();
     res.json(cart);
-  });
+  } catch(err) {
+    errors.sendError(res, err);
+  }
 }

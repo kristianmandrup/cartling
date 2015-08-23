@@ -7,7 +7,7 @@ var exports = {
 
 module.exports = function(config) {
   if (config) {
-    common = require('phrixus-common')(config);
+    common = require('cartling-common')(config);
     exports.routes = require('./routes');
     exports.models = require('./models');
   }
