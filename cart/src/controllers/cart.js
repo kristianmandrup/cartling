@@ -2,7 +2,7 @@
 
 var Cart = models.Cart;
 
-var cartController = {
+export default {
   create: function*(args) {
     yield Cart.create(args);
   },
@@ -15,5 +15,3 @@ var cartController = {
   get: require('./cart/get'),
   close: require('./cart/close')
 }
-
-module.exports = cartController;

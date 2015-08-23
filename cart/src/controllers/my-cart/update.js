@@ -9,18 +9,23 @@ var publish = events.publish;
 var verify = intents.verifyIntent;
 var type = Cart._usergrid.type;
 var async = require('async');
+var make404 = require('../util').make404;
 
 var OPEN_CRITERIA = { status: 'open' };
 
 export default function*() {
   let body = yield parse(this);
-  var id = body.id;
+  let req = this.req;
+  let res = this.res;
+
+  var id = this.params.id;
   if (!id) { return res.json(400, 'missing id'); }
   var attributes = body;
   log.debug('%s update %j', type, req.body);
   var criteria = { _id: id };
   _.assign(criteria, OPEN_CRITERIA);
-  var me = body.user;
+  var me = req.user;
+
   async.waterfall([
     function*() {
       yield me.findCartsBy(criteria, 1);

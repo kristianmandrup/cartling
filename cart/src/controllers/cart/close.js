@@ -16,23 +16,24 @@ export default function*() {
 
     var id = this.params.id;
     if (!id) { return res.json(400, 'missing id'); }
+
     log.debug('cart close %s', id);
-    var me = body.user;
+
+    var me = this.req.user;
     var target = this.req.query.merge;
+
     async.waterfall([
-      function(cb) {
-        Cart.find(id, cb);
+      function*() {
+        yield Cart.findOne(id);
       },
-      function(cart, cb) {
-        verify(me, intents.DELETE, cart, { merge: target }, function(err) {
-          cb(err, cart);
-        });
+      function*(cart) {
+        verify(me, intents.DELETE, cart, { merge: target });
       },
-      function(cart, cb) {
+      function*(cart) {
         if (target) {
-          cart.copyAndClose(target, cb);
+          yield cart.copyAndClose(target);
         } else {
-          cart.close(cb);
+          yield cart.close();
         }
       }
     ],

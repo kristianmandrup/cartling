@@ -1,4 +1,3 @@
-var models = require('cartling-models');
 var helpers = require('../helpers');
 var log = helpers.common.logger;
 var events = helpers.common.events;
@@ -7,6 +6,7 @@ var publish = events.publish;
 var intents = helpers.common.intents;
 var verify = intents.verifyIntent;
 var async = require('async');
+var findCart = require('../util').findCart;
 
 export default function*(next) {
   this.verifyParams({

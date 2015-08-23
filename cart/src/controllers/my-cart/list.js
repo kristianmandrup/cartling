@@ -14,12 +14,14 @@ var async = require('async');
 var OPEN_CRITERIA = { status: 'open' };
 
 export default function*() {
-  let body = yield parse(this);
-
+  // let body = yield parse(this);
+  let req = this.req;
+  let res = this.res;
   log.debug('my cart list');
-  var me = body.user;
+  var me = req.user;
   var criteria = req.query || {};
   _.assign(criteria, OPEN_CRITERIA);
+
   me.findCartsBy(criteria, function(err, carts) {
     if (err) { sendError(res, err); }
 

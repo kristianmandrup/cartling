@@ -4,19 +4,23 @@ var common = require('../helpers').common;
 var log = common.logger;
 var events = common.events;
 var intents = common.intents;
-var models = require('../models');
-var Cart = models.Cart;
 var _ = require('lodash');
 var publish = events.publish;
 var verify = intents.verifyIntent;
 var type = Cart._usergrid.type;
 var async = require('async');
+var make404 = require('../util').make404;
 
 var OPEN_CRITERIA = { status: 'open' };
 
-export default function*() {
-  let body = yield parse(this);
-  var id = body.id;
+export default function*(next) {
+  this.verifyParams({
+    id: 'string'
+  });
+
+  // let body = yield parse(this);
+  var id = this.params.id;
+
   if (!id) { return res.json(400, 'missing id'); }
   log.debug('%s close %s', type, id);
   var criteria = { _id: id };

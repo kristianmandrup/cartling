@@ -7,16 +7,7 @@ var publish = events.publish;
 var intents = helpers.common.intents;
 var verify = intents.verifyIntent;
 var async = require('async');
-
-// scopes to logged in user as appropriate - based on url
-function findCart*(req, cartId) {
-  if (req.url.indexOf('/my/') > 0) {
-    var me = req.user;
-    yield me.findCart(cartId);
-  } else {
-    yield Cart.findOne(cartId);
-  }
-}
+var findCart = require('../util').findCart;
 
 export default function*(next) {
   var cartId = this.params.id;

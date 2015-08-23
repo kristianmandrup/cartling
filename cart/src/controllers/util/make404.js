@@ -1,8 +1,4 @@
-'use strict';
-
-export default require('./my-cart');
-
-function make404() {
+export default function() {
   var errData = {
     statusCode: 404,
     error: 'service_resource_not_found',

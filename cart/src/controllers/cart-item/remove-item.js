@@ -7,6 +7,7 @@ var publish = events.publish;
 var intents = helpers.common.intents;
 var verify = intents.verifyIntent;
 var async = require('async');
+var findCart = require('../util').findCart;
 
 export default function*(next) {
   let body = yield parse(this);
@@ -21,26 +22,21 @@ export default function*(next) {
   if (!itemId) { return res.json(400, 'missing item id'); }
   var item;
   async.waterfall([
-    function(cb) {
-      findCart(req, cartId, cb);
+    function*() {
+      yield findCart(req, cartId);
     },
-    function(cart, cb) {
-      cart.findItem(itemId, function(err, reply) {
-        item = reply;
-        cb(err, cart);
-      });
+    function(cart) {
+      yield cart.findItem(itemId);
     },
-    function(cart, cb) {
-      verify(req.user, intents.DELETE, item, { cart: cart }, function(err) {
-        cb(err, cart);
-      });
+    function*(cart) {
+      yield verify(req.user, intents.DELETE, item, { cart: cart });
     },
-    function(cart, cb) {
-      cart.deleteItem(itemId, cb);
+    function*(cart) {
+      yield cart.deleteItem(itemId);
     },
-    function(cart, cb) {
+    function*(cart) {
       publish(req.user, events.DELETE, item);
-      cart.fetchItems(cb);
+      yield cart.fetchItems();
     }
   ],
     function(err, cart) {
