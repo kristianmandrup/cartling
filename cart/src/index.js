@@ -7,27 +7,23 @@ var ActivityLog;
 var cartEventRegistration;
 var itemEventRegistration;
 
-var parameter = require('koa-parameter');
-app.use(parameter(app));
-
-var exports = {
-};
-
-module.exports = function(config) {
+export default function(config) {
   if (config) {
     common = require('cartling-common')(config);
-    exports.routes = require('./routes');
     var models = require('cartling-models');
     ActivityLog = models.ActivityLog;
     if (cartEventRegistration) { common.events.unsubscribe(cartEventRegistration); }
     if (itemEventRegistration) { common.events.unsubscribe(itemEventRegistration); }
-    cartEventRegistration = common.events.subscribe('cart', logEventToUsergrid);
-    itemEventRegistration = common.events.subscribe('cartitem', logEventToUsergrid);
+    cartEventRegistration = common.events.subscribe('cart', logEvent);
+    itemEventRegistration = common.events.subscribe('cartitem', logEvent);
   }
-  return exports;
+
+  return {
+    routes: require('./routes')
+  }
 };
 
-function logEventToUsergrid(topic, event) {
+function logEvent(topic, event) {
   try {
     var attrs = { op: event.op };
     if (event.subject) { attrs.username = event.subject.username; }

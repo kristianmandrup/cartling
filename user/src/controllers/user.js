@@ -1,43 +1,42 @@
 'use strict';
 
-var common = require('phrixus-common')();
-var log = common.logger;
-var events = common.events;
-events.USER = common.events.ROOT + '.user';
-var _ = require('lodash');
+import Common from 'cartling-common';
+const common = Common();
+const errors = common.errors;
+const models = require('cartling-models');
+const User = models.User;
 
-var models = require('cartling-models');
-var User = models.User;
-
-var userController = {
-  list: function*() {
+export default {
+  list: async function() {
     // return all users from User model
-    yield User.find();
+    await User.find();
   },
-  get: function*(id) {
+  get: async function(id) {
     // return user by id
-    yield User.find({id: id});
+    await User.find({id: id});
   },
-  create: function*(args) {
-    yield User.create(args);
+  create: async function(args) {
+    await User.create(args);
   },
-  update: function*(args) {
-    yield User.update(args);
+  update: async function(args) {
+    await User.update(args);
   },
-  delete: function*(id) {
-    yield User.find().delete();
+  delete: async function(id) {
+    await User.find().delete();
   },
 
-  authenticate: function(req, res) {
-    if (!req.body) { return res.json(400, 'body required'); }
-    var username = req.body.username;
-    var password = req.body.password;
-    User.getAccessToken(username, password, function(err, reply) {
-      commonController.onSuccess(err, req, res, reply, function() {
-        res.json(reply);
-      });
-    });
+  authenticate: async function() {
+    try {
+      let req = this.req;
+      if (!req.body) { return res.json(400, 'body required'); }
+
+      var username = req.body.username;
+      var password = req.body.password;
+
+      token = await User.getAccessToken(username, password);
+      res.json(token);
+    } catch(err) {
+      errors.sendError(res, err);
+    }
   }
 };
-
-module.exports = userController;

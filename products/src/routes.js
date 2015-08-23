@@ -11,32 +11,32 @@ export default function(app) {
 
   var products = new Resource('products', {
     // GET /products
-    index: function *(next) {
-      yield product.list(this);
+    index: async function() {
+      await product.list(this);
     },
     // GET /products/new
-    new: function *(next) {
-      yield product.get(this);
+    new: async function() {
+      await product.get(this);
     },
     // POST /products
-    create: function *(next) {
-      yield product.create(this);
+    create: async function() {
+      await product.create(this);
     },
     // GET /products/:id
-    show: function *(next) {
-      yield product.get(this);
+    show: async function() {
+      await product.get(this);
     },
     // GET /products/:id/edit
-    edit: function *(next) {
-      yield product.get(this);
+    edit: async function() {
+      await product.get(this);
     },
     // PUT /products/:id
-    update: function *(next) {
-      product.update(this);
+    update: async function() {
+      await product.update(this);
     },
     // DELETE /products/:id
-    destroy: function *(next) {
-      product.close(this);
+    destroy: async function() {
+      await product.close(this);
     }
   });
   app.use(products.middleware());

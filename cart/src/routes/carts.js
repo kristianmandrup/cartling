@@ -9,32 +9,32 @@ export default function(app) {
 
   var carts = new Resource('carts', {
     // GET /carts
-    index: function *(next) {
-      yield cart.list(this);
+    index: async function() {
+      await cart.list(this);
     },
     // GET /carts/new
-    new: function *(next) {
-      yield cart.get(this);
+    new: async function() {
+      await cart.get(this);
     },
     // POST /carts
-    create: function *(next) {
-      yield cart.create(this);
+    create: async function() {
+      await cart.create(this);
     },
     // GET /carts/:id
-    show: function *(next) {
-      yield cart.get(this);
+    show: async function() {
+      await cart.get(this);
     },
     // GET /carts/:id/edit
-    edit: function *(next) {
-      yield cart.get(this);
+    edit: async function() {
+      await cart.get(this);
     },
     // PUT /carts/:id
-    update: function *(next) {
-      cart.update(this);
+    update: async function() {
+      await cart.update(this);
     },
     // DELETE /carts/:id
-    destroy: function *(next) {
-      cart.close(this);
+    destroy: async function() {
+      await cart.close(this);
     }
   });
   var cartItems = require('./cart-items')(app);

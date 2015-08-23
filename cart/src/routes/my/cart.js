@@ -7,39 +7,37 @@ export default function(app) {
 
   var mycart = new Resource('mycart', {
     // GET /mycart
-    index: function *(next) {
-      yield mycart.list(this);
+    index: async function() {
+      await mycart.list(this);
     },
     // GET /mycart/new
-    new: function *(next) {
-      yield mycart.get(this);
+    new: async function() {
+      await mycart.get(this);
     },
     // POST /mycart
-    create: function *(next) {
-      yield mycart.create(this);
+    create: async function() {
+      await mycart.create(this);
     },
     // GET /mycart/:id
-    show: function *(next) {
-      yield mycart.get(this);
+    show: async function() {
+      await mycart.get(this);
     },
     // GET /mycart/:id/edit
-    edit: function *(next) {
-      yield mycart.get(this);
+    edit: async function() {
+      await mycart.get(this);
     },
     // PUT /mycart/:id
-    update: function *(next) {
-      mycart.update(this);
+    update: async function() {
+      await mycart.update(this);
     },
     // DELETE /mycart/:id
-    destroy: function *(next) {
-      mycart.close(this);
+    destroy: async function() {
+      await mycart.close(this);
     }
   });
   var cartItems = require('../cart-items')(app);
   mycart.add(cartItems);
   app.use(mycart.middleware());
   app.use(bodyParser());
-
   return app;
-}
 }

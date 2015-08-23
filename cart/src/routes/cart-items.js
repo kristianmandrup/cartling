@@ -8,16 +8,16 @@ export default function(app) {
 
   var cartItems = new Resource('cartItem', {
     // POST /items
-    create: function *(next) {
-      yield cartItem.create(this);
+    create: async function(next) {
+      await cartItem.create(this);
     },
     // PUT /items/:id
-    update: function *(next) {
-      cart.update(this);
+    update: async function(next) {
+      await cart.update(this);
     },
     // DELETE /items/:id
-    destroy: function *(next) {
-      cart.close(this);
+    destroy: async function(next) {
+      await cart.close(this);
     }
   });
   return cartItems;
