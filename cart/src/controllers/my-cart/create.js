@@ -1,13 +1,14 @@
-module.exports = function(req, res) {
+import parse from 'co-parse';
+
+export default function*() {
+  let body = yield parse(this);
   async.waterfall([
-    function(cb) {
-      commonController.create(req, res, cb);
+    function() {
+      Cart.create(body);
     },
-    function(cart, cb) {
-      var me = req.user;
-      me.addCart(cart, function(err) {
-        cb(err, cart);
-      });
+    function*(cart) {
+      var me = body.user;
+      yield me.addCart(cart);
     }
   ], function(err, cart) {
       if (err) { sendError(res, err); }

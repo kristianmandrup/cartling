@@ -1,11 +1,13 @@
+import parse from 'co-parse';
 
-module.exports = function(req, res) {
+module.exports = function*() {
   async.waterfall([
-    function(cb) {
-      commonController.get(req, res, cb);
+    function*() {
+      let body = yield parse(this);
+      yield Cart.get(body.id);
     },
-    function(cart, cb) {
-      cart.fetchItems(cb);
+    function*(cart) {
+      yield cart.fetchItems();
     }
   ],
   function(err, cart) {

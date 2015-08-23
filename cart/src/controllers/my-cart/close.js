@@ -1,24 +1,26 @@
-module.exports = function(req, res) {
-  var id = req.params.id;
+import parse from 'co-parse';
+
+export default function*() {
+  let body = yield parse(this);
+  var id = body.id;
   if (!id) { return res.json(400, 'missing id'); }
   log.debug('%s close %s', type, id);
   var criteria = { _id: id };
   _.assign(criteria, OPEN_CRITERIA);
-  var me = req.user;
+  var me = body.user;
+
   async.waterfall([
-    function(cb) {
-      me.findCartsBy(criteria, 1, cb);
+    function*() {
+      yield me.findCartsBy(criteria, 1);
     },
-    function(carts, cb) {
+    function*(carts) {
       if (carts.length === 0) { return cb(make404()); }
       var cart = carts[0];
       log.debug('%s found %s', type, id);
-      verify(me, events.DELETE, cart, null, function(err) {
-        cb(err, cart);
-      });
+      yield verify(me, events.DELETE, cart, null);
     },
-    function(cart, cb) {
-      cart.close(cb);
+    function*(cart) {
+      yield cart.close;
     }
   ], function(err, cart) {
       if (err) { sendError(res, err); }

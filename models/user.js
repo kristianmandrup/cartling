@@ -7,4 +7,8 @@ class User {
     this.schema = UserSchema;
     this.model = new UserSchema.model(args);
   }
+
+  reapGuests(age, cb) {
+    schema.reapGuests(age, cb);
+  }
 }

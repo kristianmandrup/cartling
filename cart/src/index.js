@@ -7,6 +7,9 @@ var ActivityLog;
 var cartEventRegistration;
 var itemEventRegistration;
 
+var parameter = require('koa-parameter');
+app.use(parameter(app));
+
 var exports = {
 };
 

@@ -1,17 +1,22 @@
-module.exports = function(req, res) {
+import parse from 'co-parse';
+
+export default function*() {
+  let body = yield parse(this);
+
   log.debug('my cart list');
-  var me = req.user;
+  var me = body.user;
   var criteria = req.query || {};
   _.assign(criteria, OPEN_CRITERIA);
   me.findCartsBy(criteria, function(err, carts) {
     if (err) { sendError(res, err); }
+
     async.each(carts,
-      function(cart, cb) {
-        cart.fetchItems(cb);
+      function*(cart) {
+        yield cart.fetchItems();
       },
-      function(err) {
-        if (err) { sendError(res, err); }
-        res.json(carts);
+      function*(err) {
+        if (err) { yield sendError(res, err); }
+        yield res.json(carts);
       }
     );
   });

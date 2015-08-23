@@ -1,9 +1,10 @@
-module.exports = function(req, res) {
-    var id = req.params.id;
+module.exports = function*() {
+    let body = yield parse(this);
+    var id = body.id;
     if (!id) { return res.json(400, 'missing id'); }
     log.debug('cart close %s', id);
-    var me = req.user;
-    var target = req.query.merge;
+    var me = body.user;
+    var target = this.req.query.merge;
     async.waterfall([
       function(cb) {
         Cart.find(id, cb);
