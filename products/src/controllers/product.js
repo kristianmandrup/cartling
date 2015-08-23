@@ -7,13 +7,13 @@ import models from 'cartling-models';
 var Product = models.Product;
 
 export default {
-  list: function*() {
-    yield Product.find();
+  list: async function() {
+    await Product.find();
   },
 
-  create: function*() {
+  create: async function*() {
     let body = yield parse(this);
-    yield Cart.create(body);
+    await Cart.create(body);
   },
   update: function*() {
     let body = yield parse(this);

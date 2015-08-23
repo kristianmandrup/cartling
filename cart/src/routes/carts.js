@@ -1,5 +1,6 @@
 // See https://github.com/alexmingoia/koa-resource-router/
 var Resource = require('koa-resource-router');
+var bodyParser = require('koa-bodyparser');
 var cart = require('../controllers/cart');
 
 export default function(app) {
@@ -40,5 +41,6 @@ export default function(app) {
   carts.add(cartItems);
 
   app.use(carts.middleware());
+  app.use(bodyParser());
   return app;
 }

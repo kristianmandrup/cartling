@@ -2,6 +2,7 @@
 
 // See https://github.com/alexmingoia/koa-resource-router/
 var Resource = require('koa-resource-router');
+var bodyParser = require('koa-bodyparser');
 var product = require('./controllers/product');
 
 export default function(app) {
@@ -39,5 +40,6 @@ export default function(app) {
     }
   });
   app.use(products.middleware());
+  app.use(bodyParser());
   return app;
 }

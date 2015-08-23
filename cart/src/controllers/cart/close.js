@@ -1,21 +1,11 @@
-var models = require('cartling-models');
-var helpers = require('../helpers');
-var log = helpers.common.logger;
-var events = helpers.common.events;
-var _ = require('lodash');
-var publish = events.publish;
-var intents = helpers.common.intents;
-var verify = intents.verifyIntent;
-var async = require('async');
+import {Cart} from 'cartling-models';
+import helpers from '../helpers';
+const common = helpers.common;
+const publish = common.events.publish;
 
 export default async function() {
   try {
-    let body = yield parse(this);
-    this.verifyParams({
-      id: 'string'
-    });
-
-    var id = this.params.id;
+    var id = common.util.getId(this);
     if (!id) { return res.json(400, 'missing id'); }
 
     log.debug('cart close %s', id);
@@ -28,6 +18,6 @@ export default async function() {
     if (target) { publish(me, events.UPDATE, target); }
     res.json(cart);
   } catch(err) {
-    errors.sendError(res, err);
+    common.errors.sendError(res, err);
   }
 }

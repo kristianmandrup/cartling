@@ -1,4 +1,5 @@
 var mycart = require('./controllers/my-cart');
+var bodyParser = require('koa-bodyparser');
 
 export default function(app) {
   var router = app.router;
@@ -37,6 +38,7 @@ export default function(app) {
   var cartItems = require('../cart-items')(app);
   mycart.add(cartItems);
   app.use(mycart.middleware());
+  app.use(bodyParser());
 
   return app;
 }
