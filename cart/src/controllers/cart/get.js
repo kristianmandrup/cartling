@@ -2,15 +2,20 @@ import parse from 'co-parse';
 
 var models = require('cartling-models');
 var helpers = require('../helpers');
-var common = helpers.common;
+import helpers from '../helpers';
+const common = helpers.common;
+const errors = common.errors;
+
 
 export default async function() {
   try {
-    var id = common.util.getId(this);
+    let req = this.req;
+    let res = this.res;    
+    let id = common.util.getId(this);
     let cart = await Cart.get(id);
     await cart.fetchItems();
     res.json(cart);
   } catch(err) {
-    common.errors.sendError(res, err);
+    errors.sendError(res, err);
   }
 };

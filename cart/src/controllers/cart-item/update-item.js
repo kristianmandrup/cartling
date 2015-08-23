@@ -1,25 +1,27 @@
-var helpers = require('../helpers');
-var common = helpers.common;
-var log = common.logger;
-var events = common.events;
-var errors = common.errors;
-var publish = events.publish;
-var findCart = common.util.findCart;
+const helpers = require('../helpers');
+const common = helpers.common;
+const log = common.logger;
+const events = common.events;
+const errors = common.errors;
+const publish = events.publish;
+const util = common.util;
 
 export default async function(next) {
   try {
-    var cartId = this.params.id;
-    var itemId = this.params.itemId;
-    var req = this.req;
-    let body = yield parse(this);
-    var itemAttrs = body;
+    let req = this.req;
+    let res = this.res;
 
+    let cartId = util.getId(this);
     if (!cartId) { return res.json(400, 'missing id'); }
+
+    let itemId = util.getItemId(this);
     if (!itemId) { return res.json(400, 'missing item id'); }
+
+    let itemAttrs = req.body;
     if (!itemAttrs) { return res.json(400, 'body required'); }
     var item;
 
-    let cart = await findCart(req, cartId);
+    let cart = await util.findCart(req, cartId);
     let item = await cart.findItem(itemId);
     await item.update(itemAttrs);
     publish(req.user, events.UPDATE, item);

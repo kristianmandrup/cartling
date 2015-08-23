@@ -15,10 +15,10 @@ var exports = {
 
 module.exports = function(config) {
   if (config) {
-    common = require('phrixus-common')(config);
+    common = require('cartling-common')(config);
     exports.routes = require('./routes');
-
-    ActivityLog = require('./models/activity_log');
+    var models = require('cartling-models');
+    ActivityLog = models.ActivityLog;
     if (cartEventRegistration) { common.events.unsubscribe(cartEventRegistration); }
     if (itemEventRegistration) { common.events.unsubscribe(itemEventRegistration); }
     cartEventRegistration = common.events.subscribe('cart', logEventToUsergrid);
@@ -33,7 +33,7 @@ function logEventToUsergrid(topic, event) {
     if (event.subject) { attrs.username = event.subject.username; }
     if (event.target) {
       attrs.collection = inflection.pluralize(event.target.type);
-      var target = _.omit(event.target._data, ActivityLog.getMetadataAttributes());
+      var target = event.target;
       attrs.target = JSON.stringify(target);
     }
     ActivityLog.create(attrs, function (err) {

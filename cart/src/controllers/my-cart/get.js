@@ -1,21 +1,16 @@
-import parse from 'co-parse';
-
-var common = require('../helpers').common;
-var log = common.logger;
-var util = common.util;
+const common = require('../helpers').common;
+const log = common.logger;
+const util = common.util;
+const errors = common.errors;
 
 export default asyn function() {
   try {
-    this.verifyParams({
-      id: 'string'
-    });
-
     let req = this.req;
     let res = this.res;
-
-    var id = this.params.id;
-    if (!id) { return res.json(400, 'missing id'); }
     var me = req.user;
+
+    let id = util.getId(this);
+    if (!id) { return res.json(400, 'missing id'); }
 
     let carts = await me.findCartsBy({id: id});
     if (carts.length === 0) {

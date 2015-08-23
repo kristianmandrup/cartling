@@ -1,6 +1,6 @@
 'use strict';
 
-var common = require('phrixus-common')();
+var common = require('cartling-common')();
 
 module.exports = {
   common: common

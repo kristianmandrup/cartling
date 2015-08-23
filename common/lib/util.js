@@ -8,5 +8,11 @@ export default {
       id: 'string'
     });
     return ctx.params.id;
+  },
+  getId(ctx) {
+    ctx.verifyParams({
+      itemId: 'string'
+    });
+    return ctx.params.itemId;
   }
 }

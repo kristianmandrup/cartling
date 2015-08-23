@@ -1,21 +1,20 @@
-var models = require('cartling-models');
-var helpers = require('../helpers');
-var common = helpers.common;
-var log = common.logger;
-var events = common.events;
-var errors = common.errors;
-var publish = events.publish;
-var findCart = common.util.findCart;
+const helpers = require('../helpers');
+const common = helpers.common;
+const log = common.logger;
+const events = common.events;
+const errors = common.errors;
+const publish = events.publish;
+const util = common.util;
 
 export default async function(next) {
   try {
-    this.verifyParams({
-      id: 'string'
-    });
-    // let body = yield parse(this);
-    var cartId = this.params.id;
-    var itemId = this.params.itemId;
+    let req = this.req;
+    let res = this.res;
+    
+    let cartId = util.getId(this);
     if (!cartId) { return res.json(400, 'missing id'); }
+
+    let itemId = util.getItemId(this);
     if (!itemId) { return res.json(400, 'missing item id'); }
 
     let cart = await findCart(req, cartId);
