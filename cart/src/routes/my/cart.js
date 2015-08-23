@@ -1,25 +1,43 @@
-var mycart = require('./controllers/my_cart');
+var mycart = require('./controllers/my-cart');
 
-module.exports = function(app, oauth) {
-  // My Cart (logged in user's carts)
-  app.post('/my/carts',
-    oauth.authenticate('mycart'),
-    mycart.create);
+export default function(app) {
+  var router = app.router;
+  var auth = app.auth;
 
-  app.get('/my/carts',
-    oauth.authenticate('mycart'),
-    mycart.list);
+  var mycart = new Resource('mycart', {
+    // GET /mycart
+    index: function *(next) {
+      yield mycart.list(this);
+    },
+    // GET /mycart/new
+    new: function *(next) {
+      yield mycart.get(this);
+    },
+    // POST /mycart
+    create: function *(next) {
+      yield mycart.create(this);
+    },
+    // GET /mycart/:id
+    show: function *(next) {
+      yield mycart.get(this);
+    },
+    // GET /mycart/:id/edit
+    edit: function *(next) {
+      yield mycart.get(this);
+    },
+    // PUT /mycart/:id
+    update: function *(next) {
+      mycart.update(this);
+    },
+    // DELETE /mycart/:id
+    destroy: function *(next) {
+      mycart.close(this);
+    }
+  });
+  var cartItems = require('../cart-items')(app);
+  mycart.add(cartItems);
+  app.use(mycart.middleware());
 
-  app.get('/my/carts/:id',
-    oauth.authenticate('mycart'),
-    mycart.get);
-
-  app.put('/my/carts/:id',
-    oauth.authenticate('mycart'),
-    mycart.update);
-
-  app.delete('/my/carts/:id',
-    oauth.authenticate('mycart'),
-    usergridMiddleware,
-    mycart.close);
+  return app;
+}
 }

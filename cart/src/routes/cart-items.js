@@ -2,7 +2,7 @@
 var Resource = require('koa-resource-router');
 var cartItem = require('../controllers/cart-item');
 
-module.exports = function(app) {
+export default function(app) {
   var router = app.router;
   var auth = app.auth;
 

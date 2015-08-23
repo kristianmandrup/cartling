@@ -14,16 +14,9 @@ var events = helpers.common.events;
 var publish = events.publish;
 
 var controller = {
-  updateItem:
+  addItem: require('./cart-item/add-item'),
+  removeItem: require('./cart-item/remove-item'),
+  updateItem: require('./cart-item/update-item')
 };
-module.exports = controller;
 
-// scopes to logged in user as appropriate - based on url
-function findCart(req, cartId, cb) {
-  if (req.url.indexOf('/my/') > 0) {
-    var me = req.user;
-    me.findCart(cartId, cb);
-  } else {
-    Cart.find(cartId, cb);
-  }
-}
+module.exports = controller;

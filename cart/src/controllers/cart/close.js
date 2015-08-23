@@ -1,6 +1,20 @@
-module.exports = function*() {
+var models = require('cartling-models');
+var helpers = require('../helpers');
+var log = helpers.common.logger;
+var events = helpers.common.events;
+var _ = require('lodash');
+var publish = events.publish;
+var intents = helpers.common.intents;
+var verify = intents.verifyIntent;
+var async = require('async');
+
+export default function*() {
     let body = yield parse(this);
-    var id = body.id;
+    this.verifyParams({
+      id: 'string'
+    });
+
+    var id = this.params.id;
     if (!id) { return res.json(400, 'missing id'); }
     log.debug('cart close %s', id);
     var me = body.user;
