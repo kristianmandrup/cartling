@@ -1,6 +1,10 @@
 'use strict';
 
-function Product(args) {
-  args = args || {};
-  return new Product.model(args);
+const ProductSchema = require('./schemas/product');
+
+class Product {
+  constructor (args = {}) {
+    this.schema = ProductSchema;
+    this.model = new ProductSchema.model(args);
+  }
 }

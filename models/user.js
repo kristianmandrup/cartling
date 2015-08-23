@@ -1,5 +1,10 @@
 'use strict';
 
-function User() {
-  // create User instance using User schema
+const UserSchema = require('./schemas/user');
+
+class User {
+  constructor (args = {}) {
+    this.schema = UserSchema;
+    this.model = new UserSchema.model(args);
+  }
 }

@@ -2,9 +2,12 @@
 
 var helpers = require('../helpers');
 var models = require('../models');
+import models from 'cartling-models';
+
 var Product = models.Product;
 
-module.exports = function(req, res) {
-  // TODO: Set query limit using config
-  req.query.limit = 500;
+module.exports = {
+  list: function(req, res) {
+    Product.find({id: req.params.id});
+  }
 };

@@ -1,5 +1,10 @@
 'use strict';
 
-function CartItem() {
-  // create User instance using CartItem schema (ie. LineItem)
+const CartItemSchema = require('./schemas/cart-item');
+
+class CartItem {
+  constructor(args = {}) {
+    this.schema = CartItemSchema;
+    this.model = new CartItemSchema.model(args);
+  }
 }

@@ -3,16 +3,20 @@
 var common = require('../helpers').common;
 var async = require('async');
 var _ = require('lodash');
-var CartItem = require('./cart_item');
+
+const CartItem = require('./cart-item');
+const CartSchema = require('./schemas/cart');
 
 class Cart {
-  constructor(args) {
-    this.model = new CartItem.model(args);
+  constructor(args = {}) {
+    this.schema = CartSchema;
+    this.model = new CartSchema.model(args);
   }
 
   isClosed() {
     return this.model.status === 'closed';
   }
+
   close(cb) {
     this.model.update({ status: 'closed' }, cb);
   }
@@ -21,12 +25,11 @@ class Cart {
     this.model.getItems(function (err, items) {
       async.each(items,
         function(item, cb) {
-          var newItemAttrs = _.omit(item._data, CartItem.getMetadataAttributes(true)); // create clone w/o uuid, etc
-          targetCart.addItem(CartItem.new(newItemAttrs), cb);
+          targetCart.addItem(CartItem.new(item.attributes, cb);
         },
         cb);
     });
-  };
+  }
 
   copyAndClose(targetCart, cb) {
     var self = this;
@@ -34,5 +37,5 @@ class Cart {
       if (err) { return cb(err); }
       self.close(cb);
     });
-  };
+  }
 }
