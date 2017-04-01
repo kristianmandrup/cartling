@@ -1,6 +1,8 @@
 phrixus.next
 ============
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/kristianmandrup/cartling.svg)](https://greenkeeper.io/)
+
 An open source node.js shopping cart (and ultimately an ecommerce system) service.
 
 This refactored version of phrixus is a WIP. It aims to have no coupling to any specific backend or framework. The models used should expose a standard interface. There should be a `phrixus-models` reference implementation package for Mongo DB via Keystone or Mongoose, but it should be easy to swap in whichever backend adhering to the same API.
